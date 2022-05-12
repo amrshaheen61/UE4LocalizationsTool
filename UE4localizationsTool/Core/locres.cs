@@ -53,6 +53,7 @@ namespace AssetParser
 
             if (Version >= LocresVersion.Compact)
             {
+                Console.WriteLine("Compact");
                 int localizedStringOffset = (int)locresData.GetInt64Value();
                 locresData.Seek(localizedStringOffset);
 
@@ -75,7 +76,7 @@ namespace AssetParser
                         }
                     }
                 }
-                else if (Version >= LocresVersion.Optimized_CityHash64_UTF16)
+                else 
                 {
                     for (int i = 0; i < localizedStringCount; i++)
                     {
