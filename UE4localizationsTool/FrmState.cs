@@ -22,7 +22,13 @@ namespace UE4localizationsTool
             timer1.Start();
         }
 
-
+        public FrmState(string Title, string state)
+        {
+            InitializeComponent();
+            label1.Text = state;
+            this.Text = Title;
+            timer1.Start();
+        }
 
 
         private void State_Load(object sender, EventArgs e)

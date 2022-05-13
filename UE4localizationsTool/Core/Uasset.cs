@@ -216,7 +216,7 @@ namespace AssetParser
                 UassetFile.Skip(4 * 6);
                 UassetFile.Skip(2 * 2);
                 UassetFile.SetIntValue(Exports_Directory[n].ExportData.Count);
-                Console.WriteLine(Exports_Directory[n].ExportData.Count);
+              // Console.WriteLine(Exports_Directory[n].ExportData.Count);
                 int NullIntsize = 0;
                 if (UassetFile.GetIntValue(false) == 0)
                 {

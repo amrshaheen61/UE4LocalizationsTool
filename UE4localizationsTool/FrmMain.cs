@@ -9,13 +9,24 @@ namespace UE4localizationsTool
 {
     public partial class FrmMain : Form
     {
+        struct DataRow
+        {
+          public  int Index;
+          public string StringValue;
+        }
+
+
         Uasset Uasset;
         Uexp Uexp;
         locres locres;
-
         String ToolName = Application.ProductName + " v" + Application.ProductVersion;
         string FilePath = "";
         FrmState state;
+        Stack<DataRow> BackupDataUndo;
+        Stack<DataRow> BackupDataRedo;
+        int BackupDataIndex = 0;
+        
+
         public FrmMain()
         {
             InitializeComponent();
@@ -23,12 +34,17 @@ namespace UE4localizationsTool
             saveToolStripMenuItem.Enabled = false;
             exportAllTextToolStripMenuItem.Enabled = false;
             importAllTextToolStripMenuItem.Enabled = false;
+            undoToolStripMenuItem.Enabled = false;
+            redoToolStripMenuItem.Enabled = false;
+            StateLabel.Text = "";
+            BackupDataUndo = new Stack<DataRow>();
+            BackupDataRedo = new Stack<DataRow>();            
         }
 
         private void AddToDataView(List<List<string>> strings)
         {
+          
             int Index = 0;
-
             foreach (var item in strings)
             {
                 dataGridView1.Rows.Add(item[0], item[1]);
@@ -59,8 +75,13 @@ namespace UE4localizationsTool
             saveToolStripMenuItem.Enabled = false;
             exportAllTextToolStripMenuItem.Enabled = false;
             importAllTextToolStripMenuItem.Enabled = false;
+            undoToolStripMenuItem.Enabled = false;
+            redoToolStripMenuItem.Enabled = false;
             FilePath = "";
+            StateLabel.Text = "";
             this.Text = ToolName;
+            BackupDataUndo = new Stack<DataRow>();
+            BackupDataRedo = new Stack<DataRow>();
             try
             {
                 state = new FrmState(this, "loading File", "loading File please wait...");
@@ -72,11 +93,7 @@ namespace UE4localizationsTool
                     locres = await Task.Run(() => new locres(filePath));
 
                     AddToDataView(locres.Strings);
-                    saveToolStripMenuItem.Enabled = true;
-                    exportAllTextToolStripMenuItem.Enabled = true;
-                    importAllTextToolStripMenuItem.Enabled = true;
-                    FilePath = filePath;
-                    this.Text = ToolName + " - " + Path.GetFileName(FilePath);
+
                 }
                 else if (filePath.ToLower().EndsWith(".uasset"))
                 {
@@ -84,12 +101,19 @@ namespace UE4localizationsTool
                     Uexp = await Task.Run(() => new Uexp(Uasset));
 
                     AddToDataView(Uexp.Strings);
-                    saveToolStripMenuItem.Enabled = true;
-                    exportAllTextToolStripMenuItem.Enabled = true;
-                    importAllTextToolStripMenuItem.Enabled = true;
-                    FilePath = filePath;
-                    this.Text = ToolName + " - " + Path.GetFileName(FilePath);
+                    if (!Uexp.IsGood)
+                    {
+                        StateLabel.Text = "Warning: This file is't fully parsed and may not contain some text.";
+                    }
+
                 }
+                undoToolStripMenuItem.Enabled = true;
+                redoToolStripMenuItem.Enabled = true;
+                saveToolStripMenuItem.Enabled = true;
+                exportAllTextToolStripMenuItem.Enabled = true;
+                importAllTextToolStripMenuItem.Enabled = true;
+                FilePath = filePath;
+                this.Text = ToolName + " - " + Path.GetFileName(FilePath);
                 state.Close();
             }
             catch (Exception ex)
@@ -183,26 +207,18 @@ namespace UE4localizationsTool
             {
                try
                 {
-                state = new FrmState(this, "Saving File", "Saving File please wait...");
-                this.BeginInvoke(new Action(() => state.ShowDialog()));
-                if (FilePath.ToLower().EndsWith(".locres"))
-                {
-                    //for (int i = 0; i < dataGridView1.Rows.Count; i++)
-                    //{
-                    //    locres.Strings[i][1] = dataGridView1.Rows[i].Cells[1].Value != null ? dataGridView1.Rows[i].Cells[1].Value.ToString() : "";
-                    //}
-                    await Task.Run(() => locres.SaveFile(sfd.FileName));
-
-                }
-                else if (FilePath.ToLower().EndsWith(".uasset"))
-                {
-
-                    //for (int i = 0; i < dataGridView1.Rows.Count; i++)
-                    //{
-                    //    Uexp.Strings[i][1] = dataGridView1.Rows[i].Cells[1].Value != null ? dataGridView1.Rows[i].Cells[1].Value.ToString() : "";
-                    //}
-                    await Task.Run(() => Uexp.SaveFile(sfd.FileName));
-                }
+                  state = new FrmState(this, "Saving File", "Saving File please wait...");
+                  this.BeginInvoke(new Action(() => state.ShowDialog()));
+                  if (FilePath.ToLower().EndsWith(".locres"))
+                  {
+                      await Task.Run(() => locres.SaveFile(sfd.FileName));
+                  
+                  }
+                  else if (FilePath.ToLower().EndsWith(".uasset"))
+                  {
+                  
+                      await Task.Run(() => Uexp.SaveFile(sfd.FileName));
+                  }
                 }
                 catch (Exception ex)
                 {
@@ -224,6 +240,7 @@ namespace UE4localizationsTool
             if (SearchPanal.Visible)
             {
                 InputSearch.Focus();
+                InputSearch.SelectAll();
             }
         }
 
@@ -317,7 +334,14 @@ namespace UE4localizationsTool
         private void pasteToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (dataGridView1.SelectedCells.Count > 0)
-                dataGridView1.Rows[dataGridView1.SelectedCells[0].RowIndex].Cells[1].Value = Clipboard.GetText();
+            {
+                if (BackupDataUndo.Count == 0)
+                {
+                    BackupDataRedo.Clear();
+                }
+                BackupDataUndo.Push(new DataRow() { Index = dataGridView1.SelectedCells[0].RowIndex, StringValue = dataGridView1.Rows[dataGridView1.SelectedCells[0].RowIndex].Cells[1].Value != null ? dataGridView1.Rows[dataGridView1.SelectedCells[0].RowIndex].Cells[1].Value.ToString() : "" });
+                dataGridView1.Rows[dataGridView1.SelectedCells[0].RowIndex].Cells[1].Value = Clipboard.GetText();              
+            }
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -327,10 +351,16 @@ namespace UE4localizationsTool
 
         private void InputSearch_KeyDown(object sender, KeyEventArgs e)
         {
+            if (!InputSearch.Focused)
+            {
+               InputSearch.Focus();  
+            }
+            
             if (e.KeyCode == Keys.Enter)
             {
                 FindNext_Click(sender, e);
             }
+            
         }
 
         private void dataGridView1_Scroll(object sender, ScrollEventArgs e)
@@ -349,9 +379,9 @@ namespace UE4localizationsTool
         {
             if (dataGridView1.Created)
             {
+                           
                 if (FilePath.ToLower().EndsWith(".locres"))
                 {
-
                     locres.Strings[e.RowIndex][1] = dataGridView1.Rows[e.RowIndex].Cells[1].Value != null ? dataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString() : "";
                     dataGridView1.Rows[e.RowIndex].Cells[1].Style.BackColor = System.Drawing.Color.FromArgb(255, 204, 153);
                 }
@@ -380,11 +410,22 @@ namespace UE4localizationsTool
         {
             if (dataGridView1.CancelEdit())
             {
-                //if (e.KeyCode == Keys.V && e.Control)
-                //{
-                //    this.pasteToolStripMenuItem_Click(sender, e);
-                //} else 
-                if (e.KeyCode == Keys.L && e.Control && e.Alt)
+                if (e.KeyCode == Keys.V && e.Control)
+                {
+                    this.pasteToolStripMenuItem_Click(sender, e);
+                }               
+                else if (e.KeyCode == Keys.Z && e.Control)
+                {
+                    undoToolStripMenuItem_Click(sender, e);
+
+                }
+                else if ((e.KeyCode == Keys.Y && e.Control)|| (e.KeyCode == Keys.Z && e.Control && e.Shift))
+                {
+                    redoToolStripMenuItem_Click(sender, e);
+                }
+
+
+                else if (e.KeyCode == Keys.L && e.Control && e.Alt)
                 {
                     dataGridView1.RightToLeft = RightToLeft.No;
                 }
@@ -392,6 +433,7 @@ namespace UE4localizationsTool
                 {
                     dataGridView1.RightToLeft = RightToLeft.Yes;
                 }
+                
 
             }
         }
@@ -401,7 +443,67 @@ namespace UE4localizationsTool
             dataGridView1.RightToLeft = dataGridView1.RightToLeft == RightToLeft.Yes ? RightToLeft.No : RightToLeft.Yes;
         }
 
-        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+
+        private void dataGridView1_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
+        {
+            if (BackupDataUndo.Count == 0)
+            {
+                BackupDataRedo.Clear();
+            }
+            BackupDataUndo.Push(new DataRow() { Index = e.RowIndex, StringValue = dataGridView1.Rows[e.RowIndex].Cells[1].Value != null ? dataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString() : "" });
+        }
+
+        private void undoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+            if (BackupDataUndo.Count > 0)
+            {
+
+                DataRow dataRow = BackupDataUndo.Pop();
+                BackupDataRedo.Push(new DataRow() { Index = dataRow.Index, StringValue = dataGridView1.Rows[dataRow.Index].Cells[1].Value != null ? dataGridView1.Rows[dataRow.Index].Cells[1].Value.ToString() : "" });
+
+                //MessageBox.Show(dataRow.StringValue);
+                dataGridView1.Rows[dataRow.Index].Cells[1].Value = dataRow.StringValue;
+                if (dataRow.StringValue == (Uexp != null ? Uexp.Strings[dataRow.Index][1] : locres.Strings[dataRow.Index][1]))
+                    dataGridView1.Rows[dataRow.Index].Cells[1].Style.BackColor = System.Drawing.Color.FromArgb(255, 255, 255);
+                else
+                {
+                    dataGridView1.Rows[dataRow.Index].Cells[1].Style.BackColor = System.Drawing.Color.FromArgb(255, 204, 153);
+                }
+                dataGridView1.ClearSelection();
+                dataGridView1.Rows[dataRow.Index].Selected = true;
+            }
+
+        }
+
+        private void redoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+            if (BackupDataRedo.Count > 0)
+            {
+                //MessageBox.Show(BackupDataRedo.Peek().StringValue);
+              
+                DataRow dataRow = BackupDataRedo.Pop();
+                BackupDataUndo.Push(new DataRow() { Index = dataRow.Index, StringValue = dataGridView1.Rows[dataRow.Index].Cells[1].Value != null ? dataGridView1.Rows[dataRow.Index].Cells[1].Value.ToString() : "" });
+                dataGridView1.Rows[dataRow.Index].Cells[1].Value = dataRow.StringValue;
+                if (dataRow.StringValue == (Uexp != null ? Uexp.Strings[dataRow.Index][1] : locres.Strings[dataRow.Index][1]))
+                    dataGridView1.Rows[dataRow.Index].Cells[1].Style.BackColor = System.Drawing.Color.FromArgb(255, 255, 255);
+                else
+                {
+                    dataGridView1.Rows[dataRow.Index].Cells[1].Style.BackColor = System.Drawing.Color.FromArgb(255, 204, 153);
+                }
+
+                dataGridView1.ClearSelection();
+                dataGridView1.Rows[dataRow.Index].Selected = true;
+            }
+        }
+
+        private void commandLinesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show(Program.commandlines, "Command Lines",MessageBoxButtons.OK,MessageBoxIcon.Information);
+        }
+
+        private void aboutToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             new FrmAbout(this).ShowDialog();
         }

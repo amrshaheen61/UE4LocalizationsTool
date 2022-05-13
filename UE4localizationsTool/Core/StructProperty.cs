@@ -6,19 +6,27 @@ namespace AssetParser
 {
     public class StructProperty
     {
-
-        public StructProperty(MemoryList memoryList, Uexp uexp, bool FromStruct = true, bool Modify = false)
+        public Uexp uexp;
+        public StructProperty(MemoryList memoryList, Uexp Uexp, bool FromStruct = true, bool Modify = false)
         {
-
+            uexp = Uexp;
             while (memoryList.GetPosition() < memoryList.GetSize())
             {
-
-                string PropertyName = uexp.UassetData.GetPropertyName(memoryList.GetIntValue());
-                memoryList.Skip(4);//null or something
+                
+                long PropertyNameC = memoryList.GetInt64Value();
+               // Console.WriteLine($"PropertyNameC- {PropertyNameC} > "+ memoryList.GetPosition());
+                if (PropertyNameC > uexp.UassetData.Number_of_Names) 
+                {
+                    memoryList.Skip(-4);
+                    continue; 
+                }
+                
+                string PropertyName = uexp.UassetData.GetPropertyName((int)PropertyNameC);
                 if (PropertyName == "None")
                 {
                     break;
                 }
+
                 string Property = uexp.UassetData.GetPropertyName(memoryList.GetIntValue());
                 memoryList.Skip(4);//null or something
                 int ThisPosition = memoryList.GetPosition();
@@ -26,9 +34,9 @@ namespace AssetParser
                 memoryList.Skip(4);//null
 
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"PropertyName-> " + PropertyName);
-                Console.WriteLine("Property-> " + Property);
-                Console.WriteLine("PropertyLength-> " + PropertyLength);
+               // Console.WriteLine($"PropertyName-> " + PropertyName);
+               // Console.WriteLine("Property-> " + Property);
+               // Console.WriteLine("PropertyLength-> " + PropertyLength);
                 Console.ForegroundColor = ConsoleColor.White;
 
                 if (Property == "MapProperty")
@@ -48,7 +56,7 @@ namespace AssetParser
                     int MapCount = MapData.GetIntValue();
                     //Console.WriteLine("MapCount-> " + MapCount);
                     Console.ForegroundColor = ConsoleColor.Blue;
-                    Console.WriteLine("MapProperty");
+                   // Console.WriteLine("MapProperty");
                     Console.ForegroundColor = ConsoleColor.White;
                     try
                     {
@@ -58,19 +66,19 @@ namespace AssetParser
                             {
                                 MapData.Skip(4);//null or something
                             }
-                            Console.WriteLine("Mapindex-> " + Mapindex);
-                            Console.WriteLine("MapKey-> " + MapKey);
-                            Console.WriteLine("MapValue-> " + MapValue);
+                           // Console.WriteLine("Mapindex-> " + Mapindex);
+                           // Console.WriteLine("MapKey-> " + MapKey);
+                           // Console.WriteLine("MapValue-> " + MapValue);
                             PropertyParser(PropertyName, MapKey, -1, MapData, uexp, Modify);
                             PropertyParser(PropertyName, MapValue, -1, MapData, uexp, Modify);
                         }
                     }
                     catch
                     {
-
+                        uexp.IsGood = false;
                     }
                     Console.ForegroundColor = ConsoleColor.Blue;
-                    Console.WriteLine("EndMapProperty");
+                   // Console.WriteLine("EndMapProperty");
                     Console.ForegroundColor = ConsoleColor.White;
                     if (Modify)
                     {
@@ -81,8 +89,12 @@ namespace AssetParser
                 }
                 else if (Property == "ArrayProperty")
                 {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                   // Console.WriteLine("ArrayProperty");
+                    Console.ForegroundColor = ConsoleColor.White;
                     string ArrayType = uexp.UassetData.GetPropertyName(memoryList.GetIntValue());
                     memoryList.Skip(4);//null or something
+                   // Console.WriteLine("ArrayType-> " + ArrayType);
                     if (FromStruct)
                     {
                         memoryList.Skip(1);  //null For "Struct"
@@ -99,15 +111,18 @@ namespace AssetParser
                         if (ArrayType == "StructProperty")
                         {
                             string ArrayName /*?*/ = uexp.UassetData.GetPropertyName(ArrayData.GetIntValue());
+                           // Console.WriteLine("ArrayName-> " + ArrayName);
                             ArrayData.Skip(12); //null bytes
                             int StructLength = ArrayData.GetIntValue();
                             ArrayData.Skip(4); //null or something
                             string StructType = uexp.UassetData.GetPropertyName(ArrayData.GetIntValue());
+                           // Console.WriteLine("ArrayStructType-> " + StructType);
                             ArrayData.Skip(20); //Unkown bytes
                             if (FromStruct)
                             {
                                 ArrayData.Skip(1);  //null For "Struct"
                             }
+
                             for (int Arrayindex = 0; Arrayindex < ArrayCount; Arrayindex++)
                             {
                                 PropertyParser(PropertyName, StructType, -1, ArrayData, uexp, Modify);
@@ -123,7 +138,7 @@ namespace AssetParser
                     }
                     catch
                     {
-
+                        uexp.IsGood = false;
                     }
                     if (Modify)
                     {
@@ -131,16 +146,26 @@ namespace AssetParser
                         memoryList.Seek(ArrayPosition + ArrayData.GetSize());
                         memoryList.SetIntValue(ArrayData.GetSize(), false, ThisPosition);
                     }
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                   // Console.WriteLine("EndArrayProperty");
+                    Console.ForegroundColor = ConsoleColor.White;
                 }
                 else if (Property == "StructProperty")
                 {
                     string StructType = uexp.UassetData.GetPropertyName(memoryList.GetIntValue());
-                    Console.WriteLine("StructType-> " + StructType);
+                   // Console.WriteLine("StructType-> " + StructType);
                     memoryList.Skip(4);  //null or something
                     memoryList.Skip(16); //null bytes
                     if (FromStruct)
                     {
                         memoryList.Skip(1);  //null For "Struct"
+                    }
+
+
+                    if (StructType == "MovieSceneEvalTemplatePtr" || StructType == "MovieSceneTrackImplementationPtr")
+                    {
+                        PropertyParser(PropertyName, StructType, PropertyLength, memoryList, uexp, Modify);
+                        continue;
                     }
 
                     int StructPosition = memoryList.GetPosition();
@@ -150,8 +175,9 @@ namespace AssetParser
                         continue;
                     }
 
-                    if (StructType != "Box"
+                    if (StructType != "ActorReference"
                      && StructType != "Box2D"
+                     && StructType != "Box"
                      && StructType != "BoxSphereBounds"
                      && StructType != "Color"
                      && StructType != "ColorMaterialInput"
@@ -169,8 +195,9 @@ namespace AssetParser
                      && StructType != "IntPoint"
                      && StructType != "IntVector"
                      && StructType != "ItemsBitArray"
+                     && StructType != "LevelSequenceObjectReferenceMap"
                      && StructType != "LinearColor"
-                     && StructType != "MovieSceneEvaluationFieldEntityTree"
+                     && StructType != "MaterialAttributesInput"
                      && StructType != "MovieSceneEvaluationKey"
                      && StructType != "MovieSceneEvaluationTree"
                      && StructType != "MovieSceneEvaluationTreeNode"
@@ -181,28 +208,45 @@ namespace AssetParser
                      && StructType != "MovieSceneSegment"
                      && StructType != "MovieSceneSegmentIdentifier"
                      && StructType != "MovieSceneSequenceID"
+                     && StructType != "MovieSceneSubSequenceTree"
                      && StructType != "MovieSceneTangentData"
                      && StructType != "MovieSceneTrackIdentifier"
-                     && StructType != "MovieSceneTrackImplementationPtr"
+                     && StructType != "NavAgentSelector"
+                     && StructType != "PerPlatformBool"
                      && StructType != "PerPlatformFloat"
+                     && StructType != "PerPlatformInt"
+                     && StructType != "PerQualityLevelInt"
                      && StructType != "Plane"
                      && StructType != "PointerToUberGraphFrame"
                      && StructType != "Quat"
                      && StructType != "RichCurveKey"
                      && StructType != "Rotator"
-                     && StructType != "ScalarMaterialInput"
                      && StructType != "SHAHash"
+                     && StructType != "ScalarMaterialInput"
+                     && StructType != "SectionEvaluationDataTree"
+                     && StructType != "ShadingModelMaterialInput"
+                     && StructType != "SimpleCurveKey"
+                     && StructType != "SkeletalMeshSamplingLODBuiltData"
+                     && StructType != "SkeletalMeshSamplingRegionBuiltData"
+                     && StructType != "SmartName"
                      && StructType != "SoftClassPath"
+                     && StructType != "SoftObjectPath"
                      && StructType != "Sphere"
                      && StructType != "StringAssetReference"
+                     && StructType != "StringClassReference"
                      && StructType != "Table"
                      && StructType != "Timespan"
                      && StructType != "Transform"
                      && StructType != "UInt128"
-                     && StructType != "Vector"
                      && StructType != "Vector2D"
+                     && StructType != "Vector2MaterialInput"
                      && StructType != "Vector4"
+                     && StructType != "Vector"
                      && StructType != "VectorMaterialInput"
+                     && StructType != "Vector_NetQuantize10"
+                     && StructType != "Vector_NetQuantize100"
+                     && StructType != "Vector_NetQuantize"
+                     && StructType != "Vector_NetQuantizeNormal"
                      && StructType != "ViewTargetBlendParams")
                     {
                         try
@@ -211,6 +255,7 @@ namespace AssetParser
                         }
                         catch
                         {
+                            uexp.IsGood = false;
                         }
                     }
 
@@ -347,7 +392,7 @@ namespace AssetParser
         }
 
 
-        private void PropertyParser(string PropertyName, string Property, int PropertyLength, MemoryList memoryList, Uexp uexp, bool Modify = false)
+        private void PropertyParser(string PropertyName, string Property, int PropertyLength, MemoryList memoryList, Uexp Uexp, bool Modify = false)
         {
             if (Property == "Int8Property")
             {
@@ -450,7 +495,7 @@ namespace AssetParser
                 int MapCount = memoryList.GetIntValue();
                 //Console.WriteLine("MapCount-> " + MapCount);
                 Console.ForegroundColor = ConsoleColor.Blue;
-                Console.WriteLine("MapProperty");
+               // Console.WriteLine("MapProperty2");
                 Console.ForegroundColor = ConsoleColor.White;
                 try
                 {
@@ -460,19 +505,20 @@ namespace AssetParser
                         {
                             memoryList.Skip(4);//null or something
                         }
-                        Console.WriteLine("Mapindex-> " + Mapindex);
-                        Console.WriteLine("MapKey-> " + MapKey);
-                        Console.WriteLine("MapValue-> " + MapValue);
+                       // Console.WriteLine("Mapindex2-> " + Mapindex);
+                       // Console.WriteLine("MapKey2-> " + MapKey);
+                       // Console.WriteLine("MapValue2-> " + MapValue);
                         PropertyParser(PropertyName, MapKey, -1, memoryList, uexp, Modify);
                         PropertyParser(PropertyName, MapValue, -1, memoryList, uexp, Modify);
+
                     }
                 }
                 catch
                 {
-
+                    uexp.IsGood = false;
                 }
                 Console.ForegroundColor = ConsoleColor.Blue;
-                Console.WriteLine("EndMapProperty");
+               // Console.WriteLine("EndMapProperty2");
                 Console.ForegroundColor = ConsoleColor.White;
             }
             else if (Property == "FieldPathProperty")
@@ -547,11 +593,10 @@ namespace AssetParser
                 if (!Modify)
                 {
                     uexp.Strings.Add(new List<string>() { PropertyName, memoryList.GetStringUE() });
-                    Console.WriteLine(uexp.Strings[uexp.Strings.Count - 1][1]);
+                   // Console.WriteLine(uexp.Strings[uexp.Strings.Count - 1][1]);
                 }
                 else
                 {
-                    //memoryList.GetStringUE();
                     memoryList.ReplaceStringUE(uexp.Strings[uexp.CurrentIndex][1]);
                     uexp.CurrentIndex++;
                 }
@@ -599,15 +644,65 @@ namespace AssetParser
             else if (Property == "StructProperty")
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("StructProperty");
+               // Console.WriteLine("StructProperty->" + memoryList.GetPosition());
                 Console.ForegroundColor = ConsoleColor.White;
 
                 new StructProperty(memoryList, uexp, true, Modify);
 
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("EndStructProperty");
+               // Console.WriteLine("EndStructProperty->" + memoryList.GetPosition());
                 Console.ForegroundColor = ConsoleColor.White;
             }
+            //For StructProperty
+            else if (Property == "FrameNumber")
+            {
+                memoryList.Skip(4);
+            }
+            else if (Property == "MovieSceneEvalTemplatePtr")
+            {
+
+                if (memoryList.GetStringUE().Length > 0)
+                {
+
+                    try
+                    {
+                       // Console.WriteLine("MovieSceneEvalTemplatePtr--> StructProperty");
+                        new StructProperty(memoryList, uexp, true, Modify);
+                       // Console.WriteLine("MovieSceneEvalTemplatePtr--> EndStructProperty");
+                    }
+                    catch
+                    {
+                        uexp.IsGood = false;
+                    }
+                }
+            }
+            else if (Property == "MovieSceneTrackImplementationPtr")
+            {
+                //Console.ReadLine()
+               // Console.WriteLine("StartMovieSceneEvalTemplatePtrLength->"+PropertyLength);
+                if (memoryList.GetStringUE().Length > 0|| PropertyLength>0)
+                {
+                   // Console.WriteLine("StartMovieSceneEvalTemplatePtr");
+                    try
+                    {
+                        Console.ForegroundColor = ConsoleColor.DarkYellow;
+                       // Console.WriteLine("MovieSceneEvalTemplatePtr--> StructProperty");
+                        new StructProperty(memoryList, uexp, true, Modify);
+                       // Console.WriteLine("MovieSceneEvalTemplatePtr--> EndStructProperty");
+                        Console.ForegroundColor = ConsoleColor.White;
+                    }
+                    catch
+                    {
+                        uexp.IsGood = false;
+                    }
+                    memoryList.Skip(4); //ImplementationPtr Index
+                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                   // Console.WriteLine("EndStartMovieSceneEvalTemplatePtr");
+                    Console.ForegroundColor = ConsoleColor.White;
+                }
+            }
+
+
             else
             {
                 new StructProperty(memoryList, uexp, true, Modify);

@@ -6,20 +6,11 @@ namespace AssetParser
 {
     public class Uexp
     {
-        public struct TextBlock
-        {
-            public int TextBlockName { get; set; }
-            public int TextOffset { get; set; }
-            public int TextBlockSize { get; set; }
-            //TextLenght + String Value
-            public List<byte> TextBlockData { get; set; }
-        }
-
 
         public Uasset UassetData;
         public List<List<string>> Strings;  //[Text id,Text Value,...]
         private int _CurrentIndex;
-
+        public bool IsGood = true;
         public int CurrentIndex
         {
             get
@@ -49,6 +40,11 @@ namespace AssetParser
 
             for (int n = 0; n < UassetData.Exports_Directory.Count; n++)
             {
+                
+         
+                   // Console.Clear();
+                  //  Console.ReadLine();
+
                 using (MemoryList memoryList = new MemoryList(UassetData.Exports_Directory[n].ExportData))
                 {
 
@@ -56,11 +52,11 @@ namespace AssetParser
 
                     //no need for now
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"-----------{n}------------");
+                    // Console.WriteLine($"-----------{n}------------");
                     Console.ForegroundColor = ConsoleColor.White;
                     _ = new StructProperty(memoryList, this, true, Modify);
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"-----------End------------");
+                  // Console.WriteLine($"-----------End------------");
                     Console.ForegroundColor = ConsoleColor.White;
 
                     switch (UassetData.GetExportPropertyName(UassetData.Exports_Directory[n].ExportClass))
@@ -78,6 +74,8 @@ namespace AssetParser
                             break;
                     }
                 }
+
+                //Console.ReadLine();
             }
 
 

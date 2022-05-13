@@ -49,11 +49,11 @@ namespace AssetParser
                 throw new Exception("Unsupported locres version");
             }
 
-            Console.WriteLine(Version);
+          // Console.WriteLine(Version);
 
             if (Version >= LocresVersion.Compact)
             {
-                Console.WriteLine("Compact");
+              // Console.WriteLine("Compact");
                 int localizedStringOffset = (int)locresData.GetInt64Value();
                 locresData.Seek(localizedStringOffset);
 
@@ -119,7 +119,7 @@ namespace AssetParser
                         {
                             locresData.GetStringUE(); //string hash
                             locresData.Skip(4); //Unkown
-                            Strings.Add(new List<string>() { Strings.Count.ToString(), locresData.GetStringUE() });
+                            locresData.ReplaceStringUE(Strings[CurrentIndex][1]);
                             CurrentIndex++;
                         }
                     }
