@@ -96,6 +96,12 @@
     <Compile Include="Core\StructProperty.cs" />
     <Compile Include="Core\Uasset.cs" />
     <Compile Include="Core\Uexp.cs" />
+    <Compile Include="FrmFilter.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmFilter.Designer.cs">
+      <DependentUpon>FrmFilter.cs</DependentUpon>
+    </Compile>
     <Compile Include="FrmMain.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -117,6 +123,9 @@
     <Compile Include="FrmState.Designer.cs">
       <DependentUpon>FrmState.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="FrmFilter.resx">
+      <DependentUpon>FrmFilter.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FrmMain.resx">
       <DependentUpon>FrmMain.cs</DependentUpon>
     </EmbeddedResource>

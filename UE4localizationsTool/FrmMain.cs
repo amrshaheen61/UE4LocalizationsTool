@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 namespace UE4localizationsTool
@@ -25,29 +26,34 @@ namespace UE4localizationsTool
         Stack<DataRow> BackupDataUndo;
         Stack<DataRow> BackupDataRedo;
         int BackupDataIndex = 0;
-        
+        List<List<string>> ListrefValues;
 
         public FrmMain()
         {
             InitializeComponent();
             this.Text = ToolName;
-            saveToolStripMenuItem.Enabled = false;
-            exportAllTextToolStripMenuItem.Enabled = false;
-            importAllTextToolStripMenuItem.Enabled = false;
-            undoToolStripMenuItem.Enabled = false;
-            redoToolStripMenuItem.Enabled = false;
-            StateLabel.Text = "";
-            BackupDataUndo = new Stack<DataRow>();
-            BackupDataRedo = new Stack<DataRow>();            
+            this.saveToolStripMenuItem.Enabled = false;
+            this.exportAllTextToolStripMenuItem.Enabled = false;
+            this.importAllTextToolStripMenuItem.Enabled = false;
+            this.undoToolStripMenuItem.Enabled = false;
+            this.redoToolStripMenuItem.Enabled = false;
+            this.filterToolStripMenuItem.Enabled = false;
+            this.StateLabel.Text = "";
+            this.BackupDataUndo = new Stack<DataRow>();
+            this.BackupDataRedo = new Stack<DataRow>();
+            this.dataGridView1.RowsAdded += (x, y) => this.UpdateCounter();
+            this.dataGridView1.RowsRemoved += (x, y) => this.UpdateCounter();
+            this.DataCount.Text = "";
         }
 
-        private void AddToDataView(List<List<string>> strings)
+        private void AddToDataView()
         {
-          
+
+            if (ListrefValues == null) return;
             int Index = 0;
-            foreach (var item in strings)
+            foreach (var item in ListrefValues)
             {
-                dataGridView1.Rows.Add(item[0], item[1]);
+                dataGridView1.Rows.Add(item[0], item[1],Index);
                 //dataGridView1.Rows[Index].Cells[1].Style.WrapMode = DataGridViewTriState.True;
                 //dataGridView1.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill; 
                 Index++;
@@ -71,17 +77,19 @@ namespace UE4localizationsTool
         private async void LoadFile(string filePath)
         {
 
-            dataGridView1.Rows.Clear();
-            saveToolStripMenuItem.Enabled = false;
-            exportAllTextToolStripMenuItem.Enabled = false;
-            importAllTextToolStripMenuItem.Enabled = false;
-            undoToolStripMenuItem.Enabled = false;
-            redoToolStripMenuItem.Enabled = false;
-            FilePath = "";
-            StateLabel.Text = "";
+            this.dataGridView1.Rows.Clear();
+            this.saveToolStripMenuItem.Enabled = false;
+            this.exportAllTextToolStripMenuItem.Enabled = false;
+            this.importAllTextToolStripMenuItem.Enabled = false;
+            this.undoToolStripMenuItem.Enabled = false;
+            this.redoToolStripMenuItem.Enabled = false;
+            this.filterToolStripMenuItem.Enabled = false;
+            this.FilePath = "";
+            this.StateLabel.Text = "";
+            this.DataCount.Text = "";
             this.Text = ToolName;
-            BackupDataUndo = new Stack<DataRow>();
-            BackupDataRedo = new Stack<DataRow>();
+            this.BackupDataUndo = new Stack<DataRow>();
+            this.BackupDataRedo = new Stack<DataRow>();
             try
             {
                 state = new FrmState(this, "loading File", "loading File please wait...");
@@ -91,28 +99,29 @@ namespace UE4localizationsTool
                 if (filePath.ToLower().EndsWith(".locres"))
                 {
                     locres = await Task.Run(() => new locres(filePath));
-
-                    AddToDataView(locres.Strings);
+                    ListrefValues = locres.Strings;
+                    AddToDataView();
 
                 }
                 else if (filePath.ToLower().EndsWith(".uasset"))
                 {
                     Uasset = await Task.Run(() => new Uasset(filePath));
                     Uexp = await Task.Run(() => new Uexp(Uasset));
-
-                    AddToDataView(Uexp.Strings);
+                    ListrefValues = Uexp.Strings;
+                    AddToDataView();
                     if (!Uexp.IsGood)
                     {
                         StateLabel.Text = "Warning: This file is't fully parsed and may not contain some text.";
                     }
 
                 }
-                undoToolStripMenuItem.Enabled = true;
-                redoToolStripMenuItem.Enabled = true;
-                saveToolStripMenuItem.Enabled = true;
-                exportAllTextToolStripMenuItem.Enabled = true;
-                importAllTextToolStripMenuItem.Enabled = true;
-                FilePath = filePath;
+                this.undoToolStripMenuItem.Enabled = true;
+                this.redoToolStripMenuItem.Enabled = true;
+                this.saveToolStripMenuItem.Enabled = true;
+                this.exportAllTextToolStripMenuItem.Enabled = true;
+                this.importAllTextToolStripMenuItem.Enabled = true;
+                this.filterToolStripMenuItem.Enabled = true;
+                this.FilePath = filePath;
                 this.Text = ToolName + " - " + Path.GetFileName(FilePath);
                 state.Close();
             }
@@ -259,15 +268,18 @@ namespace UE4localizationsTool
                 }
             }
 
-            if (FindArray.Count == 0)
+            if (FindArray.Count == 0|| InputSearch.Text=="")
             {
                 MessageBox.Show($"can't find '{InputSearch.Text}'", "No results", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                FindArray.Clear();
+                searchcount.Text = "found: " + FindArray.Count;
                 return;
             }
             dataGridView1.ClearSelection();
             dataGridView1.Rows[FindArray[0]].Selected = true;
             dataGridView1.FirstDisplayedScrollingRowIndex = FindArray[0];
             FindIndex = 0;
+            searchcount.Text = "found: "+ FindArray.Count;
         }
 
         private void FindNext_Click(object sender, EventArgs e)
@@ -327,7 +339,7 @@ namespace UE4localizationsTool
 
         private void copyToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (dataGridView1.SelectedCells.Count > 0)
+                if (dataGridView1.SelectedCells.Count > 0)
                 Clipboard.SetText(dataGridView1.SelectedCells[0].Value.ToString());
         }
 
@@ -379,18 +391,8 @@ namespace UE4localizationsTool
         {
             if (dataGridView1.Created)
             {
-                           
-                if (FilePath.ToLower().EndsWith(".locres"))
-                {
-                    locres.Strings[e.RowIndex][1] = dataGridView1.Rows[e.RowIndex].Cells[1].Value != null ? dataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString() : "";
-                    dataGridView1.Rows[e.RowIndex].Cells[1].Style.BackColor = System.Drawing.Color.FromArgb(255, 204, 153);
-                }
-                else if (FilePath.ToLower().EndsWith(".uasset"))
-                {
-                    Uexp.Strings[e.RowIndex][1] = dataGridView1.Rows[e.RowIndex].Cells[1].Value != null ? dataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString() : "";
-                    dataGridView1.Rows[e.RowIndex].Cells[1].Style.BackColor = System.Drawing.Color.FromArgb(255, 204, 153);
-                }
-
+                ListrefValues[int.Parse(dataGridView1.Rows[e.RowIndex].Cells[2].Value.ToString())][1] = dataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString();
+                dataGridView1.Rows[e.RowIndex].Cells[1].Style.BackColor = System.Drawing.Color.FromArgb(255, 204, 153);
             }
         }
 
@@ -408,11 +410,12 @@ namespace UE4localizationsTool
 
         private void dataGridView1_KeyDown(object sender, KeyEventArgs e)
         {
-            if (dataGridView1.CancelEdit())
+            
+            if (dataGridView1.CancelEdit()&& dataGridView1.Focused)
             {
                 if (e.KeyCode == Keys.V && e.Control)
                 {
-                    this.pasteToolStripMenuItem_Click(sender, e);
+                    pasteToolStripMenuItem_Click(sender, e);
                 }               
                 else if (e.KeyCode == Keys.Z && e.Control)
                 {
@@ -450,7 +453,7 @@ namespace UE4localizationsTool
             {
                 BackupDataRedo.Clear();
             }
-            BackupDataUndo.Push(new DataRow() { Index = e.RowIndex, StringValue = dataGridView1.Rows[e.RowIndex].Cells[1].Value != null ? dataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString() : "" });
+            BackupDataUndo.Push(new DataRow() { Index = e.RowIndex, StringValue = dataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString()});
         }
 
         private void undoToolStripMenuItem_Click(object sender, EventArgs e)
@@ -464,7 +467,7 @@ namespace UE4localizationsTool
 
                 //MessageBox.Show(dataRow.StringValue);
                 dataGridView1.Rows[dataRow.Index].Cells[1].Value = dataRow.StringValue;
-                if (dataRow.StringValue == (Uexp != null ? Uexp.Strings[dataRow.Index][1] : locres.Strings[dataRow.Index][1]))
+                if (dataRow.StringValue == ListrefValues[dataRow.Index][1])
                     dataGridView1.Rows[dataRow.Index].Cells[1].Style.BackColor = System.Drawing.Color.FromArgb(255, 255, 255);
                 else
                 {
@@ -486,7 +489,7 @@ namespace UE4localizationsTool
                 DataRow dataRow = BackupDataRedo.Pop();
                 BackupDataUndo.Push(new DataRow() { Index = dataRow.Index, StringValue = dataGridView1.Rows[dataRow.Index].Cells[1].Value != null ? dataGridView1.Rows[dataRow.Index].Cells[1].Value.ToString() : "" });
                 dataGridView1.Rows[dataRow.Index].Cells[1].Value = dataRow.StringValue;
-                if (dataRow.StringValue == (Uexp != null ? Uexp.Strings[dataRow.Index][1] : locres.Strings[dataRow.Index][1]))
+                if (dataRow.StringValue == ListrefValues[dataRow.Index][1])
                     dataGridView1.Rows[dataRow.Index].Cells[1].Style.BackColor = System.Drawing.Color.FromArgb(255, 255, 255);
                 else
                 {
@@ -506,6 +509,162 @@ namespace UE4localizationsTool
         private void aboutToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             new FrmAbout(this).ShowDialog();
+        }
+
+
+
+        private void byNameToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+            if (ListrefValues==null)
+            {
+                return;
+            }
+
+            FrmFilter frmFilter = new FrmFilter(this);
+            frmFilter.Text = "Filter by name";
+           
+          
+            if (frmFilter.ShowDialog() == DialogResult.OK)
+            {   
+
+                dataGridView1.Rows.Clear();
+                for (int x = 0; x < ListrefValues.Count; x++)
+                {
+                    if (frmFilter.UseMatching)
+                    {
+                        frmFilter.ArrayValues.ForEach(Value =>
+                        {
+                            if (frmFilter.RegularExpression)
+                            {
+                                try
+                                {
+                                    if (Regex.IsMatch(ListrefValues[x][0], Value))
+                                    {
+                                        dataGridView1.Rows.Add(ListrefValues[x][0], ListrefValues[x][1], x);
+                                    }
+                                }
+                                catch { }
+                            }
+                            else
+                            {
+                                if (ListrefValues[x][0] == Value)
+                                {
+                                    dataGridView1.Rows.Add(ListrefValues[x][0], ListrefValues[x][1], x);
+                                }
+                            }
+                        });
+
+                    }
+                    else
+                    {
+                        frmFilter.ArrayValues.ForEach(Value =>
+                        {
+                            if (frmFilter.RegularExpression)
+                            {
+                                try
+                                {
+                                    if (Regex.IsMatch(ListrefValues[x][0], Value, RegexOptions.IgnoreCase))
+                                    {
+                                        dataGridView1.Rows.Add(ListrefValues[x][0], ListrefValues[x][1], x);
+                                    }
+                                }
+                                catch { }
+                            }
+                            else
+                            {
+                                if (ListrefValues[x][0].ToLower().Contains(Value.ToLower()))
+                                {
+                                    dataGridView1.Rows.Add(ListrefValues[x][0], ListrefValues[x][1], x);
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+        }
+
+        private void clearFilterToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            dataGridView1.Rows.Clear();
+            AddToDataView();
+        }
+
+        private void byValueToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (ListrefValues == null)
+            {
+                return;
+            }
+            FrmFilter frmFilter = new FrmFilter(this);
+            frmFilter.Text = "Filter by value";
+            if (frmFilter.ShowDialog() == DialogResult.OK)
+            {
+                dataGridView1.Rows.Clear();
+
+                for (int x = 0; x < ListrefValues.Count; x++)
+                {
+                    if (frmFilter.UseMatching)
+                    {
+                        frmFilter.ArrayValues.ForEach(Value =>
+                        {
+                            if (frmFilter.RegularExpression)
+                            {
+                                try
+                                {
+                                    if (Regex.IsMatch(ListrefValues[x][1], Value))
+                                    {
+                                        dataGridView1.Rows.Add(ListrefValues[x][0], ListrefValues[x][1], x);
+                                    }
+                                }
+                                catch { }
+                            }
+                            else
+                            {
+                                if (ListrefValues[x][1]==Value)
+                                {
+                                    dataGridView1.Rows.Add(ListrefValues[x][0], ListrefValues[x][1], x);
+                                }
+                            }
+                        });
+
+                    }
+                    else
+                    {
+                        frmFilter.ArrayValues.ForEach(Value =>
+                        {
+                            if (frmFilter.RegularExpression)
+                            {
+                                try
+                                {
+                                    if (Regex.IsMatch(ListrefValues[x][1], Value, RegexOptions.IgnoreCase))
+                                    {
+                                        dataGridView1.Rows.Add(ListrefValues[x][0], ListrefValues[x][1], x);
+                                    }
+                                }
+                                catch { }
+                            }
+                            else
+                            {
+                                if (ListrefValues[x][1].ToLower().Contains(Value.ToLower()))
+                                {
+                                    dataGridView1.Rows.Add(ListrefValues[x][0], ListrefValues[x][1], x);
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+        }
+
+        private void UpdateCounter()
+        {
+            DataCount.Text = "Text count: " + dataGridView1.Rows.Count;
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

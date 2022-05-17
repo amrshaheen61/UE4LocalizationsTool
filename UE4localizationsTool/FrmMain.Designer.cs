@@ -42,6 +42,10 @@ namespace UE4localizationsTool
             this.importAllTextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.search = new System.Windows.Forms.ToolStripMenuItem();
+            this.filterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.byNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.byValueToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.clearFilterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.undoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.redoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -56,7 +60,9 @@ namespace UE4localizationsTool
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.TextName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.TextValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Index = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.SearchPanal = new System.Windows.Forms.Panel();
+            this.searchcount = new System.Windows.Forms.Label();
             this.SearchHide = new System.Windows.Forms.Label();
             this.FindPrevious = new System.Windows.Forms.Button();
             this.FindNext = new System.Windows.Forms.Button();
@@ -66,6 +72,7 @@ namespace UE4localizationsTool
             this.copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pasteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.StateLabel = new System.Windows.Forms.Label();
+            this.DataCount = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SearchPanal.SuspendLayout();
@@ -99,7 +106,7 @@ namespace UE4localizationsTool
             // 
             this.OpenFile.Name = "OpenFile";
             this.OpenFile.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.OpenFile.Size = new System.Drawing.Size(146, 22);
+            this.OpenFile.Size = new System.Drawing.Size(180, 22);
             this.OpenFile.Text = "Open";
             this.OpenFile.Click += new System.EventHandler(this.OpenFile_Click);
             // 
@@ -107,7 +114,7 @@ namespace UE4localizationsTool
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
             this.saveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.SaveFile);
             // 
@@ -115,7 +122,7 @@ namespace UE4localizationsTool
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             this.exitToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F4)));
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -126,6 +133,7 @@ namespace UE4localizationsTool
             this.importAllTextToolStripMenuItem,
             this.toolStripSeparator1,
             this.search,
+            this.filterToolStripMenuItem,
             this.toolStripSeparator2,
             this.undoToolStripMenuItem,
             this.redoToolStripMenuItem,
@@ -142,7 +150,7 @@ namespace UE4localizationsTool
             // 
             this.exportAllTextToolStripMenuItem.Name = "exportAllTextToolStripMenuItem";
             this.exportAllTextToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.E)));
-            this.exportAllTextToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            this.exportAllTextToolStripMenuItem.Size = new System.Drawing.Size(213, 22);
             this.exportAllTextToolStripMenuItem.Text = "Export all text";
             this.exportAllTextToolStripMenuItem.Click += new System.EventHandler(this.exportAllTextToolStripMenuItem_Click);
             // 
@@ -150,77 +158,113 @@ namespace UE4localizationsTool
             // 
             this.importAllTextToolStripMenuItem.Name = "importAllTextToolStripMenuItem";
             this.importAllTextToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.I)));
-            this.importAllTextToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            this.importAllTextToolStripMenuItem.Size = new System.Drawing.Size(213, 22);
             this.importAllTextToolStripMenuItem.Text = "Import all text";
             this.importAllTextToolStripMenuItem.Click += new System.EventHandler(this.importAllTextToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(183, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(210, 6);
             // 
             // search
             // 
             this.search.Name = "search";
             this.search.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F)));
-            this.search.Size = new System.Drawing.Size(186, 22);
+            this.search.Size = new System.Drawing.Size(213, 22);
             this.search.Text = "Search";
             this.search.Click += new System.EventHandler(this.search_Click);
+            // 
+            // filterToolStripMenuItem
+            // 
+            this.filterToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.byNameToolStripMenuItem,
+            this.byValueToolStripMenuItem,
+            this.clearFilterToolStripMenuItem});
+            this.filterToolStripMenuItem.Name = "filterToolStripMenuItem";
+            this.filterToolStripMenuItem.Size = new System.Drawing.Size(213, 22);
+            this.filterToolStripMenuItem.Text = "Filter";
+            // 
+            // byNameToolStripMenuItem
+            // 
+            this.byNameToolStripMenuItem.Name = "byNameToolStripMenuItem";
+            this.byNameToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Q)));
+            this.byNameToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.byNameToolStripMenuItem.Text = "By Name";
+            this.byNameToolStripMenuItem.Click += new System.EventHandler(this.byNameToolStripMenuItem_Click);
+            // 
+            // byValueToolStripMenuItem
+            // 
+            this.byValueToolStripMenuItem.Name = "byValueToolStripMenuItem";
+            this.byValueToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.W)));
+            this.byValueToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.byValueToolStripMenuItem.Text = "By Value";
+            this.byValueToolStripMenuItem.Click += new System.EventHandler(this.byValueToolStripMenuItem_Click);
+            // 
+            // clearFilterToolStripMenuItem
+            // 
+            this.clearFilterToolStripMenuItem.Name = "clearFilterToolStripMenuItem";
+            this.clearFilterToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.D)));
+            this.clearFilterToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.clearFilterToolStripMenuItem.Text = "Clear filter";
+            this.clearFilterToolStripMenuItem.Click += new System.EventHandler(this.clearFilterToolStripMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(183, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(210, 6);
             // 
             // undoToolStripMenuItem
             // 
             this.undoToolStripMenuItem.Name = "undoToolStripMenuItem";
-            this.undoToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Z)));
-            this.undoToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            this.undoToolStripMenuItem.ShortcutKeyDisplayString = "Ctrl+Z";
+            this.undoToolStripMenuItem.Size = new System.Drawing.Size(213, 22);
             this.undoToolStripMenuItem.Text = "Undo";
             this.undoToolStripMenuItem.Click += new System.EventHandler(this.undoToolStripMenuItem_Click);
             // 
             // redoToolStripMenuItem
             // 
             this.redoToolStripMenuItem.Name = "redoToolStripMenuItem";
+            this.redoToolStripMenuItem.ShortcutKeyDisplayString = "Ctrl+Shift+Z/Ctrl+Y";
             this.redoToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
             | System.Windows.Forms.Keys.Z)));
-            this.redoToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            this.redoToolStripMenuItem.Size = new System.Drawing.Size(213, 22);
             this.redoToolStripMenuItem.Text = "Redo";
             this.redoToolStripMenuItem.Click += new System.EventHandler(this.redoToolStripMenuItem_Click);
             // 
             // copyToolStripMenuItem1
             // 
             this.copyToolStripMenuItem1.Name = "copyToolStripMenuItem1";
-            this.copyToolStripMenuItem1.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
-            this.copyToolStripMenuItem1.Size = new System.Drawing.Size(186, 22);
+            this.copyToolStripMenuItem1.ShortcutKeyDisplayString = "Ctrl+C";
+            this.copyToolStripMenuItem1.Size = new System.Drawing.Size(213, 22);
             this.copyToolStripMenuItem1.Text = "Copy";
             this.copyToolStripMenuItem1.Click += new System.EventHandler(this.copyToolStripMenuItem_Click);
             // 
             // pasteToolStripMenuItem1
             // 
             this.pasteToolStripMenuItem1.Name = "pasteToolStripMenuItem1";
-            this.pasteToolStripMenuItem1.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.V)));
-            this.pasteToolStripMenuItem1.Size = new System.Drawing.Size(186, 22);
+            this.pasteToolStripMenuItem1.ShortcutKeyDisplayString = "Ctrl+V";
+            this.pasteToolStripMenuItem1.Size = new System.Drawing.Size(213, 22);
             this.pasteToolStripMenuItem1.Text = "Paste";
             this.pasteToolStripMenuItem1.Click += new System.EventHandler(this.pasteToolStripMenuItem_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(183, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(210, 6);
             // 
             // fontToolStripMenuItem
             // 
             this.fontToolStripMenuItem.Name = "fontToolStripMenuItem";
-            this.fontToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            this.fontToolStripMenuItem.Size = new System.Drawing.Size(213, 22);
             this.fontToolStripMenuItem.Text = "Font";
             this.fontToolStripMenuItem.Click += new System.EventHandler(this.fontToolStripMenuItem_Click);
             // 
             // rightToLeftToolStripMenuItem
             // 
             this.rightToLeftToolStripMenuItem.Name = "rightToLeftToolStripMenuItem";
-            this.rightToLeftToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            this.rightToLeftToolStripMenuItem.ShortcutKeyDisplayString = "";
+            this.rightToLeftToolStripMenuItem.Size = new System.Drawing.Size(213, 22);
             this.rightToLeftToolStripMenuItem.Text = "Right to left (on/off)";
             this.rightToLeftToolStripMenuItem.Click += new System.EventHandler(this.rightToLeftToolStripMenuItem_Click);
             // 
@@ -236,14 +280,14 @@ namespace UE4localizationsTool
             // commandLinesToolStripMenuItem
             // 
             this.commandLinesToolStripMenuItem.Name = "commandLinesToolStripMenuItem";
-            this.commandLinesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.commandLinesToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
             this.commandLinesToolStripMenuItem.Text = "Command Lines";
             this.commandLinesToolStripMenuItem.Click += new System.EventHandler(this.commandLinesToolStripMenuItem_Click);
             // 
             // aboutToolStripMenuItem1
             // 
             this.aboutToolStripMenuItem1.Name = "aboutToolStripMenuItem1";
-            this.aboutToolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
+            this.aboutToolStripMenuItem1.Size = new System.Drawing.Size(161, 22);
             this.aboutToolStripMenuItem1.Text = "About";
             this.aboutToolStripMenuItem1.Click += new System.EventHandler(this.aboutToolStripMenuItem1_Click);
             // 
@@ -261,7 +305,8 @@ namespace UE4localizationsTool
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.TextName,
-            this.TextValue});
+            this.TextValue,
+            this.Index});
             this.dataGridView1.ImeMode = System.Windows.Forms.ImeMode.Disable;
             this.dataGridView1.Location = new System.Drawing.Point(0, 27);
             this.dataGridView1.MultiSelect = false;
@@ -290,11 +335,18 @@ namespace UE4localizationsTool
             this.TextValue.Name = "TextValue";
             this.TextValue.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             // 
+            // Index
+            // 
+            this.Index.HeaderText = "Index";
+            this.Index.Name = "Index";
+            this.Index.Visible = false;
+            // 
             // SearchPanal
             // 
             this.SearchPanal.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.SearchPanal.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.SearchPanal.Controls.Add(this.searchcount);
             this.SearchPanal.Controls.Add(this.SearchHide);
             this.SearchPanal.Controls.Add(this.FindPrevious);
             this.SearchPanal.Controls.Add(this.FindNext);
@@ -305,6 +357,14 @@ namespace UE4localizationsTool
             this.SearchPanal.Size = new System.Drawing.Size(689, 30);
             this.SearchPanal.TabIndex = 2;
             this.SearchPanal.Visible = false;
+            // 
+            // searchcount
+            // 
+            this.searchcount.Location = new System.Drawing.Point(423, 7);
+            this.searchcount.Name = "searchcount";
+            this.searchcount.Size = new System.Drawing.Size(211, 18);
+            this.searchcount.TabIndex = 6;
+            this.searchcount.Click += new System.EventHandler(this.label2_Click);
             // 
             // SearchHide
             // 
@@ -363,31 +423,44 @@ namespace UE4localizationsTool
             this.copyToolStripMenuItem,
             this.pasteToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(103, 48);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(145, 48);
             // 
             // copyToolStripMenuItem
             // 
             this.copyToolStripMenuItem.Name = "copyToolStripMenuItem";
-            this.copyToolStripMenuItem.Size = new System.Drawing.Size(102, 22);
+            this.copyToolStripMenuItem.ShortcutKeyDisplayString = "Ctrl+C";
+            this.copyToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
             this.copyToolStripMenuItem.Text = "Copy";
             this.copyToolStripMenuItem.Click += new System.EventHandler(this.copyToolStripMenuItem_Click);
             // 
             // pasteToolStripMenuItem
             // 
             this.pasteToolStripMenuItem.Name = "pasteToolStripMenuItem";
-            this.pasteToolStripMenuItem.Size = new System.Drawing.Size(102, 22);
+            this.pasteToolStripMenuItem.ShortcutKeyDisplayString = "Ctrl+V";
+            this.pasteToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
             this.pasteToolStripMenuItem.Text = "Paste";
             this.pasteToolStripMenuItem.Click += new System.EventHandler(this.pasteToolStripMenuItem_Click);
             // 
             // StateLabel
             // 
             this.StateLabel.AutoSize = true;
-            this.StateLabel.Location = new System.Drawing.Point(193, 3);
+            this.StateLabel.Location = new System.Drawing.Point(171, 10);
             this.StateLabel.Name = "StateLabel";
             this.StateLabel.Size = new System.Drawing.Size(64, 13);
             this.StateLabel.TabIndex = 3;
             this.StateLabel.Tag = "";
             this.StateLabel.Text = "-------------------";
+            // 
+            // DataCount
+            // 
+            this.DataCount.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.DataCount.BackColor = System.Drawing.SystemColors.Window;
+            this.DataCount.Location = new System.Drawing.Point(460, 9);
+            this.DataCount.Name = "DataCount";
+            this.DataCount.Size = new System.Drawing.Size(226, 15);
+            this.DataCount.TabIndex = 5;
+            this.DataCount.Text = "------";
+            this.DataCount.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
             // FrmMain
             // 
@@ -395,6 +468,7 @@ namespace UE4localizationsTool
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(689, 450);
+            this.Controls.Add(this.DataCount);
             this.Controls.Add(this.StateLabel);
             this.Controls.Add(this.SearchPanal);
             this.Controls.Add(this.dataGridView1);
@@ -440,8 +514,6 @@ namespace UE4localizationsTool
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripMenuItem copyToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem pasteToolStripMenuItem1;
-        private System.Windows.Forms.DataGridViewTextBoxColumn TextName;
-        private System.Windows.Forms.DataGridViewTextBoxColumn TextValue;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripMenuItem fontToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem rightToLeftToolStripMenuItem;
@@ -450,6 +522,15 @@ namespace UE4localizationsTool
         private System.Windows.Forms.ToolStripMenuItem redoToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem commandLinesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem filterToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem byValueToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem byNameToolStripMenuItem;
+        private System.Windows.Forms.DataGridViewTextBoxColumn TextName;
+        private System.Windows.Forms.DataGridViewTextBoxColumn TextValue;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Index;
+        private System.Windows.Forms.ToolStripMenuItem clearFilterToolStripMenuItem;
+        private System.Windows.Forms.Label DataCount;
+        private System.Windows.Forms.Label searchcount;
     }
 }
 

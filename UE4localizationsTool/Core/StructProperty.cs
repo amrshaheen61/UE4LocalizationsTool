@@ -6,15 +6,15 @@ namespace AssetParser
 {
     public class StructProperty
     {
-        public Uexp uexp;
-        public StructProperty(MemoryList memoryList, Uexp Uexp, bool FromStruct = true, bool Modify = false)
+
+        public StructProperty(MemoryList memoryList, Uexp uexp, bool FromStruct = true, bool Modify = false)
         {
-            uexp = Uexp;
+        
             while (memoryList.GetPosition() < memoryList.GetSize())
             {
                 
                 long PropertyNameC = memoryList.GetInt64Value();
-               // Console.WriteLine($"PropertyNameC- {PropertyNameC} > "+ memoryList.GetPosition());
+               //Console.WriteLine($"PropertyNameC- {PropertyNameC} > "+ memoryList.GetPosition());
                 if (PropertyNameC > uexp.UassetData.Number_of_Names) 
                 {
                     memoryList.Skip(-4);
@@ -33,11 +33,11 @@ namespace AssetParser
                 int PropertyLength = memoryList.GetIntValue();
                 memoryList.Skip(4);//null
 
-                Console.ForegroundColor = ConsoleColor.Green;
-               // Console.WriteLine($"PropertyName-> " + PropertyName);
-               // Console.WriteLine("Property-> " + Property);
-               // Console.WriteLine("PropertyLength-> " + PropertyLength);
-                Console.ForegroundColor = ConsoleColor.White;
+                //Console.ForegroundColor = //ConsoleColor.Green;
+                //Console.WriteLine($"PropertyName-> " + PropertyName);
+                //Console.WriteLine("Property-> " + Property);
+                //Console.WriteLine("PropertyLength-> " + PropertyLength);
+                //Console.ForegroundColor = //ConsoleColor.White;
 
                 if (Property == "MapProperty")
                 {
@@ -55,9 +55,9 @@ namespace AssetParser
                     MapData.Skip(4);//null or something
                     int MapCount = MapData.GetIntValue();
                     //Console.WriteLine("MapCount-> " + MapCount);
-                    Console.ForegroundColor = ConsoleColor.Blue;
-                   // Console.WriteLine("MapProperty");
-                    Console.ForegroundColor = ConsoleColor.White;
+                    //Console.ForegroundColor = //ConsoleColor.Blue;
+                   //Console.WriteLine("MapProperty");
+                    //Console.ForegroundColor = //ConsoleColor.White;
                     try
                     {
                         for (int Mapindex = 0; Mapindex < MapCount; Mapindex++)
@@ -66,9 +66,9 @@ namespace AssetParser
                             {
                                 MapData.Skip(4);//null or something
                             }
-                           // Console.WriteLine("Mapindex-> " + Mapindex);
-                           // Console.WriteLine("MapKey-> " + MapKey);
-                           // Console.WriteLine("MapValue-> " + MapValue);
+                            //Console.WriteLine("Mapindex-> " + Mapindex);
+                            //Console.WriteLine("MapKey-> " + MapKey);
+                            //Console.WriteLine("MapValue-> " + MapValue);
                             PropertyParser(PropertyName, MapKey, -1, MapData, uexp, Modify);
                             PropertyParser(PropertyName, MapValue, -1, MapData, uexp, Modify);
                         }
@@ -77,9 +77,9 @@ namespace AssetParser
                     {
                         uexp.IsGood = false;
                     }
-                    Console.ForegroundColor = ConsoleColor.Blue;
-                   // Console.WriteLine("EndMapProperty");
-                    Console.ForegroundColor = ConsoleColor.White;
+                    //Console.ForegroundColor = //ConsoleColor.Blue;
+                   //Console.WriteLine("EndMapProperty");
+                    //Console.ForegroundColor = //ConsoleColor.White;
                     if (Modify)
                     {
                         memoryList.ReplaceBytes(PropertyLength, MapData.ToArray(), false, MapDataPosition);
@@ -89,12 +89,12 @@ namespace AssetParser
                 }
                 else if (Property == "ArrayProperty")
                 {
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                   // Console.WriteLine("ArrayProperty");
-                    Console.ForegroundColor = ConsoleColor.White;
+                    //Console.ForegroundColor = //ConsoleColor.Yellow;
+                   //Console.WriteLine("ArrayProperty");
+                    //Console.ForegroundColor = //ConsoleColor.White;
                     string ArrayType = uexp.UassetData.GetPropertyName(memoryList.GetIntValue());
                     memoryList.Skip(4);//null or something
-                   // Console.WriteLine("ArrayType-> " + ArrayType);
+                   //Console.WriteLine("ArrayType-> " + ArrayType);
                     if (FromStruct)
                     {
                         memoryList.Skip(1);  //null For "Struct"
@@ -111,21 +111,30 @@ namespace AssetParser
                         if (ArrayType == "StructProperty")
                         {
                             string ArrayName /*?*/ = uexp.UassetData.GetPropertyName(ArrayData.GetIntValue());
-                           // Console.WriteLine("ArrayName-> " + ArrayName);
+                           //Console.WriteLine("ArrayName-> " + ArrayName);
                             ArrayData.Skip(12); //null bytes
+                            int StructpositionEdit = ArrayData.GetPosition();
                             int StructLength = ArrayData.GetIntValue();
                             ArrayData.Skip(4); //null or something
                             string StructType = uexp.UassetData.GetPropertyName(ArrayData.GetIntValue());
-                           // Console.WriteLine("ArrayStructType-> " + StructType);
+                           //Console.WriteLine("ArrayStructType-> " + StructType);
                             ArrayData.Skip(20); //Unkown bytes
                             if (FromStruct)
                             {
                                 ArrayData.Skip(1);  //null For "Struct"
                             }
 
+                            int StructPosition = ArrayData.GetPosition();
+                            
                             for (int Arrayindex = 0; Arrayindex < ArrayCount; Arrayindex++)
                             {
                                 PropertyParser(PropertyName, StructType, -1, ArrayData, uexp, Modify);
+                            }
+    
+
+                            if (Modify)
+                            {
+                                ArrayData.SetIntValue(ArrayData.GetSize() - StructPosition, false, StructpositionEdit);
                             }
                         }
                         else
@@ -146,14 +155,14 @@ namespace AssetParser
                         memoryList.Seek(ArrayPosition + ArrayData.GetSize());
                         memoryList.SetIntValue(ArrayData.GetSize(), false, ThisPosition);
                     }
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                   // Console.WriteLine("EndArrayProperty");
-                    Console.ForegroundColor = ConsoleColor.White;
+                    //Console.ForegroundColor = //ConsoleColor.Yellow;
+                    //Console.WriteLine("EndArrayProperty");
+                    //Console.ForegroundColor = //ConsoleColor.White;
                 }
                 else if (Property == "StructProperty")
                 {
                     string StructType = uexp.UassetData.GetPropertyName(memoryList.GetIntValue());
-                   // Console.WriteLine("StructType-> " + StructType);
+                   //Console.WriteLine("StructType-> " + StructType);
                     memoryList.Skip(4);  //null or something
                     memoryList.Skip(16); //null bytes
                     if (FromStruct)
@@ -299,49 +308,62 @@ namespace AssetParser
                     int TextDataPosition = memoryList.GetPosition();
                     if (ContainText == 0xff)
                     {
-                        TextData = new MemoryList(memoryList.GetBytes(PropertyLength - 5));
-                        if (TextData.GetSize() == 0)
+                        try
                         {
-                            continue;
-                        }
-                        int TextLinesCount = TextData.GetIntValue();
-                        for (int i = 0; i < TextLinesCount; i++)
-                        {
-                            if (!Modify)
+                            TextData = new MemoryList(memoryList.GetBytes(PropertyLength - 5));
+                            if (TextData.GetSize() == 0)
                             {
-                                uexp.Strings.Add(new List<string>() { PropertyName, TextData.GetStringUE() });
+                                continue;
+                            }
+                            int TextLinesCount = TextData.GetIntValue();
+                            for (int i = 0; i < TextLinesCount; i++)
+                            {
+                                if (!Modify)
+                                {
+                                    uexp.Strings.Add(new List<string>() { PropertyName, TextData.GetStringUE() });
 
+                                }
+                                else
+                                {
+                                    TextData.ReplaceStringUE(uexp.Strings[uexp.CurrentIndex][1]);
+                                    uexp.CurrentIndex++;
+                                    memoryList.ReplaceBytes(PropertyLength - 5, TextData.ToArray(), false, TextDataPosition);
+                                    memoryList.Seek(TextDataPosition + TextData.GetSize());
+                                    memoryList.SetIntValue(TextData.GetSize() + 5, false, ThisPosition);
+                                }
                             }
-                            else
-                            {
-                                TextData.ReplaceStringUE(uexp.Strings[uexp.CurrentIndex][1]);
-                                uexp.CurrentIndex++;
-                                memoryList.ReplaceBytes(PropertyLength - 5, TextData.ToArray(), false, TextDataPosition);
-                                memoryList.Seek(TextDataPosition + TextData.GetSize());
-                                memoryList.SetIntValue(TextData.GetSize() + 5, false, ThisPosition);
-                            }
+                        }
+                        catch
+                        {
+
                         }
                         continue;
                     }
-
-                    TextData = new MemoryList(memoryList.GetBytes(PropertyLength - 5));
-                    if (!Modify)
+                    try
                     {
-                        uexp.Strings.Add(new List<string>() { PropertyName, TextData.GetStringUE() });
-                        uexp.Strings.Add(new List<string>() { PropertyName, TextData.GetStringUE() });
-                        uexp.Strings.Add(new List<string>() { PropertyName, TextData.GetStringUE() });
+                        TextData = new MemoryList(memoryList.GetBytes(PropertyLength - 5));
+                        if (!Modify)
+                        {
+                            uexp.Strings.Add(new List<string>() { PropertyName + "_1", TextData.GetStringUE() });
+                            uexp.Strings.Add(new List<string>() { PropertyName + "_2", TextData.GetStringUE() });
+                            uexp.Strings.Add(new List<string>() { PropertyName + "_3", TextData.GetStringUE() });
+                        }
+                        else
+                        {
+                            TextData.ReplaceStringUE(uexp.Strings[uexp.CurrentIndex][1]);
+                            uexp.CurrentIndex++;
+                            TextData.ReplaceStringUE(uexp.Strings[uexp.CurrentIndex][1]);
+                            uexp.CurrentIndex++;
+                            TextData.ReplaceStringUE(uexp.Strings[uexp.CurrentIndex][1]);
+                            uexp.CurrentIndex++;
+                            memoryList.ReplaceBytes(PropertyLength - 5, TextData.ToArray(), false, TextDataPosition);
+                            memoryList.Seek(TextDataPosition + TextData.GetSize());
+                            memoryList.SetIntValue(TextData.GetSize() + 5, false, ThisPosition);
+                        }
                     }
-                    else
+                    catch
                     {
-                        TextData.ReplaceStringUE(uexp.Strings[uexp.CurrentIndex][1]);
-                        uexp.CurrentIndex++;
-                        TextData.ReplaceStringUE(uexp.Strings[uexp.CurrentIndex][1]);
-                        uexp.CurrentIndex++;
-                        TextData.ReplaceStringUE(uexp.Strings[uexp.CurrentIndex][1]);
-                        uexp.CurrentIndex++;
-                        memoryList.ReplaceBytes(PropertyLength - 5, TextData.ToArray(), false, TextDataPosition);
-                        memoryList.Seek(TextDataPosition + TextData.GetSize());
-                        memoryList.SetIntValue(TextData.GetSize() + 5, false, ThisPosition);
+
                     }
                 }
                 else if (Property == "ByteProperty")
@@ -364,6 +386,25 @@ namespace AssetParser
                         memoryList.Skip(8); //Val2
                     }
                 }
+                else if (Property == "SetProperty")
+                {
+
+                    string SetKey = uexp.UassetData.GetPropertyName(memoryList.GetIntValue());
+                    memoryList.Skip(4);//null or something
+                    if (FromStruct)
+                    {
+                        memoryList.Skip(1);  //null For "Struct"
+                    }
+                    int StructPosition = memoryList.GetPosition();
+                    MemoryList SetData = new MemoryList(memoryList.GetBytes(PropertyLength));
+
+                    int SetCount = SetData.GetIntValue();
+                    for (int n = 0; n < SetCount; n++)
+                    {
+                        PropertyParser(PropertyName, SetKey, -1, SetData, uexp, Modify);
+                    }
+
+                }
                 else
                 {
                     if (FromStruct)
@@ -378,13 +419,19 @@ namespace AssetParser
 
                     int TextDataPosition = memoryList.GetPosition();
                     MemoryList TextData = new MemoryList(memoryList.GetBytes(PropertyLength));
-                    PropertyParser(PropertyName, Property, PropertyLength, TextData, uexp, Modify);
-
-                    if (Modify)
+                    try
                     {
-                        memoryList.ReplaceBytes(PropertyLength, TextData.ToArray(), false, TextDataPosition);
-                        memoryList.Seek(TextDataPosition + TextData.GetSize());
-                        memoryList.SetIntValue(TextData.GetSize(), false, ThisPosition);
+                        PropertyParser(PropertyName, Property, PropertyLength, TextData, uexp, Modify);
+                        if (Modify)
+                        {
+                            memoryList.ReplaceBytes(PropertyLength, TextData.ToArray(), false, TextDataPosition);
+                            memoryList.Seek(TextDataPosition + TextData.GetSize());
+                            memoryList.SetIntValue(TextData.GetSize(), false, ThisPosition);
+                        }
+                    }
+                    catch
+                    {
+
                     }
                 }
 
@@ -392,7 +439,7 @@ namespace AssetParser
         }
 
 
-        private void PropertyParser(string PropertyName, string Property, int PropertyLength, MemoryList memoryList, Uexp Uexp, bool Modify = false)
+        private void PropertyParser(string PropertyName, string Property, int PropertyLength, MemoryList memoryList, Uexp uexp, bool Modify = false)
         {
             if (Property == "Int8Property")
             {
@@ -494,9 +541,9 @@ namespace AssetParser
                 memoryList.Skip(4);//null or something
                 int MapCount = memoryList.GetIntValue();
                 //Console.WriteLine("MapCount-> " + MapCount);
-                Console.ForegroundColor = ConsoleColor.Blue;
-               // Console.WriteLine("MapProperty2");
-                Console.ForegroundColor = ConsoleColor.White;
+                //Console.ForegroundColor = //ConsoleColor.Blue;
+               //Console.WriteLine("MapProperty2");
+                //Console.ForegroundColor = //ConsoleColor.White;
                 try
                 {
                     for (int Mapindex = 0; Mapindex < MapCount; Mapindex++)
@@ -505,9 +552,9 @@ namespace AssetParser
                         {
                             memoryList.Skip(4);//null or something
                         }
-                       // Console.WriteLine("Mapindex2-> " + Mapindex);
-                       // Console.WriteLine("MapKey2-> " + MapKey);
-                       // Console.WriteLine("MapValue2-> " + MapValue);
+                        //Console.WriteLine("Mapindex2-> " + Mapindex);
+                        //Console.WriteLine("MapKey2-> " + MapKey);
+                        //Console.WriteLine("MapValue2-> " + MapValue);
                         PropertyParser(PropertyName, MapKey, -1, memoryList, uexp, Modify);
                         PropertyParser(PropertyName, MapValue, -1, memoryList, uexp, Modify);
 
@@ -517,9 +564,9 @@ namespace AssetParser
                 {
                     uexp.IsGood = false;
                 }
-                Console.ForegroundColor = ConsoleColor.Blue;
-               // Console.WriteLine("EndMapProperty2");
-                Console.ForegroundColor = ConsoleColor.White;
+                //Console.ForegroundColor = //ConsoleColor.Blue;
+               //Console.WriteLine("EndMapProperty2");
+                //Console.ForegroundColor = //ConsoleColor.White;
             }
             else if (Property == "FieldPathProperty")
             {
@@ -570,13 +617,27 @@ namespace AssetParser
                 {
                     string ArrayName /*?*/ = uexp.UassetData.GetPropertyName(memoryList.GetIntValue());
                     memoryList.Skip(12); //null bytes
+                    int StructpositionEdit = memoryList.GetPosition();
                     int StructLength = memoryList.GetIntValue();
                     memoryList.Skip(4); //null or something
                     string StructType = uexp.UassetData.GetPropertyName(memoryList.GetIntValue());
                     memoryList.Skip(20); //Unkown bytes
-                    for (int Arrayindex = 0; Arrayindex < ArrayCount; Arrayindex++)
+                    int StructPosition = memoryList.GetPosition();
+                    MemoryList StructData = new MemoryList(memoryList.GetBytes(StructLength));
+                    try
                     {
-                        PropertyParser(PropertyName, StructType, -1, memoryList, uexp, Modify);
+                        for (int Arrayindex = 0; Arrayindex < ArrayCount; Arrayindex++)
+                        {
+                            PropertyParser(PropertyName, StructType, -1, StructData, uexp, Modify);
+                        }
+                    }
+                    catch { uexp.IsGood = false; }
+
+                    if (Modify)
+                    {
+                        memoryList.ReplaceBytes(StructLength, StructData.ToArray(), false, StructPosition);
+                        memoryList.Seek(StructPosition + memoryList.GetSize());
+                        memoryList.SetIntValue(StructData.GetSize(), false, StructpositionEdit);
                     }
                 }
                 else
@@ -593,7 +654,7 @@ namespace AssetParser
                 if (!Modify)
                 {
                     uexp.Strings.Add(new List<string>() { PropertyName, memoryList.GetStringUE() });
-                   // Console.WriteLine(uexp.Strings[uexp.Strings.Count - 1][1]);
+                   //Console.WriteLine(uexp.Strings[uexp.Strings.Count - 1][1]);
                 }
                 else
                 {
@@ -626,9 +687,9 @@ namespace AssetParser
 
                 if (!Modify)
                 {
-                    uexp.Strings.Add(new List<string>() { PropertyName, memoryList.GetStringUE() });
-                    uexp.Strings.Add(new List<string>() { PropertyName, memoryList.GetStringUE() });
-                    uexp.Strings.Add(new List<string>() { PropertyName, memoryList.GetStringUE() });
+                    uexp.Strings.Add(new List<string>() { PropertyName + "_1", memoryList.GetStringUE() });
+                    uexp.Strings.Add(new List<string>() { PropertyName + "_2", memoryList.GetStringUE() });
+                    uexp.Strings.Add(new List<string>() { PropertyName + "_3", memoryList.GetStringUE() });
                 }
                 else
                 {
@@ -643,15 +704,30 @@ namespace AssetParser
             }
             else if (Property == "StructProperty")
             {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-               // Console.WriteLine("StructProperty->" + memoryList.GetPosition());
-                Console.ForegroundColor = ConsoleColor.White;
+                //Console.ForegroundColor = //ConsoleColor.Yellow;
+               //Console.WriteLine("StructProperty->" + memoryList.GetPosition());
+                //Console.ForegroundColor = //ConsoleColor.White;
 
                 new StructProperty(memoryList, uexp, true, Modify);
 
-                Console.ForegroundColor = ConsoleColor.Yellow;
-               // Console.WriteLine("EndStructProperty->" + memoryList.GetPosition());
-                Console.ForegroundColor = ConsoleColor.White;
+                //Console.ForegroundColor = //ConsoleColor.Yellow;
+               //Console.WriteLine("EndStructProperty->" + memoryList.GetPosition());
+                //Console.ForegroundColor = //ConsoleColor.White;
+            }
+            else if (Property == "SetProperty")
+            {
+                string SetKey= uexp.UassetData.GetPropertyName(memoryList.GetIntValue());
+                memoryList.Skip(4);//null or something
+                int SetCount = memoryList.GetIntValue();
+                for(int n=0;n< SetCount; n++)
+                {
+                    PropertyParser(PropertyName, SetKey, -1, memoryList, uexp, Modify);
+                }
+
+            }
+            else if (Property == "MulticastInlineDelegateProperty")
+            {
+            
             }
             //For StructProperty
             else if (Property == "FrameNumber")
@@ -666,9 +742,9 @@ namespace AssetParser
 
                     try
                     {
-                       // Console.WriteLine("MovieSceneEvalTemplatePtr--> StructProperty");
+                       //Console.WriteLine("MovieSceneEvalTemplatePtr--> StructProperty");
                         new StructProperty(memoryList, uexp, true, Modify);
-                       // Console.WriteLine("MovieSceneEvalTemplatePtr--> EndStructProperty");
+                       //Console.WriteLine("MovieSceneEvalTemplatePtr--> EndStructProperty");
                     }
                     catch
                     {
@@ -678,27 +754,27 @@ namespace AssetParser
             }
             else if (Property == "MovieSceneTrackImplementationPtr")
             {
-                //Console.ReadLine()
-               // Console.WriteLine("StartMovieSceneEvalTemplatePtrLength->"+PropertyLength);
+               //Console.ReadLine();
+               //Console.WriteLine("StartMovieSceneEvalTemplatePtrLength->"+PropertyLength);
                 if (memoryList.GetStringUE().Length > 0|| PropertyLength>0)
                 {
-                   // Console.WriteLine("StartMovieSceneEvalTemplatePtr");
+                   //Console.WriteLine("StartMovieSceneEvalTemplatePtr");
                     try
                     {
-                        Console.ForegroundColor = ConsoleColor.DarkYellow;
-                       // Console.WriteLine("MovieSceneEvalTemplatePtr--> StructProperty");
+                        //Console.ForegroundColor = //ConsoleColor.DarkYellow;
+                       //Console.WriteLine("MovieSceneEvalTemplatePtr--> StructProperty");
                         new StructProperty(memoryList, uexp, true, Modify);
-                       // Console.WriteLine("MovieSceneEvalTemplatePtr--> EndStructProperty");
-                        Console.ForegroundColor = ConsoleColor.White;
+                       //Console.WriteLine("MovieSceneEvalTemplatePtr--> EndStructProperty");
+                        //Console.ForegroundColor = //ConsoleColor.White;
                     }
                     catch
                     {
                         uexp.IsGood = false;
                     }
                     memoryList.Skip(4); //ImplementationPtr Index
-                    Console.ForegroundColor = ConsoleColor.DarkYellow;
-                   // Console.WriteLine("EndStartMovieSceneEvalTemplatePtr");
-                    Console.ForegroundColor = ConsoleColor.White;
+                    //Console.ForegroundColor = //ConsoleColor.DarkYellow;
+                   //Console.WriteLine("EndStartMovieSceneEvalTemplatePtr");
+                    //Console.ForegroundColor = //ConsoleColor.White;
                 }
             }
 
