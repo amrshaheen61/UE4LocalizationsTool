@@ -53,8 +53,17 @@ namespace AssetParser
 
             if (Version >= LocresVersion.Compact)
             {
-              // Console.WriteLine("Compact");
+                // Console.WriteLine("Compact");
+              
                 int localizedStringOffset = (int)locresData.GetInt64Value();
+                int currentFileOffset = locresData.GetPosition();
+
+
+                if (localizedStringOffset == -1)
+                {
+                    return;
+                }
+
                 locresData.Seek(localizedStringOffset);
 
                 int localizedStringCount = locresData.GetIntValue();
@@ -92,6 +101,7 @@ namespace AssetParser
                         }
                     }
                 }
+                locresData.Seek(currentFileOffset);
 
             }
             else if (Version == LocresVersion.Legacy)
@@ -101,7 +111,7 @@ namespace AssetParser
 
                 for (int i = 0; i < HashTablesCount; i++)
                 {
-                    locresData.GetStringUE(); //hash namespace
+                  locresData.GetStringUE(); //hash namespace
 
                     int localizedStringCount = locresData.GetIntValue();
 
@@ -110,9 +120,9 @@ namespace AssetParser
                     {
                         if (!Modify)
                         {
-                            locresData.GetStringUE(); //string hash
+                            string KeyHash = locresData.GetStringUE(); //string hash
                             locresData.Skip(4); //Unkown
-                            Strings.Add(new List<string>() { Strings.Count.ToString(), locresData.GetStringUE() });
+                            Strings.Add(new List<string>() { KeyHash, locresData.GetStringUE() });
 
                         }
                         else
@@ -125,11 +135,67 @@ namespace AssetParser
                     }
 
                 }
+                return;
             }
+
+
+            if (Version >= LocresVersion.Optimized)
+            {
+                locresData.Skip(4); //FileHash
+            }
+
+
+            int namespaceCount = locresData.GetIntValue();
+
+            for(int n=0;n< namespaceCount; n++)
+            {
+                string nameSpaceStr; 
+                uint StrHash;
+                ReadTextKey(locresData, Version,out StrHash,out nameSpaceStr); //no need right now
+                uint keyCount= locresData.GetUIntValue();
+                for (int k=0;k< keyCount;k++)
+                {
+                    string KeyStr;
+                    uint KeyStrHash;
+                    ReadTextKey(locresData, Version, out KeyStrHash, out KeyStr); 
+                    locresData.Skip(4);//SourceStringHash
+
+                    if (Version >= LocresVersion.Compact)
+                    {
+                    int localizedStringIndex= locresData.GetIntValue();
+                     if(Strings.Count> localizedStringIndex)
+                      {
+                            Strings[localizedStringIndex][0] = KeyStr;
+                      }
+
+                    }
+
+                }
+
+            }
+
+
+
+
+
+
+
+
+
 
         }
 
+        private void ReadTextKey(MemoryList memoryList, LocresVersion locresVersion, out uint StrHash, out string Str)
+        {
+            StrHash = 0;
+            Str = "";
+            if (locresVersion >= LocresVersion.Optimized)
+            {
+                StrHash = memoryList.GetUIntValue();
+            }
 
+            Str = memoryList.GetStringUE();
+        }
 
 
         private void ModifyStrings()
