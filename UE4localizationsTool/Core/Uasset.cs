@@ -34,9 +34,21 @@ namespace AssetParser
             public List<byte> ExportData;
         }
 
+        public enum AssetVersions : int
+        {
+            VersionZero = 0,     //no example yet
+            VersionOne,        //no example yet
+            VersionTwo,        //no example yet
+            VersioneThere,     //no example yet
+            VersionFour,       //no example yet
+            VersionFive,       //no example yet
+            VersionSix,
+            VersionSeven
+        }
 
 
-        public int FileVersion;
+
+        public AssetVersions FileVersion;
         public int File_Directory_Offset;
         public int Number_of_Names;
         public int Name_Directory_Offset;
@@ -50,6 +62,7 @@ namespace AssetParser
         public MemoryList UassetFile;
         public MemoryList UexpFile;
         public bool IsNotUseUexp;
+        public bool UseFromStruct = true;
         public Uasset(string FilePath)
         {
 
@@ -85,10 +98,18 @@ namespace AssetParser
                 throw new Exception($"This file \'{FilePath}\' is not uasset file!");
             }
 
-            FileVersion = UassetFile.GetIntValue();
-            if (FileVersion != -7)
+
+            FileVersion = (AssetVersions)Math.Abs(UassetFile.GetIntValue());
+
+
+            if (FileVersion != AssetVersions.VersionSeven && FileVersion != AssetVersions.VersionSix)
             {
                 throw new Exception("Not supported version!");
+            }
+
+            if (FileVersion == AssetVersions.VersionSix)
+            {
+                UseFromStruct = false;
             }
 
 
@@ -120,6 +141,7 @@ namespace AssetParser
             Number_Of_Imports = UassetFile.GetIntValue();
             Imports_Directory_Offset = UassetFile.GetIntValue();
 
+
             //seek to position
             UassetFile.Seek(Name_Directory_Offset, SeekOrigin.Begin);
             //Get Names
@@ -129,7 +151,8 @@ namespace AssetParser
                 NAMES_DIRECTORY.Add(UassetFile.GetStringUE());
                 //Console.WriteLine(NAMES_DIRECTORY[n]);
                 //Flags
-                UassetFile.Seek(4, SeekOrigin.Current);
+                if (FileVersion == AssetVersions.VersionSeven)
+                    UassetFile.Seek(4, SeekOrigin.Current);
             }
 
             //seek to position
@@ -150,85 +173,122 @@ namespace AssetParser
 
 
 
+            //Get Exports
+            Exports_Directory = new List<ExportsDirectory>();
+            ExportReadOrEdit();
+        }
 
 
 
+        public void ExportReadOrEdit(bool Modify = false)
+        {
+            int NextExportPosition = File_Directory_Offset;
             //seek to position
             UassetFile.Seek(Exports_Directory_Offset, SeekOrigin.Begin);
-            //Get Imports
-            Exports_Directory = new List<ExportsDirectory>();
             for (int n = 0; n < Number_Of_Exports; n++)
             {
                 ExportsDirectory ExportsDirectory = new ExportsDirectory();
                 ExportsDirectory.ExportClass = UassetFile.GetIntValue();
                 ExportsDirectory.ExportParent_1 = UassetFile.GetIntValue();
-                ExportsDirectory.ExportParent_2 = UassetFile.GetIntValue();
+                if (FileVersion >= AssetVersions.VersionSeven)
+                {
+                    ExportsDirectory.ExportParent_2 = UassetFile.GetIntValue();
+                }
+
                 _ = UassetFile.GetIntValue();
                 ExportsDirectory.ExportName = UassetFile.GetIntValue();
+                if (FileVersion >= AssetVersions.VersionSeven)
+                {
+                    _ = UassetFile.GetIntValue();
+                }
+
+
+                if (FileVersion < AssetVersions.VersionSeven)
+                {
+                    _ = UassetFile.GetIntValue(); //Unknown
+                    ExportsDirectory.ExportMemberType = UassetFile.GetShortValue();
+                    _ = UassetFile.GetShortValue();//Unknown
+                    if (!Modify)
+                    {
+                        ExportsDirectory.ExportLength = UassetFile.GetIntValue();
+                    }
+                    else
+                    {
+                        UassetFile.SetIntValue(Exports_Directory[n].ExportData.Count);
+                    }
+
+                }
+
+
+                if (FileVersion >= AssetVersions.VersionSeven)
+                {
+                    ExportsDirectory.ExportMemberType = UassetFile.GetShortValue();
+                    _ = UassetFile.GetShortValue();
+                    if (!Modify)
+                    {
+                        ExportsDirectory.ExportLength = UassetFile.GetIntValue();
+
+                    }
+                    else
+                    {
+                        UassetFile.SetIntValue(Exports_Directory[n].ExportData.Count);
+                    }
+                }
+
+
+                if (UassetFile.GetIntValue(false) == 0)
+                {
+                    _ = UassetFile.GetIntValue();
+                }
+
+
+                if (!Modify)
+                {
+                    ExportsDirectory.ExportStart = UassetFile.GetIntValue();
+                }
+                else
+                {
+                    UassetFile.SetIntValue(NextExportPosition);
+                    NextExportPosition += Exports_Directory[n].ExportData.Count;
+                }
+                
+
+                if (FileVersion >= AssetVersions.VersionSeven)
+                {
+                    UassetFile.Skip(4 * 4);
+                }
+
                 _ = UassetFile.GetIntValue();
-                ExportsDirectory.ExportMemberType = UassetFile.GetShortValue();
-                _ = UassetFile.GetShortValue();
-                ExportsDirectory.ExportLength = UassetFile.GetIntValue();
-                int NullIntsize = 0;
-                if (UassetFile.GetIntValue(false) == 0)
+
+                if (FileVersion >= AssetVersions.VersionSeven)
                 {
-                    _ = UassetFile.GetIntValue();
+                    UassetFile.Skip(4 * 4);
                 }
-                else
+
+                UassetFile.Skip(4 * 7);
+
+                if (FileVersion < AssetVersions.VersionSeven)
                 {
-                    NullIntsize = 1;
+                    UassetFile.Skip(4 * 2);
                 }
-                ExportsDirectory.ExportStart = UassetFile.GetIntValue();
-                UassetFile.Seek(4 * 16 - NullIntsize, SeekOrigin.Current);
 
-
-                if (IsNotUseUexp)
+                if (!Modify)
                 {
+                    if (IsNotUseUexp)
+                    {
 
-                    ExportsDirectory.ExportData = new List<byte>();
-                    ExportsDirectory.ExportData.AddRange(UassetFile.GetBytes(ExportsDirectory.ExportLength, false, ExportsDirectory.ExportStart));
-                    Exports_Directory.Add(ExportsDirectory);
+                        ExportsDirectory.ExportData = new List<byte>();
+                        ExportsDirectory.ExportData.AddRange(UassetFile.GetBytes(ExportsDirectory.ExportLength, false, ExportsDirectory.ExportStart));
+                        Exports_Directory.Add(ExportsDirectory);
+                    }
+                    else
+                    {
+                        UexpFile.Seek(ExportsDirectory.ExportStart - File_Directory_Offset, SeekOrigin.Begin);
+                        ExportsDirectory.ExportData = new List<byte>();
+                        ExportsDirectory.ExportData.AddRange(UexpFile.GetBytes(ExportsDirectory.ExportLength));
+                        Exports_Directory.Add(ExportsDirectory);
+                    }
                 }
-                else
-                {
-                    UexpFile.Seek(ExportsDirectory.ExportStart - File_Directory_Offset, SeekOrigin.Begin);
-                    ExportsDirectory.ExportData = new List<byte>();
-                    ExportsDirectory.ExportData.AddRange(UexpFile.GetBytes(ExportsDirectory.ExportLength));
-                    Exports_Directory.Add(ExportsDirectory);
-                }
-            }
-
-
-
-
-
-        }
-
-
-
-        public void UpdateExport()
-        {
-            int NextExportPosition = File_Directory_Offset;
-            //seek to position
-            UassetFile.Seek(Exports_Directory_Offset, SeekOrigin.Begin);
-            for (int n = 0; n < Exports_Directory.Count; n++)
-            {
-                UassetFile.Skip(4 * 6);
-                UassetFile.Skip(2 * 2);
-                UassetFile.SetIntValue(Exports_Directory[n].ExportData.Count);
-              // Console.WriteLine(Exports_Directory[n].ExportData.Count);
-                int NullIntsize = 0;
-                if (UassetFile.GetIntValue(false) == 0)
-                {
-                    _ = UassetFile.GetIntValue();
-                }
-                else
-                {
-                    NullIntsize = 1;
-                }
-                UassetFile.SetIntValue(NextExportPosition);
-                NextExportPosition += Exports_Directory[n].ExportData.Count;
-                UassetFile.Skip(4 * (16 - NullIntsize));
             }
         }
 

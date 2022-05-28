@@ -361,7 +361,6 @@ namespace Helper.MemoryList
         }
         public sbyte GetUByteValue(bool SavePosition = true, int SeekAndRead = -1)
         {
-
             return (sbyte)GetByteValue(SavePosition, SeekAndRead);
 
         }
@@ -448,10 +447,6 @@ namespace Helper.MemoryList
                     throw new Exception("Out of range");
                 }
 
-                if (SeekAndRead < MemoryListPosition)
-                {
-                    MemoryListPosition--;
-                }
                 MemoryListData.RemoveAt(SeekAndRead);
                 return;
             }
@@ -527,47 +522,41 @@ namespace Helper.MemoryList
 
         public void InsertBytes(byte[] BytesArray, bool SavePosition = true, int SeekAndRead = -1)
         {
-
             if (SeekAndRead != -1)
             {
-                for (int i = 0; i < BytesArray.Length; i++)
-                {
-                    InsertByteValue(BytesArray[i], false, SeekAndRead + i);
-                }
+                MemoryListData.InsertRange(SeekAndRead, BytesArray);
                 return;
             }
-
 
             if (SavePosition)
             {
-                for (int i = 0; i < BytesArray.Length; i++)
-                {
-                    InsertByteValue(BytesArray[i]);
-                }
+                MemoryListData.InsertRange(MemoryListPosition, BytesArray);
+                MemoryListPosition+= BytesArray.Length;
                 return;
             }
-            for (int i = 0; i < BytesArray.Length; i++)
-            {
-                InsertByteValue(BytesArray[i], false, MemoryListIndex + i);
-            }
+            MemoryListData.InsertRange(MemoryListPosition, BytesArray);
         }
         public void DeleteBytes(int count, int SeekAndRead = -1)
         {
 
+            if (MemoryListSize < count)
+            {
+                throw new Exception("Not enought data");
+            }
             if (SeekAndRead != -1)
             {
-                for (int i = 0; i < count; i++)
+                if (SeekAndRead > MemoryListSize)
                 {
-                    DeleteByteValue(SeekAndRead);
+                    throw new Exception("Out of range");
                 }
+                MemoryListData.RemoveRange(SeekAndRead, count);
                 return;
             }
-
-
-            for (int i = 0; i < count; i++)
+            if (MemoryListPosition > MemoryListSize - 1)
             {
-                DeleteByteValue();
+                throw new Exception("Out of range");
             }
+            MemoryListData.RemoveRange(MemoryListPosition, count);
         }
 
 

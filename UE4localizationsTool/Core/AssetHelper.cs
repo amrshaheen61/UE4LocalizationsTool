@@ -52,7 +52,14 @@ namespace AssetParser
 
         public static bool IsASCII(string StringValue)
         {
-            return (Encoding.UTF8.GetBytes(StringValue).Length == StringValue.Length);
+            for(int n=0; n< StringValue.Length; n++)
+            {
+                if (StringValue[n]>127)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         public static void DeleteStringUE(this MemoryList memoryList)

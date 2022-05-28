@@ -11,7 +11,7 @@ namespace AssetParser
 
             for (int TableIndex = 0; TableIndex < TableCount; TableIndex++)
             {
-                _ = new StructProperty(memoryList, uexp, true, Modify);
+                _ = new StructProperty(memoryList, uexp, uexp.UassetData.UseFromStruct, Modify);
             }
         }
     }

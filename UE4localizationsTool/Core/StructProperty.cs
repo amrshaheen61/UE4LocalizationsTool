@@ -654,7 +654,7 @@ namespace AssetParser
                 if (!Modify)
                 {
                     uexp.Strings.Add(new List<string>() { PropertyName, memoryList.GetStringUE() });
-                   //Console.WriteLine(uexp.Strings[uexp.Strings.Count - 1][1]);
+                 //   Console.WriteLine(uexp.Strings[uexp.Strings.Count - 1][1]);
                 }
                 else
                 {
@@ -708,7 +708,7 @@ namespace AssetParser
                //Console.WriteLine("StructProperty->" + memoryList.GetPosition());
                 //Console.ForegroundColor = //ConsoleColor.White;
 
-                new StructProperty(memoryList, uexp, true, Modify);
+                new StructProperty(memoryList, uexp, uexp.UassetData.UseFromStruct, Modify);
 
                 //Console.ForegroundColor = //ConsoleColor.Yellow;
                //Console.WriteLine("EndStructProperty->" + memoryList.GetPosition());
@@ -743,7 +743,7 @@ namespace AssetParser
                     try
                     {
                        //Console.WriteLine("MovieSceneEvalTemplatePtr--> StructProperty");
-                        new StructProperty(memoryList, uexp, true, Modify);
+                        new StructProperty(memoryList, uexp, uexp.UassetData.UseFromStruct, Modify);
                        //Console.WriteLine("MovieSceneEvalTemplatePtr--> EndStructProperty");
                     }
                     catch
@@ -781,7 +781,7 @@ namespace AssetParser
 
             else
             {
-                new StructProperty(memoryList, uexp, true, Modify);
+                new StructProperty(memoryList, uexp, uexp.UassetData.UseFromStruct, Modify);
             }
 
         }

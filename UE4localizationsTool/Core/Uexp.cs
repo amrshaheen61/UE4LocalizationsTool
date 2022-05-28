@@ -54,7 +54,7 @@ namespace AssetParser
                     Console.ForegroundColor = ConsoleColor.Red;
                     // Console.WriteLine($"-----------{n}------------");
                     Console.ForegroundColor = ConsoleColor.White;
-                    _ = new StructProperty(memoryList, this, true, Modify);
+                    _ = new StructProperty(memoryList, this, UassetData.UseFromStruct, Modify);
                     Console.ForegroundColor = ConsoleColor.Red;
                   // Console.WriteLine($"-----------End------------");
                     Console.ForegroundColor = ConsoleColor.White;
@@ -91,7 +91,7 @@ namespace AssetParser
         public void SaveFile(string FilPath)
         {
             ModifyStrings();
-            UassetData.UpdateExport();
+            UassetData.ExportReadOrEdit(true);
             if (UassetData.IsNotUseUexp)
             {
                 MakeBlocks();

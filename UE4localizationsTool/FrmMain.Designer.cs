@@ -319,11 +319,12 @@ namespace UE4localizationsTool
             this.dataGridView1.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellValueChanged);
             this.dataGridView1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dataGridView1_KeyDown);
             this.dataGridView1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.dataGridView1_MouseDown);
+
             // 
             // TextName
             // 
             this.TextName.HeaderText = "Name";
-            this.TextName.MaxInputLength = 2147483647;
+            this.TextName.MaxInputLength =int.MaxValue;
             this.TextName.Name = "TextName";
             this.TextName.ReadOnly = true;
             this.TextName.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
@@ -334,6 +335,7 @@ namespace UE4localizationsTool
             this.TextValue.HeaderText = "Text Value";
             this.TextValue.Name = "TextValue";
             this.TextValue.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.TextValue.MaxInputLength = int.MaxValue;
             // 
             // Index
             // 
