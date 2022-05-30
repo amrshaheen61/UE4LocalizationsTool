@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("Simple to to edit engine texts")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Arabic Subtitles")]
-[assembly: AssemblyProduct("UE4 localizations Tool")]
+[assembly: AssemblyProduct("UE4 localizations Tool Beta")]
 [assembly: AssemblyCopyright("Copyright ©  2022 - By Amr Shaheen")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -32,4 +32,4 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0")]
-[assembly: AssemblyFileVersion("1.2")]
+[assembly: AssemblyFileVersion("1.3")]

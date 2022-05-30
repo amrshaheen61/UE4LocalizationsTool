@@ -50,14 +50,9 @@ namespace AssetParser
 
                     memoryList.Seek(0); //Seek to beginning of Block
 
-                    //no need for now
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    // Console.WriteLine($"-----------{n}------------");
-                    Console.ForegroundColor = ConsoleColor.White;
-                    _ = new StructProperty(memoryList, this, UassetData.UseFromStruct, Modify);
-                    Console.ForegroundColor = ConsoleColor.Red;
-                  // Console.WriteLine($"-----------End------------");
-                    Console.ForegroundColor = ConsoleColor.White;
+                    ConsoleMode.Print($"-----------{n}------------", ConsoleColor.Red);
+                    _ = new StructProperty(memoryList, this, UassetData.UseFromStruct,false, Modify);                   
+                    ConsoleMode.Print($"-----------End------------", ConsoleColor.Red);
 
                     switch (UassetData.GetExportPropertyName(UassetData.Exports_Directory[n].ExportClass))
                     {

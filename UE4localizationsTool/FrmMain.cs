@@ -1,8 +1,12 @@
 ﻿using AssetParser;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
+using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -25,8 +29,8 @@ namespace UE4localizationsTool
         FrmState state;
         Stack<DataRow> BackupDataUndo;
         Stack<DataRow> BackupDataRedo;
-        int BackupDataIndex = 0;
         List<List<string>> ListrefValues;
+        bool Filter;
 
         public FrmMain()
         {
@@ -44,6 +48,8 @@ namespace UE4localizationsTool
             this.dataGridView1.RowsAdded += (x, y) => this.UpdateCounter();
             this.dataGridView1.RowsRemoved += (x, y) => this.UpdateCounter();
             this.DataCount.Text = "";
+            this.Filter= false;
+            this.clearFilterToolStripMenuItem.Enabled = false;
         }
 
         private void AddToDataView()
@@ -90,6 +96,8 @@ namespace UE4localizationsTool
             this.Text = ToolName;
             this.BackupDataUndo = new Stack<DataRow>();
             this.BackupDataRedo = new Stack<DataRow>();
+            this.Filter = false;
+            this.clearFilterToolStripMenuItem.Enabled = false;
             try
             {
                 state = new FrmState(this, "loading File", "loading File please wait...");
@@ -138,7 +146,7 @@ namespace UE4localizationsTool
             string[] DataGridStrings = new string[dataGridView1.Rows.Count];
             for (int i = 0; i < dataGridView1.Rows.Count; i++)
             {
-                DataGridStrings[i] = dataGridView1.Rows[i].Cells[1].Value.ToString();
+                DataGridStrings[i] = ObjectToString(dataGridView1.Rows[i].Cells[1].Value);
             }
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.Filter = "Text File|*.txt";
@@ -241,6 +249,7 @@ namespace UE4localizationsTool
         private void SearchHide_Click(object sender, EventArgs e)
         {
             SearchPanal.Visible = false;
+            dataGridView1.Height += SearchPanal.Height;
         }
 
         private void search_Click(object sender, EventArgs e)
@@ -248,9 +257,16 @@ namespace UE4localizationsTool
             SearchPanal.Visible = !SearchPanal.Visible;
             if (SearchPanal.Visible)
             {
+                dataGridView1.Height -= SearchPanal.Height;
                 InputSearch.Focus();
                 InputSearch.SelectAll();
             }
+            else
+            {
+                dataGridView1.Height += SearchPanal.Height;
+            }
+            
+
         }
 
         List<int> FindArray = new List<int>();
@@ -262,7 +278,7 @@ namespace UE4localizationsTool
             OldFind = InputSearch.Text;
             for (int i = 0; i < dataGridView1.Rows.Count; i++)
             {
-                if (dataGridView1.Rows[i].Cells[1].Value.ToString().ToLower().Contains(InputSearch.Text.ToLower()))
+                if (ObjectToString(dataGridView1.Rows[i].Cells[1].Value).ToLower().Contains(InputSearch.Text.ToLower()))
                 {
                     FindArray.Add(i);
                 }
@@ -351,7 +367,7 @@ namespace UE4localizationsTool
                 {
                     BackupDataRedo.Clear();
                 }
-                BackupDataUndo.Push(new DataRow() { Index = dataGridView1.SelectedCells[0].RowIndex, StringValue = dataGridView1.Rows[dataGridView1.SelectedCells[0].RowIndex].Cells[1].Value != null ? dataGridView1.Rows[dataGridView1.SelectedCells[0].RowIndex].Cells[1].Value.ToString() : "" });
+                BackupDataUndo.Push(new DataRow() { Index = dataGridView1.SelectedCells[0].RowIndex, StringValue = ObjectToString(dataGridView1.Rows[dataGridView1.SelectedCells[0].RowIndex].Cells[1].Value)});
                 dataGridView1.Rows[dataGridView1.SelectedCells[0].RowIndex].Cells[1].Value = Clipboard.GetText();              
             }
         }
@@ -391,7 +407,7 @@ namespace UE4localizationsTool
         {
             if (dataGridView1.Created)
             {
-                ListrefValues[int.Parse(dataGridView1.Rows[e.RowIndex].Cells[2].Value.ToString())][1] = dataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString();
+                ListrefValues[int.Parse(dataGridView1.Rows[e.RowIndex].Cells[2].Value.ToString())][1] = ObjectToString(dataGridView1.Rows[e.RowIndex].Cells[1].Value);
                 dataGridView1.Rows[e.RowIndex].Cells[1].Style.BackColor = System.Drawing.Color.FromArgb(255, 204, 153);
             }
         }
@@ -453,7 +469,7 @@ namespace UE4localizationsTool
             {
                 BackupDataRedo.Clear();
             }
-            BackupDataUndo.Push(new DataRow() { Index = e.RowIndex, StringValue = dataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString()});
+            BackupDataUndo.Push(new DataRow() { Index = e.RowIndex, StringValue = ObjectToString(dataGridView1.Rows[e.RowIndex].Cells[1].Value)});
         }
 
         private void undoToolStripMenuItem_Click(object sender, EventArgs e)
@@ -463,7 +479,7 @@ namespace UE4localizationsTool
             {
 
                 DataRow dataRow = BackupDataUndo.Pop();
-                BackupDataRedo.Push(new DataRow() { Index = dataRow.Index, StringValue = dataGridView1.Rows[dataRow.Index].Cells[1].Value != null ? dataGridView1.Rows[dataRow.Index].Cells[1].Value.ToString() : "" });
+                BackupDataRedo.Push(new DataRow() { Index = dataRow.Index, StringValue = ObjectToString(dataGridView1.Rows[dataRow.Index].Cells[1].Value)});
 
                 //MessageBox.Show(dataRow.StringValue);
                 dataGridView1.Rows[dataRow.Index].Cells[1].Value = dataRow.StringValue;
@@ -487,7 +503,7 @@ namespace UE4localizationsTool
                 //MessageBox.Show(BackupDataRedo.Peek().StringValue);
               
                 DataRow dataRow = BackupDataRedo.Pop();
-                BackupDataUndo.Push(new DataRow() { Index = dataRow.Index, StringValue = dataGridView1.Rows[dataRow.Index].Cells[1].Value != null ? dataGridView1.Rows[dataRow.Index].Cells[1].Value.ToString() : "" });
+                BackupDataUndo.Push(new DataRow() { Index = dataRow.Index, StringValue = ObjectToString(dataGridView1.Rows[dataRow.Index].Cells[1].Value) });
                 dataGridView1.Rows[dataRow.Index].Cells[1].Value = dataRow.StringValue;
                 if (dataRow.StringValue == ListrefValues[dataRow.Index][1])
                     dataGridView1.Rows[dataRow.Index].Cells[1].Style.BackColor = System.Drawing.Color.FromArgb(255, 255, 255);
@@ -512,7 +528,7 @@ namespace UE4localizationsTool
         }
 
 
-
+       
         private void byNameToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
@@ -526,8 +542,9 @@ namespace UE4localizationsTool
            
           
             if (frmFilter.ShowDialog() == DialogResult.OK)
-            {   
-
+            {
+                Filter = true;
+                clearFilterToolStripMenuItem.Enabled = true;
                 dataGridView1.Rows.Clear();
                 for (int x = 0; x < ListrefValues.Count; x++)
                 {
@@ -584,11 +601,7 @@ namespace UE4localizationsTool
             }
         }
 
-        private void clearFilterToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            dataGridView1.Rows.Clear();
-            AddToDataView();
-        }
+
 
         private void byValueToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -600,6 +613,8 @@ namespace UE4localizationsTool
             frmFilter.Text = "Filter by value";
             if (frmFilter.ShowDialog() == DialogResult.OK)
             {
+                Filter = true;
+                clearFilterToolStripMenuItem.Enabled = true;
                 dataGridView1.Rows.Clear();
 
                 for (int x = 0; x < ListrefValues.Count; x++)
@@ -657,6 +672,17 @@ namespace UE4localizationsTool
             }
         }
 
+        private void clearFilterToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (Filter)
+            {
+                dataGridView1.Rows.Clear();
+                AddToDataView();
+                Filter = false;
+                clearFilterToolStripMenuItem.Enabled = false;
+            }
+        }
+
         private void UpdateCounter()
         {
             DataCount.Text = "Text count: " + dataGridView1.Rows.Count;
@@ -665,6 +691,68 @@ namespace UE4localizationsTool
         private void label2_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private string ObjectToString(object Value)
+        {
+            if(!(Value is null))
+            {
+                return Value.ToString();
+            }
+            return "";
+        }
+
+        private void FrmMain_Load(object sender, EventArgs e)
+        {
+
+            float  ToolVer = 0;
+            string ToolSite = "";
+
+            using (WebClient client = new WebClient())
+            {
+                try
+                {
+                    string UpdateScript = client.DownloadString("https://raw.githubusercontent.com/amrshaheen61/UE4LocalizationsTool/UpdateInfo.txt");
+
+                    if (UpdateScript.StartsWith("UpdateFile",false,CultureInfo.InvariantCulture))
+                    {
+                        var lines = Regex.Split(UpdateScript, "\r\n|\r|\n");
+                        foreach (string Line in lines)
+                        {
+
+                            if (Line.StartsWith("Tool_UpdateVer", false, CultureInfo.InvariantCulture))
+                            {
+                                ToolVer = float.Parse(Line.Split(new char[] { '=' }, 2)[1].Trim());
+                            }
+                            if (Line.StartsWith("Tool_UpdateSite", false, CultureInfo.InvariantCulture))
+                            {
+                                ToolSite = Line.Split(new char[] { '=' }, 2)[1].Trim();
+                            }
+                        }
+
+                        if (ToolVer > float.Parse(Application.ProductVersion))
+                        {
+
+                            DialogResult message = MessageBox.Show("There is an update available\nDo you want to download it?", "Update available", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                            if (message == DialogResult.Yes)
+                            {
+                                Process.Start(new ProcessStartInfo { FileName = ToolSite, UseShellExecute = true });
+                                Application.Exit();
+                            }
+
+
+                        }
+                    }
+
+                }
+                catch
+                {
+                    //n
+                }
+
+
+            }
         }
     }
 }

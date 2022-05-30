@@ -1,0 +1,3 @@
+﻿UpdateFile
+Tool_UpdateVer  = 1.3
+Tool_UpdateSite = https://github.com/amrshaheen61/UE4LocalizationsTool
