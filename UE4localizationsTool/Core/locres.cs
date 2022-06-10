@@ -49,12 +49,12 @@ namespace AssetParser
                 throw new Exception("Unsupported locres version");
             }
 
-          // Console.WriteLine(Version);
+            // Console.WriteLine(Version);
 
             if (Version >= LocresVersion.Compact)
             {
                 // Console.WriteLine("Compact");
-              
+
                 int localizedStringOffset = (int)locresData.GetInt64Value();
                 int currentFileOffset = locresData.GetPosition();
 
@@ -85,7 +85,7 @@ namespace AssetParser
                         }
                     }
                 }
-                else 
+                else
                 {
                     for (int i = 0; i < localizedStringCount; i++)
                     {
@@ -111,7 +111,7 @@ namespace AssetParser
 
                 for (int i = 0; i < HashTablesCount; i++)
                 {
-                  locresData.GetStringUE(); //hash namespace
+                    locresData.GetStringUE(); //hash namespace
 
                     int localizedStringCount = locresData.GetIntValue();
 
@@ -147,26 +147,26 @@ namespace AssetParser
 
             int namespaceCount = locresData.GetIntValue();
 
-            for(int n=0;n< namespaceCount; n++)
+            for (int n = 0; n < namespaceCount; n++)
             {
-                string nameSpaceStr; 
+                string nameSpaceStr;
                 uint StrHash;
-                ReadTextKey(locresData, Version,out StrHash,out nameSpaceStr); //no need right now
-                uint keyCount= locresData.GetUIntValue();
-                for (int k=0;k< keyCount;k++)
+                ReadTextKey(locresData, Version, out StrHash, out nameSpaceStr); //no need right now
+                uint keyCount = locresData.GetUIntValue();
+                for (int k = 0; k < keyCount; k++)
                 {
                     string KeyStr;
                     uint KeyStrHash;
-                    ReadTextKey(locresData, Version, out KeyStrHash, out KeyStr); 
+                    ReadTextKey(locresData, Version, out KeyStrHash, out KeyStr);
                     locresData.Skip(4);//SourceStringHash
 
                     if (Version >= LocresVersion.Compact)
                     {
-                    int localizedStringIndex= locresData.GetIntValue();
-                     if(Strings.Count> localizedStringIndex)
-                      {
+                        int localizedStringIndex = locresData.GetIntValue();
+                        if (Strings.Count > localizedStringIndex)
+                        {
                             Strings[localizedStringIndex][0] = KeyStr;
-                      }
+                        }
 
                     }
 

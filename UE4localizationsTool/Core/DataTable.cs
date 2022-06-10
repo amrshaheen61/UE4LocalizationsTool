@@ -12,7 +12,7 @@ namespace AssetParser
             for (int TableIndex = 0; TableIndex < TableCount; TableIndex++)
             {
                 memoryList.Skip(8); //no neeed
-                _ = new StructProperty(memoryList, uexp, uexp.UassetData.UseFromStruct,false, Modify);
+                _ = new StructProperty(memoryList, uexp, uexp.UassetData.UseFromStruct, false, Modify);
             }
         }
     }

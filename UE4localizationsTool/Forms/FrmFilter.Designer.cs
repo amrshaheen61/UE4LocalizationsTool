@@ -42,6 +42,7 @@
             this.matchcase = new System.Windows.Forms.CheckBox();
             this.Close = new System.Windows.Forms.Button();
             this.regularexpression = new System.Windows.Forms.CheckBox();
+            this.reversemode = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // button1
@@ -156,6 +157,17 @@
             this.regularexpression.TabIndex = 11;
             this.regularexpression.Text = "Regular expression";
             this.regularexpression.UseVisualStyleBackColor = true;
+            this.regularexpression.CheckedChanged += new System.EventHandler(this.regularexpression_CheckedChanged);
+            // 
+            // reversemode
+            // 
+            this.reversemode.AutoSize = true;
+            this.reversemode.Location = new System.Drawing.Point(228, 103);
+            this.reversemode.Name = "reversemode";
+            this.reversemode.Size = new System.Drawing.Size(95, 17);
+            this.reversemode.TabIndex = 12;
+            this.reversemode.Text = "Reverse mode";
+            this.reversemode.UseVisualStyleBackColor = true;
             // 
             // FrmFilter
             // 
@@ -164,6 +176,7 @@
             this.AutoSize = true;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.ClientSize = new System.Drawing.Size(584, 261);
+            this.Controls.Add(this.reversemode);
             this.Controls.Add(this.regularexpression);
             this.Controls.Add(this.Close);
             this.Controls.Add(this.matchcase);
@@ -206,5 +219,6 @@
         private System.Windows.Forms.CheckBox matchcase;
         private System.Windows.Forms.Button Close;
         private System.Windows.Forms.CheckBox regularexpression;
+        private System.Windows.Forms.CheckBox reversemode;
     }
 }

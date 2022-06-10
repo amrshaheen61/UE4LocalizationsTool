@@ -40,37 +40,40 @@ namespace AssetParser
 
             for (int n = 0; n < UassetData.Exports_Directory.Count; n++)
             {
-                
-         
-                   // Console.Clear();
-                  //  Console.ReadLine();
+
+
 
                 using (MemoryList memoryList = new MemoryList(UassetData.Exports_Directory[n].ExportData))
                 {
-
-                    memoryList.Seek(0); //Seek to beginning of Block
-
-                    ConsoleMode.Print($"-----------{n}------------", ConsoleColor.Red);
-                    _ = new StructProperty(memoryList, this, UassetData.UseFromStruct,false, Modify);                   
-                    ConsoleMode.Print($"-----------End------------", ConsoleColor.Red);
-
-                    switch (UassetData.GetExportPropertyName(UassetData.Exports_Directory[n].ExportClass))
+                    try
                     {
-                        case "StringTable":
-                            _ = new StringTable(memoryList, this, Modify);
-                            break;
-                        case "DataTable":
+                        memoryList.Seek(0); //Seek to beginning of Block
 
-                            _ = new DataTable(memoryList, this, Modify);
-                            break;
-                        case "Spreadsheet":
+                        ConsoleMode.Print($"-----------{n}------------", ConsoleColor.Red);
+                        _ = new StructProperty(memoryList, this, UassetData.UseFromStruct, false, Modify);
+                        ConsoleMode.Print($"-----------End------------", ConsoleColor.Red);
 
-                            _ = new Spreadsheet(memoryList, this, Modify);
-                            break;
+                        switch (UassetData.GetExportPropertyName(UassetData.Exports_Directory[n].ExportClass))
+                        {
+                            case "StringTable":
+                                _ = new StringTable(memoryList, this, Modify);
+                                break;
+                            case "DataTable":
+
+                                _ = new DataTable(memoryList, this, Modify);
+                                break;
+                            case "Spreadsheet":
+
+                                _ = new Spreadsheet(memoryList, this, Modify);
+                                break;
+                        }
+                    }
+                    catch
+                    {
+                        //Skip this export
                     }
                 }
 
-                //Console.ReadLine();
             }
 
 

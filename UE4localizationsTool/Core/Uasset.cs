@@ -8,9 +8,13 @@ namespace AssetParser
 
 
 
-
     public class Uasset
     {
+
+
+
+
+
 
         public struct ImportsDirectory
         {
@@ -34,28 +38,43 @@ namespace AssetParser
             public List<byte> ExportData;
         }
 
-        public enum AssetVersions : int
-        {
-            VersionZero = 0,     //no example yet
-            VersionOne,        //no example yet
-            VersionTwo,        //no example yet
-            VersioneThere,     //no example yet
-            VersionFour,       //no example yet
-            VersionFive,       //no example yet
-            VersionSix,
-            VersionSeven
-        }
 
-
-
-        public AssetVersions FileVersion;
+        private int NewSize;
+        public int LegacyFileVersion;
+        public UE4Version EngineVersion;
+        int numCustomVersions;
         public int File_Directory_Offset;
+        private int FFile_Directory_Offset;
         public int Number_of_Names;
         public int Name_Directory_Offset;
+        private int FName_Directory_Offset;
         public int Number_Of_Exports;
+        public int GatherableTextDataCount;
+        public int GatherableTextDataOffset;
+        private int FGatherableTextDataOffset;
         public int Exports_Directory_Offset;
+        private int FExports_Directory_Offset;
         public int Number_Of_Imports;
         public int Imports_Directory_Offset;
+        private int FImports_Directory_Offset;
+        public int DependsOffset;
+        private int FDependsOffset;
+        public int SoftPackageReferencesCount;
+        public int SoftPackageReferencesOffset;
+        private int FSoftPackageReferencesOffset;
+        public int SearchableNamesOffset;
+        private int FSearchableNamesOffset;
+        public int ThumbnailTableOffset;
+        private int FThumbnailTableOffset;
+        public int AssetRegistryDataOffset;
+        private int FAssetRegistryDataOffset;
+        public int BulkDataStartOffset;
+        private int FBulkDataStartOffset;
+        public int WorldTileInfoDataOffset;
+        private int FWorldTileInfoDataOffset;
+        public int PreloadDependencyCount;
+        public int PreloadDependencyOffset;
+        private int FPreloadDependencyOffset;
         public List<string> NAMES_DIRECTORY;
         public List<ImportsDirectory> Imports_Directory;
         public List<ExportsDirectory> Exports_Directory;
@@ -63,13 +82,10 @@ namespace AssetParser
         public MemoryList UexpFile;
         public bool IsNotUseUexp;
         public bool UseFromStruct = true;
+
         public Uasset(string FilePath)
         {
 
-            if (!File.Exists(FilePath))
-            {
-                throw new Exception("Uasset file is not exists!");
-            }
 
             if (!File.Exists(FilePath))
             {
@@ -99,47 +115,186 @@ namespace AssetParser
             }
 
 
-            FileVersion = (AssetVersions)Math.Abs(UassetFile.GetIntValue());
-
-
-            if (FileVersion != AssetVersions.VersionSeven && FileVersion != AssetVersions.VersionSix)
+            LegacyFileVersion = UassetFile.GetIntValue();
+            if (LegacyFileVersion != -4)
             {
-                throw new Exception("Not supported version!");
+                UassetFile.GetIntValue(); //LegacyUE3Version
             }
 
-            if (FileVersion == AssetVersions.VersionSix)
+            EngineVersion = (UE4Version)UassetFile.GetIntValue();
+
+            if (LegacyFileVersion <= -8)
             {
-                UseFromStruct = false;
+                UassetFile.GetIntValue(); //FileVersionUE5
+            }
+
+            UassetFile.Skip(4);//FileVersionLicenseeUE 
+            if (LegacyFileVersion <= -2)
+            {
+                numCustomVersions = UassetFile.GetIntValue();
+                for (int i = 0; i < numCustomVersions; i++)
+                {
+                    UassetFile.Skip(16);//Guid
+                    UassetFile.Skip(4);//Unkown 
+                }
             }
 
 
-            //3 Null Bytes
-            UassetFile.Seek(3 * 4, SeekOrigin.Current);
 
-            //Unknow
-            _ = UassetFile.GetIntValue();
-
+            //File Start
+            FFile_Directory_Offset = UassetFile.GetPosition();
             File_Directory_Offset = UassetFile.GetIntValue();
+
             // None
-            UassetFile.GetBytes(UassetFile.GetIntValue());
+            UassetFile.GetStringUE();
 
             //Unknow
             UassetFile.Seek(4, SeekOrigin.Current);
 
             //Property names
             Number_of_Names = UassetFile.GetIntValue();
+            FName_Directory_Offset = UassetFile.GetPosition();
             Name_Directory_Offset = UassetFile.GetIntValue();
 
-            //Unknow
-            UassetFile.Seek(8, SeekOrigin.Current);
+            //TODO
+            if (EngineVersion == UE4Version.UNKNOWN)
+            {
+                if (Name_Directory_Offset - (numCustomVersions * 20) == 189)
+                {
+                    EngineVersion = UE4Version.VER_UE4_15;
+                }
+                else if (Name_Directory_Offset - (numCustomVersions * 20) > 185)
+                {
+                    EngineVersion = UE4Version.VER_UE4_16;
+                }
+                else if (Name_Directory_Offset - (numCustomVersions * 20) == 185)
+                {
+                    EngineVersion = UE4Version.VER_UE4_6;
+                }
+            }
+            if (EngineVersion >= UE4Version.VER_UE4_NAME_HASHES_SERIALIZED)
+            {
+
+                UseFromStruct = true;
+
+            }
+            else
+            {
+                UseFromStruct = false;
+            }
+
+
+            if (EngineVersion >= UE4Version.VER_UE4_SERIALIZE_TEXT_IN_PACKAGES)
+            {
+                GatherableTextDataCount = UassetFile.GetIntValue();
+                GatherableTextDataOffset = UassetFile.GetIntValue();
+            }
 
             //Exports Blocks
             Number_Of_Exports = UassetFile.GetIntValue();
+            FExports_Directory_Offset = UassetFile.GetPosition();
             Exports_Directory_Offset = UassetFile.GetIntValue();
 
             //Imports Blocks
             Number_Of_Imports = UassetFile.GetIntValue();
+            FImports_Directory_Offset = UassetFile.GetPosition();
             Imports_Directory_Offset = UassetFile.GetIntValue();
+
+            FDependsOffset = UassetFile.GetPosition();
+            DependsOffset = UassetFile.GetIntValue();
+
+
+            if (EngineVersion >= UE4Version.VER_UE4_ADD_STRING_ASSET_REFERENCES_MAP)
+            {
+                SoftPackageReferencesCount = UassetFile.GetIntValue();
+                FSoftPackageReferencesOffset = UassetFile.GetPosition();
+                SoftPackageReferencesOffset = UassetFile.GetIntValue();
+            }
+            if (EngineVersion >= UE4Version.VER_UE4_ADDED_SEARCHABLE_NAMES)
+            {
+                FSearchableNamesOffset = UassetFile.GetPosition();
+                SearchableNamesOffset = UassetFile.GetIntValue();
+            }
+            FThumbnailTableOffset = UassetFile.GetPosition();
+            ThumbnailTableOffset = UassetFile.GetIntValue();
+
+            //PackageGuid
+            UassetFile.Skip(16);
+
+            int Num = UassetFile.GetIntValue();
+            for (int i = 0; i < Num; i++)
+            {
+                UassetFile.Skip(8);
+            }
+
+            if (EngineVersion >= UE4Version.VER_UE4_ENGINE_VERSION_OBJECT)
+            {
+                UassetFile.Skip(2);
+                UassetFile.Skip(2);
+                UassetFile.Skip(2);
+                UassetFile.Skip(4);
+                UassetFile.GetStringUE();
+            }
+            else
+            {
+                UassetFile.Skip(4);
+            }
+
+
+            if (EngineVersion >= UE4Version.VER_UE4_PACKAGE_SUMMARY_HAS_COMPATIBLE_ENGINE_VERSION)
+            {
+                UassetFile.Skip(2);
+                UassetFile.Skip(2);
+                UassetFile.Skip(2);
+                UassetFile.Skip(4);
+                UassetFile.GetStringUE();
+            }
+
+            UassetFile.Skip(4);// CompressionFlags
+
+            UassetFile.Skip(4);// numCompressedChunks
+
+            UassetFile.Skip(4);// PackageSource
+
+            UassetFile.Skip(4);// numAdditionalPackagesToCook
+
+            if (LegacyFileVersion > -7)
+            {
+                UassetFile.Skip(4);// numTextureAllocations 
+            }
+            FAssetRegistryDataOffset = UassetFile.GetPosition();
+            AssetRegistryDataOffset = UassetFile.GetIntValue();
+            FBulkDataStartOffset = UassetFile.GetPosition();
+            BulkDataStartOffset = UassetFile.GetIntValue();
+            UassetFile.Skip(4);
+            if (EngineVersion >= UE4Version.VER_UE4_WORLD_LEVEL_INFO)
+            {
+                FWorldTileInfoDataOffset = UassetFile.GetPosition();
+                WorldTileInfoDataOffset = UassetFile.GetIntValue();
+            }
+
+            //ChunkIDs
+            if (EngineVersion >= UE4Version.VER_UE4_CHANGED_CHUNKID_TO_BE_AN_ARRAY_OF_CHUNKIDS)
+            {
+                int numChunkIDs = UassetFile.GetIntValue();
+
+                for (int i = 0; i < numChunkIDs; i++)
+                {
+                    UassetFile.Skip(4);
+                }
+            }
+            else if (EngineVersion >= UE4Version.VER_UE4_ADDED_CHUNKID_TO_ASSETDATA_AND_UPACKAGE)
+            {
+                UassetFile.Skip(4);
+            }
+
+            if (EngineVersion >= UE4Version.VER_UE4_PRELOAD_DEPENDENCIES_IN_COOKED_EXPORTS)
+            {
+                PreloadDependencyCount = UassetFile.GetIntValue();
+                FPreloadDependencyOffset = UassetFile.GetPosition();
+                PreloadDependencyOffset = UassetFile.GetIntValue();
+            }
+
 
 
             //seek to position
@@ -149,10 +304,9 @@ namespace AssetParser
             for (int n = 0; n < Number_of_Names; n++)
             {
                 NAMES_DIRECTORY.Add(UassetFile.GetStringUE());
-                //Console.WriteLine(NAMES_DIRECTORY[n]);
                 //Flags
-                if (FileVersion == AssetVersions.VersionSeven)
-                    UassetFile.Seek(4, SeekOrigin.Current);
+                if (EngineVersion >= UE4Version.VER_UE4_NAME_HASHES_SERIALIZED)
+                    UassetFile.Skip(4);
             }
 
             //seek to position
@@ -180,6 +334,108 @@ namespace AssetParser
 
 
 
+        public void EditName(string NewStr, int Index)
+        {
+            NewSize = 0;
+            int OldSize = UassetFile.GetSize();
+            UassetFile.Seek(Name_Directory_Offset, SeekOrigin.Begin);
+
+            for (int n = 0; n < Number_of_Names; n++)
+            {
+                if (n == Index)
+                {
+                    UassetFile.ReplaceStringUE(NewStr);
+                    break;
+                }
+                else
+                {
+                    UassetFile.GetStringUE();
+                    if (EngineVersion >= UE4Version.VER_UE4_NAME_HASHES_SERIALIZED)
+                        UassetFile.Skip(4);
+                }
+            }
+
+
+            NewSize = UassetFile.GetSize() - OldSize;
+
+            if (FFile_Directory_Offset != 0 && File_Directory_Offset != 0)
+            {
+                File_Directory_Offset = File_Directory_Offset + NewSize;
+                UassetFile.SetIntValue(File_Directory_Offset, false, FFile_Directory_Offset);
+            }
+
+            //Name  
+
+            if (FGatherableTextDataOffset != 0 && GatherableTextDataOffset != 0)
+            {
+                GatherableTextDataOffset = GatherableTextDataOffset + NewSize;
+                UassetFile.SetIntValue(GatherableTextDataOffset, false, FGatherableTextDataOffset);
+            }
+
+            if (FExports_Directory_Offset != 0 && Exports_Directory_Offset != 0)
+            {
+                Exports_Directory_Offset = Exports_Directory_Offset + NewSize;
+                UassetFile.SetIntValue(Exports_Directory_Offset, false, FExports_Directory_Offset);
+            }
+
+            if (FImports_Directory_Offset != 0 && Imports_Directory_Offset != 0)
+            {
+                Imports_Directory_Offset = Imports_Directory_Offset + NewSize;
+                UassetFile.SetIntValue(Imports_Directory_Offset, false, FImports_Directory_Offset);
+            }
+
+            if (FDependsOffset != 0 && DependsOffset != 0)
+            {
+                DependsOffset = DependsOffset + NewSize;
+                UassetFile.SetIntValue(DependsOffset, false, FDependsOffset);
+            }
+
+            if (FSoftPackageReferencesOffset != 0 && SoftPackageReferencesOffset != 0)
+            {
+                SoftPackageReferencesOffset = SoftPackageReferencesOffset + NewSize;
+                UassetFile.SetIntValue(SoftPackageReferencesOffset, false, FSoftPackageReferencesOffset);
+            }
+
+            if (FSearchableNamesOffset != 0 && SearchableNamesOffset != 0)
+            {
+                SearchableNamesOffset = SearchableNamesOffset + NewSize;
+                UassetFile.SetIntValue(SearchableNamesOffset, false, FSearchableNamesOffset);
+            }
+
+            if (FThumbnailTableOffset != 0 && ThumbnailTableOffset != 0)
+            {
+                ThumbnailTableOffset = ThumbnailTableOffset + NewSize;
+                UassetFile.SetIntValue(ThumbnailTableOffset, false, FThumbnailTableOffset);
+            }
+
+            if (FAssetRegistryDataOffset != 0 && AssetRegistryDataOffset != 0)
+            {
+                AssetRegistryDataOffset = AssetRegistryDataOffset + NewSize;
+                UassetFile.SetIntValue(AssetRegistryDataOffset, false, FAssetRegistryDataOffset);
+            }
+
+            if (FBulkDataStartOffset != 0 && BulkDataStartOffset != 0)
+            {
+                BulkDataStartOffset = BulkDataStartOffset + NewSize;
+                UassetFile.SetIntValue(BulkDataStartOffset, false, FBulkDataStartOffset);
+            }
+
+            if (FWorldTileInfoDataOffset != 0 && WorldTileInfoDataOffset != 0)
+            {
+                WorldTileInfoDataOffset = WorldTileInfoDataOffset + NewSize;
+                UassetFile.SetIntValue(WorldTileInfoDataOffset, false, FWorldTileInfoDataOffset);
+            }
+
+            if (FPreloadDependencyOffset != 0 && PreloadDependencyOffset != 0)
+            {
+                PreloadDependencyOffset = PreloadDependencyOffset + NewSize;
+                UassetFile.SetIntValue(PreloadDependencyOffset, false, FPreloadDependencyOffset);
+            }
+
+        }
+
+
+
         public void ExportReadOrEdit(bool Modify = false)
         {
             int NextExportPosition = File_Directory_Offset;
@@ -190,24 +446,20 @@ namespace AssetParser
                 ExportsDirectory ExportsDirectory = new ExportsDirectory();
                 ExportsDirectory.ExportClass = UassetFile.GetIntValue();
                 ExportsDirectory.ExportParent_1 = UassetFile.GetIntValue();
-                if (FileVersion >= AssetVersions.VersionSeven)
+                if (EngineVersion >= UE4Version.VER_UE4_TemplateIndex_IN_COOKED_EXPORTS)
                 {
                     ExportsDirectory.ExportParent_2 = UassetFile.GetIntValue();
                 }
 
                 _ = UassetFile.GetIntValue();
                 ExportsDirectory.ExportName = UassetFile.GetIntValue();
-                if (FileVersion >= AssetVersions.VersionSeven)
-                {
-                    _ = UassetFile.GetIntValue();
-                }
+
+                _ = UassetFile.GetIntValue();
+                _ = UassetFile.GetIntValue();//ObjectFlags
 
 
-                if (FileVersion < AssetVersions.VersionSeven)
+                if (EngineVersion < UE4Version.VER_UE4_64BIT_EXPORTMAP_SERIALSIZES)
                 {
-                    _ = UassetFile.GetIntValue(); //Unknown
-                    ExportsDirectory.ExportMemberType = UassetFile.GetShortValue();
-                    _ = UassetFile.GetShortValue();//Unknown
                     if (!Modify)
                     {
                         ExportsDirectory.ExportLength = UassetFile.GetIntValue();
@@ -216,61 +468,60 @@ namespace AssetParser
                     {
                         UassetFile.SetIntValue(Exports_Directory[n].ExportData.Count);
                     }
-
-                }
-
-
-                if (FileVersion >= AssetVersions.VersionSeven)
-                {
-                    ExportsDirectory.ExportMemberType = UassetFile.GetShortValue();
-                    _ = UassetFile.GetShortValue();
                     if (!Modify)
                     {
-                        ExportsDirectory.ExportLength = UassetFile.GetIntValue();
-
+                        ExportsDirectory.ExportStart = UassetFile.GetIntValue();
                     }
                     else
                     {
-                        UassetFile.SetIntValue(Exports_Directory[n].ExportData.Count);
+                        UassetFile.SetIntValue(NextExportPosition);
+                        NextExportPosition += Exports_Directory[n].ExportData.Count;
                     }
-                }
-
-
-                if (UassetFile.GetIntValue(false) == 0)
-                {
-                    _ = UassetFile.GetIntValue();
-                }
-
-
-                if (!Modify)
-                {
-                    ExportsDirectory.ExportStart = UassetFile.GetIntValue();
                 }
                 else
                 {
-                    UassetFile.SetIntValue(NextExportPosition);
-                    NextExportPosition += Exports_Directory[n].ExportData.Count;
+                    if (!Modify)
+                    {
+                        ExportsDirectory.ExportLength = UassetFile.GetIntValue();
+                    }
+                    else
+                    {
+                        UassetFile.SetIntValue(Exports_Directory[n].ExportData.Count);
+                    }
+                    UassetFile.Skip(4);
+                    if (!Modify)
+                    {
+                        ExportsDirectory.ExportStart = UassetFile.GetIntValue();
+                    }
+                    else
+                    {
+                        UassetFile.SetIntValue(NextExportPosition);
+                        NextExportPosition += Exports_Directory[n].ExportData.Count;
+                    }
+                    UassetFile.Skip(4);
                 }
-                
 
-                if (FileVersion >= AssetVersions.VersionSeven)
+
+                UassetFile.Skip(4 * 3);
+
+                UassetFile.Skip(16);// PackageGuid
+                UassetFile.Skip(4); // PackageFlags
+
+                if (EngineVersion >= UE4Version.VER_UE4_LOAD_FOR_EDITOR_GAME)
                 {
-                    UassetFile.Skip(4 * 4);
+                    UassetFile.Skip(4);
                 }
 
-                _ = UassetFile.GetIntValue();
-
-                if (FileVersion >= AssetVersions.VersionSeven)
+                if (EngineVersion >= UE4Version.VER_UE4_COOKED_ASSETS_IN_EDITOR_SUPPORT)
                 {
-                    UassetFile.Skip(4 * 4);
+                    UassetFile.Skip(4);
                 }
-
-                UassetFile.Skip(4 * 7);
-
-                if (FileVersion < AssetVersions.VersionSeven)
+                if (EngineVersion >= UE4Version.VER_UE4_PRELOAD_DEPENDENCIES_IN_COOKED_EXPORTS)
                 {
-                    UassetFile.Skip(4 * 2);
+                    UassetFile.Skip(4 * 5);
                 }
+
+
 
                 if (!Modify)
                 {

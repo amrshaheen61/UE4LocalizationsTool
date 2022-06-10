@@ -18,9 +18,9 @@ namespace Helper.MemoryList
     {
 
         public List<byte> MemoryListData;
-       //private bool CutFromMemoryListData = false;
-       //private int CutSize;
-       //private int CutOffset;
+        //private bool CutFromMemoryListData = false;
+        //private int CutSize;
+        //private int CutOffset;
 
 
         public int MemoryListSize
@@ -472,7 +472,7 @@ namespace Helper.MemoryList
                 throw new Exception("Not enought data");
             }
 
-            byte[] array = new byte[Count];
+            byte[] array;
             if (SeekAndRead != -1)
             {
                 array = MemoryListData.GetRange(SeekAndRead, Count).ToArray();
@@ -531,7 +531,7 @@ namespace Helper.MemoryList
             if (SavePosition)
             {
                 MemoryListData.InsertRange(MemoryListPosition, BytesArray);
-                MemoryListPosition+= BytesArray.Length;
+                MemoryListPosition += BytesArray.Length;
                 return;
             }
             MemoryListData.InsertRange(MemoryListPosition, BytesArray);

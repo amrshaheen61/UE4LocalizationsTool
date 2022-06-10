@@ -28,6 +28,15 @@ namespace AssetParser
             return GetPropertyName(SourceFile, SourceFile.Imports_Directory[(Index * -1) - 1].NameID);
         }
 
+        public static void ReadExtraByte(this MemoryList memoryList, Uexp SourceFile, bool fromStruct)
+        {
+            if (fromStruct && SourceFile.UassetData.EngineVersion >= UE4Version.VER_UE4_NAME_HASHES_SERIALIZED)
+            {
+                memoryList.Skip(1);
+            }
+        }
+
+
         public static string GetStringUE(this MemoryList memoryList)
         {
             int StringLength = memoryList.GetIntValue();
@@ -52,9 +61,9 @@ namespace AssetParser
 
         public static bool IsASCII(string StringValue)
         {
-            for(int n=0; n< StringValue.Length; n++)
+            for (int n = 0; n < StringValue.Length; n++)
             {
-                if (StringValue[n]>127)
+                if (StringValue[n] > 127)
                 {
                     return false;
                 }
@@ -78,8 +87,8 @@ namespace AssetParser
 
         public static void ReplaceStringUE(this MemoryList memoryList, string StringValue)
         {
-            
-           // memoryList.DeleteStringUE();
+
+            // memoryList.DeleteStringUE();
 
             StringValue = StringValue.Replace("<cf>", "\r\n");
             StringValue = StringValue.Replace("<cr>", "\r");
@@ -88,14 +97,14 @@ namespace AssetParser
             //To save time
             int ThisPosition = memoryList.GetPosition();
             string TempString = memoryList.GetStringUE();
-            if(StringValue== TempString)
+            if (StringValue == TempString)
             {
                 return;
             }
 
             memoryList.Seek(ThisPosition);
             memoryList.DeleteStringUE();
-            
+
             StringValue += '\0';
 
             Encoding encoding = Encoding.Unicode;
