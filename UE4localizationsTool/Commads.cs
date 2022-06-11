@@ -26,12 +26,13 @@ namespace UE4localizationsTool
 
                     Strings = Export(SourcePath);
                     SizeOfRecord = Strings.Count;
-                    SaveTextFile(SourcePath + ".txt");
-
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.SetCursorPosition(ConsoleText.Length, Console.CursorTop - 1);
                     Console.WriteLine("Done");
                     Console.ForegroundColor = ConsoleColor.White;
+
+                    SaveTextFile(SourcePath + ".txt");
+
 
                     break;
                 case "exportall"://Folders
@@ -170,8 +171,9 @@ namespace UE4localizationsTool
                 int ThisPosition = Strings.Count - 1;
                 try
                 {
-                    Strings.AddRange(Export(LanguageFiles[i]));
-                    SizeOfRecord = Strings.Count;
+                    List<List<string>> Souce = Export(LanguageFiles[i]);
+                    Strings.AddRange(Souce);
+                    SizeOfRecord = Souce.Count;
                     Strings[ThisPosition][1] = "[PATH]" + SizeOfRecord + "*" + LanguageFiles[i].Replace(FolderPath, "") + "[PATH]";
                 }
                 catch (Exception EX)
@@ -271,7 +273,7 @@ namespace UE4localizationsTool
             }
 
 
-            int[] Indexs = Values.Select((Value, Index) => (Value.StartsWith("[PATH]") && Value.EndsWith("[PATH]")) ? Index : -1).Where(index => index != -1).ToArray();
+            int[] Indexs = Values.Select((Value, Index) => (Value.Trim().StartsWith("[PATH]") && Value.Trim().EndsWith("[PATH]")) ? Index : -1).Where(index => index != -1).ToArray();
 
             if (Indexs.Length == 0)
             {
