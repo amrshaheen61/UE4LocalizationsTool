@@ -3,15 +3,27 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace UE4localizationsTool
 {
     public class Commads
     {
         private List<List<string>> Strings;
-        private int SizeOfRecord = 0;
-        public Commads(string Options, string SourcePath)
+        private bool usefilter = false;
+        private bool UseMatching = false;
+        private bool RegularExpression = false;
+        private bool ReverseMode = false;
+        private List<string> ArrayValues;
+        public Commads(string Options, string SourcePath, bool UseFilter = false)
         {
+            usefilter = UseFilter;
+
+            if (usefilter)
+            {
+                GetFilterValues();
+            }
+
 
             string[] Paths;
             string ConsoleText;
@@ -25,7 +37,12 @@ namespace UE4localizationsTool
                     Console.ForegroundColor = ConsoleColor.White;
 
                     Strings = Export(SourcePath);
-                    SizeOfRecord = Strings.Count;
+
+                    if (usefilter)
+                    {
+                        Strings = ApplyFilter(Strings);
+                    }
+
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.SetCursorPosition(ConsoleText.Length, Console.CursorTop - 1);
                     Console.WriteLine("Done");
@@ -90,6 +107,7 @@ namespace UE4localizationsTool
 
             string[] stringsArray = new string[Strings.Count];
             int i = 0;
+
             foreach (var item in Strings)
             {
                 if (item[0] == "[~PATHFile~]")
@@ -167,14 +185,20 @@ namespace UE4localizationsTool
                 ConsoleText = $"[{ i + 1}:{LanguageFiles.Count()}] Exporting... '{Path.GetFileName(LanguageFiles[i])}' ";
                 Console.WriteLine(ConsoleText);
                 Console.ForegroundColor = ConsoleColor.White;
-                Strings.Add(new List<string>() { "[~PATHFile~]", "", "[~PATHFile~]" });
+
                 int ThisPosition = Strings.Count - 1;
                 try
                 {
+
                     List<List<string>> Souce = Export(LanguageFiles[i]);
+
+                    if (usefilter)
+                    {
+                        Souce = ApplyFilter(Souce);
+                    }
+
+                    Strings.Add(new List<string>() { "[~PATHFile~]", "[PATH]" + Souce.Count + "*" + LanguageFiles[i].Replace(FolderPath, "") + "[PATH]", "[~PATHFile~]" });
                     Strings.AddRange(Souce);
-                    SizeOfRecord = Souce.Count;
-                    Strings[ThisPosition][1] = "[PATH]" + SizeOfRecord + "*" + LanguageFiles[i].Replace(FolderPath, "") + "[PATH]";
                 }
                 catch (Exception EX)
                 {
@@ -186,9 +210,6 @@ namespace UE4localizationsTool
                     Console.ForegroundColor = ConsoleColor.Yellow;
                     Console.WriteLine("Can't parse it, the tool will skip this file.\n" + EX.Message);
                     Console.ForegroundColor = ConsoleColor.White;
-                    if (Strings.Count != 0)
-                        Strings.RemoveAt(Strings.Count - 1);
-
                     continue;
 
                 }
@@ -202,6 +223,13 @@ namespace UE4localizationsTool
 
         void EditList(List<List<string>> Strings, string[] StringValues)
         {
+
+            if (usefilter)
+            {
+                ApplyFilter(Strings, StringValues);
+                return;
+            }
+
             if (StringValues.Length < Strings.Count)
             {
                 throw new Exception("Text file is too short");
@@ -331,5 +359,195 @@ namespace UE4localizationsTool
 
         }
 
+
+        private void GetFilterValues()
+        {
+
+            if (!File.Exists("FilterValues.txt"))
+            {
+                throw new Exception("Can't find 'FilterValues.txt' file, open the GUI and create new one from (Tool>Filter)");
+            }
+
+            try
+            {
+                List<string> FV = new List<string>();
+                FV.AddRange(File.ReadAllLines("FilterValues.txt"));
+                string[] Controls = FV[0].Split(new char[] { '|' });
+                bool.TryParse(Controls[0], out UseMatching);
+                bool.TryParse(Controls[1], out RegularExpression);
+                bool.TryParse(Controls[2], out ReverseMode);
+                FV.RemoveAt(0);
+                ArrayValues = FV;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Can't parse 'FilterValues.txt', open the GUI and create new one from (Tool>Filter)\n" + ex.Message);
+            }
+        }
+
+
+        private List<List<string>> ApplyFilter(List<List<string>> Strings)
+        {
+            List<List<string>> FV = new List<List<string>>();
+            for (int x = 0; x < Strings.Count; x++)
+            {
+
+                bool CanAdd = false;
+
+
+                ArrayValues.ForEach(Value =>
+                  {
+
+                      if (UseMatching)
+                      {
+                          if (RegularExpression)
+                          {
+                              try
+                              {
+                                  if (Regex.IsMatch(Strings[x][0], Value))
+                                  {
+                                      CanAdd = true;
+                                  }
+
+                              }
+                              catch { }
+                          }
+                          else
+                          {
+                              if (Strings[x][0] == Value)
+                              {
+                                  CanAdd = true;
+                              }
+                          }
+                      }
+                      else
+                      {
+                          if (RegularExpression)
+                          {
+                              try
+                              {
+                                  if (Regex.IsMatch(Strings[x][0], Value, RegexOptions.IgnoreCase))
+                                  {
+                                      CanAdd = true;
+                                  }
+                              }
+                              catch { }
+                          }
+                          else
+                          {
+                              if (Strings[x][0].IndexOf(Value, StringComparison.OrdinalIgnoreCase) >= 0)
+                              {
+                                  CanAdd = true;
+                              }
+                          }
+                      }
+                  });
+
+                if (CanAdd)
+                {
+                    if (!ReverseMode)
+                        FV.Add(Strings[x]);
+                }
+                else if (ReverseMode)
+                {
+                    FV.Add(Strings[x]);
+                }
+            }
+            return FV;
+        }
+
+
+        private void ApplyFilter(List<List<string>> Strings, string[] Array)
+        {
+            int i = 0;
+            for (int x = 0; x < Strings.Count; x++)
+            {
+
+                bool CanAdd = false;
+
+
+                ArrayValues.ForEach(Value =>
+                {
+
+                    if (UseMatching)
+                    {
+                        if (RegularExpression)
+                        {
+                            try
+                            {
+                                if (Regex.IsMatch(Strings[x][0], Value))
+                                {
+                                    CanAdd = true;
+                                }
+
+                            }
+                            catch { }
+                        }
+                        else
+                        {
+                            if (Strings[x][0] == Value)
+                            {
+                                CanAdd = true;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (RegularExpression)
+                        {
+                            try
+                            {
+                                if (Regex.IsMatch(Strings[x][0], Value, RegexOptions.IgnoreCase))
+                                {
+                                    CanAdd = true;
+                                }
+                            }
+                            catch { }
+                        }
+                        else
+                        {
+                            if (Strings[x][0].IndexOf(Value, StringComparison.OrdinalIgnoreCase) >= 0)
+                            {
+                                CanAdd = true;
+                            }
+                        }
+                    }
+                });
+
+                if (CanAdd)
+                {
+                    if (!ReverseMode)
+                    {
+                        try
+                        {
+                            Strings[x][1] = Array[i].Split(new char[] { '=' }, 2)[1];
+                            i++;
+                        }
+                        catch
+                        {
+                            throw new Exception("Can't parse this line from text file: " + Array[i]);
+                        }
+                    }
+                }
+                else if (ReverseMode)
+                {
+                    try
+                    {
+                        Strings[x][1] = Array[i].Split(new char[] { '=' }, 2)[1];
+                        i++;
+                    }
+                    catch
+                    {
+                        throw new Exception("Can't parse this line from text file: " + Array[i]);
+                    }
+                }
+            }
+        }
+
+
+
+
     }
+
 }
+

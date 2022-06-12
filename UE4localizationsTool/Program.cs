@@ -18,8 +18,17 @@ namespace UE4localizationsTool
          $"{AppDomain.CurrentDomain.FriendlyName}  exportall  <Folder> <TxtFile>\n" +
          $"{AppDomain.CurrentDomain.FriendlyName}  importall  <Folder> <TxtFile>\n" +
          $"{AppDomain.CurrentDomain.FriendlyName} -importall  <Folder> <TxtFile>\n\n" +
-          "- for import without rename file be careful with this command.";
+          "- for import without rename file be careful with this command.\n\n" +
 
+          "To use last filter you applied before in GUI, add (TRUE) after command line\n" +
+          "filter will apply only in name table (Remember to apply the same filter when importing)\n\n" +
+          "Examples:\n" +
+         $"{AppDomain.CurrentDomain.FriendlyName} export Actions.uasset\n" +
+         $"{AppDomain.CurrentDomain.FriendlyName} import Actions.uasset.txt\n" +
+         $"{AppDomain.CurrentDomain.FriendlyName} exportall Actions\n" +
+         $"{AppDomain.CurrentDomain.FriendlyName} exportall Actions True\n" +
+         $"{AppDomain.CurrentDomain.FriendlyName} importall Actions\n" +
+         $"{AppDomain.CurrentDomain.FriendlyName} importall Actions True";
 
 
         [STAThread]
@@ -31,7 +40,7 @@ namespace UE4localizationsTool
             {
                 AttachConsole(ATTACH_PARENT_PROCESS);
                 Console.SetCursorPosition(0, Console.CursorTop + 1);
-
+                bool UseFilter = false;
                 if (args.Length < 2)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
@@ -49,14 +58,22 @@ namespace UE4localizationsTool
                             Console.ForegroundColor = ConsoleColor.Red;
                             Console.WriteLine("Invalid number of arguments.\n" + commandlines);
                             Console.ForegroundColor = ConsoleColor.White;
+
                             return;
                         }
-
-                        new Commads(args[0], args[1] + "*" + args[2]);
+                        if (args.Length > 3)
+                        {
+                            bool.TryParse(args[3], out UseFilter);
+                        }
+                        new Commads(args[0], args[1] + "*" + args[2], UseFilter);
                     }
                     else
                     {
-                        new Commads(args[0], args[1]);
+                        if (args.Length > 2)
+                        {
+                            bool.TryParse(args[2], out UseFilter);
+                        }
+                        new Commads(args[0], args[1], UseFilter);
                     }
 
                 }
