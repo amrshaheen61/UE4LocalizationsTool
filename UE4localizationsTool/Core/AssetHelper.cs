@@ -88,7 +88,6 @@ namespace AssetParser
         public static void ReplaceStringUE(this MemoryList memoryList, string StringValue)
         {
 
-            // memoryList.DeleteStringUE();
 
             StringValue = StringValue.Replace("<cf>", "\r\n");
             StringValue = StringValue.Replace("<cr>", "\r");
@@ -99,11 +98,19 @@ namespace AssetParser
             string TempString = memoryList.GetStringUE();
             if (StringValue == TempString)
             {
-                return;
+              return;
             }
 
             memoryList.Seek(ThisPosition);
             memoryList.DeleteStringUE();
+
+
+            if (string.IsNullOrEmpty(StringValue))
+            {
+                memoryList.InsertIntValue(0);
+                return;
+            }
+
 
             StringValue += '\0';
 
@@ -113,17 +120,17 @@ namespace AssetParser
                 encoding = Encoding.ASCII;
             }
 
+           byte[] TextBytes= encoding.GetBytes(StringValue);
+
             if (encoding == Encoding.ASCII)
             {
-
-                memoryList.InsertIntValue(StringValue.Length);
-                memoryList.InsertStringValue(StringValue, true, -1, encoding);
+                memoryList.InsertIntValue(TextBytes.Length);
+                memoryList.InsertBytes(TextBytes);
             }
             else
             {
-
-                memoryList.InsertIntValue(memoryList.GetStringLenght(StringValue, encoding) / -2);
-                memoryList.InsertStringValue(StringValue, true, -1, encoding);
+                memoryList.InsertIntValue(TextBytes.Length/-2);
+                memoryList.InsertBytes(TextBytes);
             }
         }
 

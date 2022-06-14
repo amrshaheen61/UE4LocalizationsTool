@@ -84,6 +84,7 @@ namespace AssetParser
                     catch
                     {
                         uexp.IsGood = false;
+                        ConsoleMode.Print("Bug here.", ConsoleColor.Red);
                     }
 
                     ConsoleMode.Print("EndMapProperty", ConsoleColor.Blue);
@@ -155,6 +156,7 @@ namespace AssetParser
                     catch
                     {
                         uexp.IsGood = false;
+                        ConsoleMode.Print("Bug here.", ConsoleColor.Red);
                     }
                     if (Modify)
                     {
@@ -271,6 +273,7 @@ namespace AssetParser
                         catch
                         {
                             uexp.IsGood = false;
+                            ConsoleMode.Print("Bug here.", ConsoleColor.Red);
                         }
                     }
 
@@ -314,6 +317,7 @@ namespace AssetParser
                     int TextDataPosition = memoryList.GetPosition();
                     if (ContainText == 0xff)
                     {
+
                         try
                         {
                             TextData = new MemoryList(memoryList.GetBytes(PropertyLength - 5));
@@ -326,7 +330,7 @@ namespace AssetParser
                             {
                                 if (!Modify)
                                 {
-                                    uexp.Strings.Add(new List<string>() { PropertyName, TextData.GetStringUE() });
+                                    uexp.Strings.Add(new List<string>() { PropertyName+"_"+i, TextData.GetStringUE() });
 
                                 }
                                 else
@@ -341,7 +345,8 @@ namespace AssetParser
                         }
                         catch
                         {
-
+                            uexp.IsGood = false;
+                            ConsoleMode.Print("Bug here.", ConsoleColor.Red);
                         }
                         continue;
                     }
@@ -369,7 +374,8 @@ namespace AssetParser
                     }
                     catch
                     {
-
+                        uexp.IsGood = false;
+                        ConsoleMode.Print("Bug here.", ConsoleColor.Red);
                     }
                 }
                 else if (Property == "ByteProperty")
@@ -437,7 +443,8 @@ namespace AssetParser
                     }
                     catch
                     {
-
+                        uexp.IsGood = false;
+                        ConsoleMode.Print("Bug here.", ConsoleColor.Red);
                     }
                 }
 
@@ -579,6 +586,7 @@ namespace AssetParser
                 catch
                 {
                     uexp.IsGood = false;
+                    ConsoleMode.Print("Bug here.", ConsoleColor.Red);
                 }
                 ConsoleMode.Print("EndMap", ConsoleColor.DarkBlue);
             }
@@ -645,7 +653,11 @@ namespace AssetParser
                             PropertyParser(PropertyName, StructType, -1, StructData, uexp, Modify);
                         }
                     }
-                    catch { uexp.IsGood = false; }
+                    catch
+                    {
+                        uexp.IsGood = false;
+                        ConsoleMode.Print("Bug here.", ConsoleColor.Red);
+                    }
 
                     if (Modify)
                     {
@@ -682,21 +694,7 @@ namespace AssetParser
                 byte ContainText = memoryList.GetByteValue();
                 if (ContainText == 0xff)
                 {
-                    int TextLinesCount = memoryList.GetIntValue();
-                    for (int i = 0; i < TextLinesCount; i++)
-                    {
-                        if (!Modify)
-                        {
-                            uexp.Strings.Add(new List<string>() { PropertyName, memoryList.GetStringUE() });
-
-                        }
-                        else
-                        {
-                            memoryList.ReplaceStringUE(uexp.Strings[uexp.CurrentIndex][1]);
-                            uexp.CurrentIndex++;
-                        }
-                    }
-                    return;
+                    return;          
                 }
 
                 if (!Modify)
@@ -704,6 +702,9 @@ namespace AssetParser
                     uexp.Strings.Add(new List<string>() { PropertyName + "_1", memoryList.GetStringUE() });
                     uexp.Strings.Add(new List<string>() { PropertyName + "_2", memoryList.GetStringUE() });
                     uexp.Strings.Add(new List<string>() { PropertyName + "_3", memoryList.GetStringUE() });
+                    ConsoleMode.Print(uexp.Strings[uexp.Strings.Count - 3][1], ConsoleColor.Magenta);
+                    ConsoleMode.Print(uexp.Strings[uexp.Strings.Count - 2][1], ConsoleColor.Magenta);
+                    ConsoleMode.Print(uexp.Strings[uexp.Strings.Count - 1][1], ConsoleColor.Magenta);
                 }
                 else
                 {
@@ -757,6 +758,7 @@ namespace AssetParser
                     catch
                     {
                         uexp.IsGood = false;
+                        ConsoleMode.Print("Bug here.", ConsoleColor.Red);
                     }
                 }
             }
@@ -776,6 +778,7 @@ namespace AssetParser
                     catch
                     {
                         uexp.IsGood = false;
+                        ConsoleMode.Print("Bug here.", ConsoleColor.Red);
                     }
                     memoryList.Skip(4); //ImplementationPtr Index
                     ConsoleMode.Print("EndMovieSceneEvalTemplatePtr", ConsoleColor.Yellow);

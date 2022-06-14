@@ -746,7 +746,7 @@ namespace UE4localizationsTool
             {
                 try
                 {
-                    string UpdateScript = client.DownloadString("https://raw.githubusercontent.com/amrshaheen61/UE4LocalizationsTool/blob/master/UE4localizationsTool/UpdateInfo.txt");
+                    string UpdateScript = client.DownloadString("https://raw.githubusercontent.com/amrshaheen61/UE4LocalizationsTool/master/UE4localizationsTool/UpdateInfo.txt");
 
                     if (UpdateScript.StartsWith("UpdateFile", false, CultureInfo.InvariantCulture))
                     {

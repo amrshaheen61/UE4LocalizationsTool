@@ -66,6 +66,9 @@ namespace AssetParser
 
                                 _ = new Spreadsheet(memoryList, this, Modify);
                                 break;
+                            case "Function":
+                             //   _ = new Function(memoryList, this, Modify);
+                                break;
                         }
                     }
                     catch
