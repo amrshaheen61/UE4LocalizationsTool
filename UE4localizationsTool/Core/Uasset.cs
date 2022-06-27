@@ -30,6 +30,7 @@ namespace AssetParser
             public int ExportClass { get; set; }
             public int ExportParent_1 { get; set; }
             public int ExportParent_2 { get; set; }
+            public int Value { get; set; }
             public int ExportName { get; set; }
             public short ExportMemberType { get; set; }
             public int ExportLength { get; set; }
@@ -82,7 +83,7 @@ namespace AssetParser
         public MemoryList UexpFile;
         public bool IsNotUseUexp;
         public bool UseFromStruct = true;
-
+        public bool AutoVersion=false;
         public Uasset(string FilePath)
         {
 
@@ -162,14 +163,17 @@ namespace AssetParser
                 if (Name_Directory_Offset - (numCustomVersions * 20) == 189)
                 {
                     EngineVersion = UE4Version.VER_UE4_15;
+                    AutoVersion = true;
                 }
                 else if (Name_Directory_Offset - (numCustomVersions * 20) > 185)
                 {
                     EngineVersion = UE4Version.VER_UE4_16;
+                    AutoVersion = true;
                 }
                 else if (Name_Directory_Offset - (numCustomVersions * 20) == 185)
                 {
                     EngineVersion = UE4Version.VER_UE4_6;
+                    AutoVersion = true;
                 }
             }
             if (EngineVersion >= UE4Version.VER_UE4_NAME_HASHES_SERIALIZED)
@@ -187,6 +191,7 @@ namespace AssetParser
             if (EngineVersion >= UE4Version.VER_UE4_SERIALIZE_TEXT_IN_PACKAGES)
             {
                 GatherableTextDataCount = UassetFile.GetIntValue();
+                FGatherableTextDataOffset = UassetFile.GetPosition();
                 GatherableTextDataOffset = UassetFile.GetIntValue();
             }
 
@@ -451,7 +456,7 @@ namespace AssetParser
                     ExportsDirectory.ExportParent_2 = UassetFile.GetIntValue();
                 }
 
-                _ = UassetFile.GetIntValue();
+                ExportsDirectory.Value = UassetFile.GetIntValue();
                 ExportsDirectory.ExportName = UassetFile.GetIntValue();
 
                 _ = UassetFile.GetIntValue();

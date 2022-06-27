@@ -243,6 +243,10 @@ namespace Helper.MemoryList
             {
                 MemoryListData.Add(Convert.ToByte(Value));
             }
+            else if (Value.GetType().IsArray)
+            {
+                MemoryListData.AddRange((byte[])Value);
+            }
             else
             {
                 throw new Exception("Unknown type");
@@ -300,13 +304,22 @@ namespace Helper.MemoryList
             {
                 SetBoolValue((bool)Value, SavePosition, SeekAndRead);
             }
+            else if (Value.GetType().IsArray)
+            {
+                SetBytes((byte[])Value, SavePosition, SeekAndRead);
+            }
             else
             {
                 throw new Exception("Unknown type");
             }
         }
 
-
+        void IDisposable.Dispose() { }
+        public void Dispose()
+        {
+            Clear();
+            GC.SuppressFinalize(this);
+        }
         #endregion
 
 
@@ -328,13 +341,6 @@ namespace Helper.MemoryList
         public void DeleteBoolValue(int SeekAndWrite = -1)
         {
             DeleteByteValue(SeekAndWrite);
-        }
-
-        void IDisposable.Dispose() { }
-        public void Dispose()
-        {
-            Clear();
-            GC.SuppressFinalize(this);
         }
 
         #endregion
@@ -1248,6 +1254,45 @@ namespace Helper.MemoryList
             InsertBytes(encoding.GetBytes(String), SavePosition, SeekAndRead);
         }
 
+
+        private byte[] GetString(Encoding encoding, bool SavePosition = true)
+        {
+            int ThisPosition = GetPosition();
+            List<byte> StringValues = new List<byte>();
+            if (encoding != Encoding.Unicode)
+            {
+                while (true)
+                {
+                    StringValues.Add(GetByteValue());
+                    if (StringValues[StringValues.Count - 1] == 0)
+                    {
+                        break;
+                    }
+
+                }
+            }
+            else
+            {
+                while (true)
+                {
+                    StringValues.Add(GetByteValue());
+                    StringValues.Add(GetByteValue());
+                    if (StringValues[StringValues.Count - 1] == 0 && StringValues[StringValues.Count - 2] == 0)
+                    {
+                        break;
+                    }
+                }
+
+            }
+
+            if (!SavePosition)
+            {
+                Seek(ThisPosition);
+            }
+
+            return StringValues.ToArray();
+        }
+
         public string GetStringValueN(bool SavePosition = true, int SeekAndRead = -1, Encoding encoding = null)
         {
             if (encoding == null)
@@ -1255,39 +1300,45 @@ namespace Helper.MemoryList
                 encoding = Encoding.ASCII;
             }
 
-            List<byte> StringValues = new List<byte>();
-            int StringLenght = 0;
+            int ThisPosition = GetPosition();
+            string Value;
             if (SeekAndRead != -1)
             {
-                do
-                {
-                    StringValues.Add(GetByteValue(false, SeekAndRead + StringLenght));
-                    StringLenght++;
-                } while (StringValues[StringValues.Count - 1] != 0);
 
-                return encoding.GetString(StringValues.ToArray());
+                Seek(SeekAndRead);
+                Value = encoding.GetString(GetString(encoding)).TrimEnd('\0');
+                Seek(ThisPosition);
+                return Value;
             }
-
 
             if (SavePosition)
             {
-                do
-                {
-                    StringValues.Add(GetByteValue(false, MemoryListIndex + StringLenght));
-                    StringLenght++;
-                } while (StringValues[StringValues.Count - 1] != 0);
-                MemoryListIndex += StringLenght;
-                return encoding.GetString(StringValues.ToArray());
+                return encoding.GetString(GetString(encoding)).TrimEnd('\0');
             }
 
-            do
-            {
-                StringValues.Add(GetByteValue(false, MemoryListIndex + StringLenght));
-                StringLenght++;
-            } while (StringValues[StringValues.Count - 1] != 0);
-            return encoding.GetString(StringValues.ToArray());
+            Seek(MemoryListIndex);
+            Value = encoding.GetString(GetString(encoding)).TrimEnd('\0');
+            Seek(ThisPosition);
+            return Value;
         }
 
+
+        public void DeleteStringN(int SeekAndRead = -1, Encoding encoding = null)
+        {
+            if (encoding == null)
+            {
+                encoding = Encoding.ASCII;
+            }
+
+            int ThisPosition = GetPosition();
+            if (SeekAndRead != -1)
+            {
+                DeleteBytes(GetString(encoding, false).Length, SeekAndRead);
+                return;
+            }
+
+            DeleteBytes(GetString(encoding, false).Length);
+        }
 
 
         public void SetStringValueN(string String, bool SavePosition = true, int SeekAndRead = -1, Encoding encoding = null)

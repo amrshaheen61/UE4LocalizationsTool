@@ -1,4 +1,7 @@
 ﻿using Helper.MemoryList;
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace AssetParser
@@ -59,7 +62,75 @@ namespace AssetParser
             return Stringvalue.TrimEnd('\0');
         }
 
-        public static bool IsASCII(string StringValue)
+
+        public static string GetStringUE(this MemoryList memoryList,Encoding encoding)
+        {
+            string Stringvalue = memoryList.GetStringValueN(true,-1, encoding);
+            Stringvalue = Stringvalue.Replace("\r\n", "<cf>");
+            Stringvalue = Stringvalue.Replace("\r", "<cr>");
+            Stringvalue = Stringvalue.Replace("\n", "<lf>");
+            return Stringvalue.TrimEnd('\0');
+        }
+
+        public static string GetStringUE(this MemoryList memoryList,int Lenght, bool SavePosition = true, int SeekAndRead = -1, Encoding encoding = null)
+        {
+            string Stringvalue = memoryList.GetStringValue(Lenght, SavePosition, SeekAndRead, encoding);
+            Stringvalue = Stringvalue.Replace("\r\n", "<cf>");
+            Stringvalue = Stringvalue.Replace("\r", "<cr>");
+            Stringvalue = Stringvalue.Replace("\n", "<lf>");
+            return Stringvalue.TrimEnd('\0');
+        }
+
+
+        public static string ReplaceString(string Str)
+        {
+            Str = Str.Replace("<cf>", "\r\n");
+            Str = Str.Replace("<cr>", "\r");
+            return Str.Replace("<lf>", "\n");  
+        }
+
+
+        public static void ReplaceStringUE_Func(this MemoryList memoryList, string StringValue)
+        {
+
+            StringValue = StringValue.Replace("<cf>", "\r\n");
+            StringValue = StringValue.Replace("<cr>", "\r");
+            StringValue = StringValue.Replace("<lf>", "\n");
+
+            memoryList.Skip(-1);
+            ExprToken eExpr = (ExprToken)memoryList.GetByteValue();
+            if (eExpr == ExprToken.EX_StringConst)
+            {
+                memoryList.DeleteStringN(-1, Encoding.ASCII);
+            }
+            else if (eExpr == ExprToken.EX_UnicodeStringConst)
+            {
+                memoryList.DeleteStringN(-1, Encoding.Unicode);
+            }
+            memoryList.Skip(-1);
+
+
+            Encoding encoding = Encoding.Unicode;
+            if (IsASCII(StringValue))
+            {
+                encoding = Encoding.ASCII;
+            }
+
+            if (encoding == Encoding.ASCII)
+            {
+                memoryList.SetByteValue((byte)ExprToken.EX_StringConst);
+                memoryList.InsertStringValueN(StringValue,true,-1, encoding);
+            }
+            else
+            {
+                memoryList.SetByteValue((byte)ExprToken.EX_UnicodeStringConst);
+                memoryList.InsertStringValueN(StringValue, true, -1, encoding);
+            }
+        }
+
+
+
+            public static bool IsASCII(string StringValue)
         {
             for (int n = 0; n < StringValue.Length; n++)
             {
@@ -135,4 +206,24 @@ namespace AssetParser
         }
 
     }
+
+
+    public class ReadStringProperty
+    {
+        public ReadStringProperty(MemoryList memoryList, Uexp uexp, string PropertyName, bool Modify = false)
+        {
+            if (!Modify)
+            {
+                uexp.Strings.Add(new List<string>() { PropertyName, memoryList.GetStringUE() });
+                ConsoleMode.Print(uexp.Strings[uexp.Strings.Count - 1][1], ConsoleColor.Magenta);
+            }
+            else
+            {
+                memoryList.ReplaceStringUE(uexp.Strings[uexp.CurrentIndex][1]);
+                uexp.CurrentIndex++;
+            }
+        }
+    }
+
+
 }

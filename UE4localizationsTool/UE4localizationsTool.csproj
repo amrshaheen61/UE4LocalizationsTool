@@ -92,6 +92,9 @@
     <Compile Include="Core\AssetHelper.cs" />
     <Compile Include="Core\ConsoleMode.cs" />
     <Compile Include="Core\Enum.cs" />
+    <Compile Include="Core\Function.cs" />
+    <Compile Include="Core\REDAdvTextData.cs" />
+    <Compile Include="Core\REDLocalizeTextData.cs" />
     <Compile Include="Core\Spreadsheet.cs" />
     <Compile Include="Core\DataTable.cs" />
     <Compile Include="Core\locres.cs" />

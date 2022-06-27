@@ -11,14 +11,15 @@ namespace UE4localizationsTool
     {
         private List<List<string>> Strings;
         private bool usefilter = false;
+        private bool nonames = false;
         private bool UseMatching = false;
         private bool RegularExpression = false;
         private bool ReverseMode = false;
         private List<string> ArrayValues;
-        public Commads(string Options, string SourcePath, bool UseFilter = false)
+        public Commads(string Options, string SourcePath, bool UseFilter = false, bool NoNames = false)
         {
             usefilter = UseFilter;
-
+            nonames = NoNames;
             if (usefilter)
             {
                 GetFilterValues();
@@ -116,7 +117,14 @@ namespace UE4localizationsTool
                 }
                 else
                 {
-                    stringsArray[i] = item[0] + "=" + item[1];
+                    if (!nonames)
+                    {
+                        stringsArray[i] = item[0] + "=" + item[1];
+                    }
+                    else
+                    {
+                        stringsArray[i] = item[1];
+                    }
                 }
                 i++;
             }
@@ -238,12 +246,20 @@ namespace UE4localizationsTool
             {
                 try
                 {
-                    Strings[i][1] = StringValues[i].Split(new char[] { '=' }, 2)[1];
+                    if (!nonames)
+                    {
+                        Strings[i][1] = StringValues[i].Split(new char[] { '=' }, 2)[1];
+                    }
+                    else
+                    {
+                        Strings[i][1] = StringValues[i];
+                    }
                 }
                 catch
                 {
                     throw new Exception("Can't parse this line from text file: " + StringValues[i]);
                 }
+
             }
         }
 
@@ -518,10 +534,19 @@ namespace UE4localizationsTool
                 {
                     if (!ReverseMode)
                     {
+
                         try
                         {
-                            Strings[x][1] = Array[i].Split(new char[] { '=' }, 2)[1];
-                            i++;
+                            if (!nonames)
+                            {
+                                Strings[x][1] = Array[i].Split(new char[] { '=' }, 2)[1];
+                                i++;
+                            }
+                            else
+                            {
+                                Strings[x][1] = Array[i];
+                                i++;
+                            }
                         }
                         catch
                         {
@@ -533,8 +558,16 @@ namespace UE4localizationsTool
                 {
                     try
                     {
-                        Strings[x][1] = Array[i].Split(new char[] { '=' }, 2)[1];
-                        i++;
+                        if (!nonames)
+                        {
+                            Strings[x][1] = Array[i].Split(new char[] { '=' }, 2)[1];
+                            i++;
+                        }
+                        else
+                        {
+                            Strings[x][1] = Array[i];
+                            i++;
+                        }
                     }
                     catch
                     {

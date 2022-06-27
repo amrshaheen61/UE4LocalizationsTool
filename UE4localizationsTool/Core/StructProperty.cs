@@ -12,13 +12,13 @@ namespace AssetParser
 
             while (memoryList.GetPosition() < memoryList.GetSize())
             {
-                long GetPropertyName;
+                ulong GetPropertyName;
                 if (FromProperty)
                 {
-                    GetPropertyName = memoryList.GetInt64Value();
+                    GetPropertyName = memoryList.GetUInt64Value();
 
                     ConsoleMode.Print($"PropertyNameMoving- {GetPropertyName} > " + memoryList.GetPosition(), ConsoleColor.DarkBlue);
-                    if (GetPropertyName > uexp.UassetData.Number_of_Names)
+                    if (GetPropertyName > (uint)uexp.UassetData.Number_of_Names)
                     {
                         memoryList.Skip(-4);
                         continue;
@@ -26,7 +26,7 @@ namespace AssetParser
                 }
                 else
                 {
-                    GetPropertyName = memoryList.GetIntValue();
+                    GetPropertyName = (uint)memoryList.GetIntValue();
                     memoryList.Skip(4);
                 }
                 string PropertyName = uexp.UassetData.GetPropertyName((int)GetPropertyName);
@@ -85,6 +85,7 @@ namespace AssetParser
                     {
                         uexp.IsGood = false;
                         ConsoleMode.Print("Bug here.", ConsoleColor.Red);
+                        //Console.ReadLine();
                     }
 
                     ConsoleMode.Print("EndMapProperty", ConsoleColor.Blue);
@@ -157,7 +158,9 @@ namespace AssetParser
                     {
                         uexp.IsGood = false;
                         ConsoleMode.Print("Bug here.", ConsoleColor.Red);
+                        //Console.ReadLine();
                     }
+
                     if (Modify)
                     {
                         memoryList.ReplaceBytes(PropertyLength, ArrayData.ToArray(), false, ArrayPosition);
@@ -274,6 +277,7 @@ namespace AssetParser
                         {
                             uexp.IsGood = false;
                             ConsoleMode.Print("Bug here.", ConsoleColor.Red);
+                            //Console.ReadLine();
                         }
                     }
 
@@ -311,65 +315,67 @@ namespace AssetParser
                     {
                         memoryList.Skip(1);  //null For "Struct"
                     }
-                    memoryList.Skip(4); //unkown
-                    byte ContainText = memoryList.GetByteValue();
-                    MemoryList TextData;
                     int TextDataPosition = memoryList.GetPosition();
-                    if (ContainText == 0xff)
+                    MemoryList TextData = new MemoryList(memoryList.GetBytes(PropertyLength));
+
+                    if (TextData.GetSize() == 5)
                     {
-
-                        try
-                        {
-                            TextData = new MemoryList(memoryList.GetBytes(PropertyLength - 5));
-                            if (TextData.GetSize() == 0)
-                            {
-                                continue;
-                            }
-                            int TextLinesCount = TextData.GetIntValue();
-                            for (int i = 0; i < TextLinesCount; i++)
-                            {
-                                if (!Modify)
-                                {
-                                    uexp.Strings.Add(new List<string>() { PropertyName+"_"+i, TextData.GetStringUE() });
-
-                                }
-                                else
-                                {
-                                    TextData.ReplaceStringUE(uexp.Strings[uexp.CurrentIndex][1]);
-                                    uexp.CurrentIndex++;
-                                    memoryList.ReplaceBytes(PropertyLength - 5, TextData.ToArray(), false, TextDataPosition);
-                                    memoryList.Seek(TextDataPosition + TextData.GetSize());
-                                    memoryList.SetIntValue(TextData.GetSize() + 5, false, ThisPosition);
-                                }
-                            }
-                        }
-                        catch
-                        {
-                            uexp.IsGood = false;
-                            ConsoleMode.Print("Bug here.", ConsoleColor.Red);
-                        }
                         continue;
                     }
+
                     try
                     {
-                        TextData = new MemoryList(memoryList.GetBytes(PropertyLength - 5));
-                        if (!Modify)
+                        if (uexp.UassetData.EngineVersion < UE4Version.VER_UE4_FTEXT_HISTORY)
                         {
-                            uexp.Strings.Add(new List<string>() { PropertyName + "_1", TextData.GetStringUE() });
-                            uexp.Strings.Add(new List<string>() { PropertyName + "_2", TextData.GetStringUE() });
-                            uexp.Strings.Add(new List<string>() { PropertyName + "_3", TextData.GetStringUE() });
+
+                            new ReadStringProperty(TextData, uexp, PropertyName + "_0", Modify);
+                            if (uexp.UassetData.EngineVersion >= UE4Version.VER_UE4_ADDED_NAMESPACE_AND_KEY_DATA_TO_FTEXT)
+                            {
+                                new ReadStringProperty(TextData, uexp, PropertyName + "_1", Modify);
+                                new ReadStringProperty(TextData, uexp, PropertyName + "_2", Modify);
+                            }
+                            else
+                            {
+                                new ReadStringProperty(TextData, uexp, PropertyName + "_2", Modify);
+                            }
+
                         }
-                        else
+
+                        if (uexp.UassetData.EngineVersion > UE4Version.VER_UE4_FTEXT_HISTORY)
                         {
-                            TextData.ReplaceStringUE(uexp.Strings[uexp.CurrentIndex][1]);
-                            uexp.CurrentIndex++;
-                            TextData.ReplaceStringUE(uexp.Strings[uexp.CurrentIndex][1]);
-                            uexp.CurrentIndex++;
-                            TextData.ReplaceStringUE(uexp.Strings[uexp.CurrentIndex][1]);
-                            uexp.CurrentIndex++;
-                            memoryList.ReplaceBytes(PropertyLength - 5, TextData.ToArray(), false, TextDataPosition);
+                            TextData.Skip(4); //unkown
+                            TextHistoryType ContainText = (TextHistoryType)TextData.GetByteValue();
+
+                            switch (ContainText)
+                            {
+                                case TextHistoryType.None:
+                                    int TextLinesCount = TextData.GetIntValue();
+                                    for (int i = 0; i < TextLinesCount; i++)
+                                    {
+                                        new ReadStringProperty(TextData, uexp, PropertyName + "_" + (i + 1), Modify);
+                                    }
+                                    break;
+
+                                case TextHistoryType.Base:
+                                    new ReadStringProperty(TextData, uexp, PropertyName + "_1", Modify);
+                                    new ReadStringProperty(TextData, uexp, PropertyName + "_2", Modify);
+                                    new ReadStringProperty(TextData, uexp, PropertyName + "_3", Modify);
+                                    break;
+                                case TextHistoryType.StringTableEntry:
+                                    TextData.Skip(8); //Id
+                                    new ReadStringProperty(TextData, uexp, PropertyName + "_1", Modify);
+                                    break;
+
+                                default:
+                                    throw new Exception("UnKnown 'TextProperty' type: " + ContainText.ToString());
+                            }
+                        }
+
+                        if (Modify)
+                        {
+                            memoryList.ReplaceBytes(PropertyLength, TextData.ToArray(), false, TextDataPosition);
                             memoryList.Seek(TextDataPosition + TextData.GetSize());
-                            memoryList.SetIntValue(TextData.GetSize() + 5, false, ThisPosition);
+                            memoryList.SetIntValue(TextData.GetSize(), false, ThisPosition);
                         }
                     }
                     catch
@@ -445,6 +451,7 @@ namespace AssetParser
                     {
                         uexp.IsGood = false;
                         ConsoleMode.Print("Bug here.", ConsoleColor.Red);
+                        //Console.ReadLine();
                     }
                 }
 
@@ -544,15 +551,7 @@ namespace AssetParser
             else if (Property == "ActorReference")
             {
                 memoryList.Skip(4);
-                if (!Modify)
-                {
-                    uexp.Strings.Add(new List<string>() { PropertyName, memoryList.GetStringUE() });
-                }
-                else
-                {
-                    memoryList.ReplaceStringUE(uexp.Strings[uexp.CurrentIndex][1]);
-                    uexp.CurrentIndex++;
-                }
+                new ReadStringProperty(memoryList, uexp, PropertyName, Modify);
                 memoryList.Skip(2);
             }
             else if (Property == "MapProperty")
@@ -587,6 +586,7 @@ namespace AssetParser
                 {
                     uexp.IsGood = false;
                     ConsoleMode.Print("Bug here.", ConsoleColor.Red);
+                    //Console.ReadLine();
                 }
                 ConsoleMode.Print("EndMap", ConsoleColor.DarkBlue);
             }
@@ -601,15 +601,7 @@ namespace AssetParser
             }
             else if (Property == "AssetObjectProperty")
             {
-                if (!Modify)
-                {
-                    uexp.Strings.Add(new List<string>() { PropertyName, memoryList.GetStringUE() });
-                }
-                else
-                {
-                    memoryList.ReplaceStringUE(uexp.Strings[uexp.CurrentIndex][1]);
-                    uexp.CurrentIndex++;
-                }
+                new ReadStringProperty(memoryList, uexp, PropertyName, Modify);
             }
             else if (Property == "BoolProperty")
             {
@@ -657,6 +649,7 @@ namespace AssetParser
                     {
                         uexp.IsGood = false;
                         ConsoleMode.Print("Bug here.", ConsoleColor.Red);
+                        //Console.ReadLine();
                     }
 
                     if (Modify)
@@ -677,48 +670,62 @@ namespace AssetParser
             }
             else if (Property == "StrProperty")
             {
-                if (!Modify)
-                {
-                    uexp.Strings.Add(new List<string>() { PropertyName, memoryList.GetStringUE() });
-                    ConsoleMode.Print(uexp.Strings[uexp.Strings.Count - 1][1], ConsoleColor.Magenta);
-                }
-                else
-                {
-                    memoryList.ReplaceStringUE(uexp.Strings[uexp.CurrentIndex][1]);
-                    uexp.CurrentIndex++;
-                }
+                new ReadStringProperty(memoryList, uexp, PropertyName, Modify);
             }
             else if (Property == "TextProperty")
             {
-                memoryList.Skip(4); //unkown
-                byte ContainText = memoryList.GetByteValue();
-                if (ContainText == 0xff)
+                if (uexp.UassetData.EngineVersion < UE4Version.VER_UE4_FTEXT_HISTORY)
                 {
-                    return;          
+
+                    new ReadStringProperty(memoryList, uexp, PropertyName + "_0", Modify);
+                    if (uexp.UassetData.EngineVersion >= UE4Version.VER_UE4_ADDED_NAMESPACE_AND_KEY_DATA_TO_FTEXT)
+                    {
+                        new ReadStringProperty(memoryList, uexp, PropertyName + "_1", Modify);
+                        new ReadStringProperty(memoryList, uexp, PropertyName + "_2", Modify);
+                    }
+                    else
+                    {
+                        new ReadStringProperty(memoryList, uexp, PropertyName + "_2", Modify);
+                    }
+
                 }
 
-                if (!Modify)
+                if (uexp.UassetData.EngineVersion > UE4Version.VER_UE4_FTEXT_HISTORY)
                 {
-                    uexp.Strings.Add(new List<string>() { PropertyName + "_1", memoryList.GetStringUE() });
-                    uexp.Strings.Add(new List<string>() { PropertyName + "_2", memoryList.GetStringUE() });
-                    uexp.Strings.Add(new List<string>() { PropertyName + "_3", memoryList.GetStringUE() });
-                    ConsoleMode.Print(uexp.Strings[uexp.Strings.Count - 3][1], ConsoleColor.Magenta);
-                    ConsoleMode.Print(uexp.Strings[uexp.Strings.Count - 2][1], ConsoleColor.Magenta);
-                    ConsoleMode.Print(uexp.Strings[uexp.Strings.Count - 1][1], ConsoleColor.Magenta);
-                }
-                else
-                {
-                    memoryList.ReplaceStringUE(uexp.Strings[uexp.CurrentIndex][1]);
-                    uexp.CurrentIndex++;
-                    memoryList.ReplaceStringUE(uexp.Strings[uexp.CurrentIndex][1]);
-                    uexp.CurrentIndex++;
-                    memoryList.ReplaceStringUE(uexp.Strings[uexp.CurrentIndex][1]);
-                    uexp.CurrentIndex++;
+                    memoryList.Skip(4); //Flag
+                    TextHistoryType ContainText = (TextHistoryType)memoryList.GetByteValue();
+
+                    switch (ContainText)
+                    {
+                        case TextHistoryType.None:
+                            int TextLinesCount = memoryList.GetIntValue();
+                            for (int i = 0; i < TextLinesCount; i++)
+                            {
+                                new ReadStringProperty(memoryList, uexp, PropertyName + "_" + (i + 1), Modify);
+                            }
+                            break;
+
+                        case TextHistoryType.Base:
+                            new ReadStringProperty(memoryList, uexp, PropertyName + "_1", Modify);
+                            new ReadStringProperty(memoryList, uexp, PropertyName + "_2", Modify);
+                            new ReadStringProperty(memoryList, uexp, PropertyName + "_3", Modify);
+                            break;
+                        case TextHistoryType.StringTableEntry:
+                            new ReadStringProperty(memoryList, uexp, PropertyName + "_1", Modify);
+                            new ReadStringProperty(memoryList, uexp, PropertyName + "_2", Modify);
+                            break;
+
+                        default:
+                            throw new Exception("UnKnown 'TextProperty' type: " + ContainText.ToString());
+                    }
                 }
 
             }
             else if (Property == "StructProperty")
             {
+
+
+
                 ConsoleMode.Print("Struct->" + memoryList.GetPosition(), ConsoleColor.DarkCyan);
                 new StructProperty(memoryList, uexp, uexp.UassetData.UseFromStruct, true, Modify);
                 ConsoleMode.Print("EndStruct->" + memoryList.GetPosition(), ConsoleColor.DarkCyan);
@@ -759,6 +766,7 @@ namespace AssetParser
                     {
                         uexp.IsGood = false;
                         ConsoleMode.Print("Bug here.", ConsoleColor.Red);
+                        //Console.ReadLine();
                     }
                 }
             }
@@ -779,13 +787,12 @@ namespace AssetParser
                     {
                         uexp.IsGood = false;
                         ConsoleMode.Print("Bug here.", ConsoleColor.Red);
+                        //Console.ReadLine();
                     }
                     memoryList.Skip(4); //ImplementationPtr Index
                     ConsoleMode.Print("EndMovieSceneEvalTemplatePtr", ConsoleColor.Yellow);
                 }
             }
-
-
             else
             {
                 new StructProperty(memoryList, uexp, uexp.UassetData.UseFromStruct, true, Modify);
@@ -793,4 +800,5 @@ namespace AssetParser
 
         }
     }
+
 }

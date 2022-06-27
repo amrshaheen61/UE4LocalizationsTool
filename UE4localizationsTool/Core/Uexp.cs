@@ -53,6 +53,12 @@ namespace AssetParser
                         _ = new StructProperty(memoryList, this, UassetData.UseFromStruct, false, Modify);
                         ConsoleMode.Print($"-----------End------------", ConsoleColor.Red);
 
+
+                        ConsoleMode.Print($"-----------{n}------------", ConsoleColor.DarkRed);
+                        if (memoryList.EndofFile())
+                        {
+                            continue;
+                        }
                         switch (UassetData.GetExportPropertyName(UassetData.Exports_Directory[n].ExportClass))
                         {
                             case "StringTable":
@@ -67,13 +73,22 @@ namespace AssetParser
                                 _ = new Spreadsheet(memoryList, this, Modify);
                                 break;
                             case "Function":
-                             //   _ = new Function(memoryList, this, Modify);
+                             //   _ = new Function(memoryList, this, n, Modify);
+                                break;
+                            case "REDLocalizeTextData":
+                                _ = new REDLocalizeTextData(memoryList, this, Modify);
+                                break;
+                            case "REDAdvTextData":
+                                _ = new REDAdvTextData(memoryList, this, Modify);
                                 break;
                         }
+                        ConsoleMode.Print($"-----------End------------", ConsoleColor.DarkRed);
+                 
                     }
-                    catch
+                    catch(Exception ex)
                     {
-                        //Skip this export
+                         ConsoleMode.Print("Skip this export:\n"+ ex.ToString(),ConsoleColor.Red);
+                        // Skip this export
                     }
                 }
 

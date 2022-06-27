@@ -12,23 +12,71 @@ namespace UE4localizationsTool
 
 
         public static string commandlines =
-         $"{AppDomain.CurrentDomain.FriendlyName}  export     <(Locres/Uasset) FilePath>\n" +
-         $"{AppDomain.CurrentDomain.FriendlyName}  import     <(txt) FilePath>\n" +
-         $"{AppDomain.CurrentDomain.FriendlyName} -import     <(txt) FilePath>\n" +
-         $"{AppDomain.CurrentDomain.FriendlyName}  exportall  <Folder> <TxtFile>\n" +
-         $"{AppDomain.CurrentDomain.FriendlyName}  importall  <Folder> <TxtFile>\n" +
-         $"{AppDomain.CurrentDomain.FriendlyName} -importall  <Folder> <TxtFile>\n\n" +
+         $"{AppDomain.CurrentDomain.FriendlyName}  export     <(Locres/Uasset) FilePath>  <Options>\n" +
+         $"{AppDomain.CurrentDomain.FriendlyName}  import     <(txt) FilePath>  <Options>\n" +
+         $"{AppDomain.CurrentDomain.FriendlyName} -import     <(txt) FilePath>  <Options>\n" +
+         $"{AppDomain.CurrentDomain.FriendlyName}  exportall  <Folder> <TxtFile> <Options>\n" +
+         $"{AppDomain.CurrentDomain.FriendlyName}  importall  <Folder> <TxtFile>  <Options>\n" +
+         $"{AppDomain.CurrentDomain.FriendlyName} -importall  <Folder> <TxtFile>  <Options>\n\n" +
           "- for import without rename file be careful with this command.\n\n" +
 
-          "To use last filter you applied before in GUI, add (TRUE) after command line\n" +
+          "Options:\n" +
+          "To use last filter you applied before in GUI, add (-f \\ -filter) after command line\n" +
           "filter will apply only in name table (Remember to apply the same filter when importing)\n\n" +
+
+          "To export file without including the names use (-nn \\ -NoName)" +
+          "\n(Remember to use this command when importing)\n\n" +
+
           "Examples:\n" +
          $"{AppDomain.CurrentDomain.FriendlyName} export Actions.uasset\n" +
          $"{AppDomain.CurrentDomain.FriendlyName} import Actions.uasset.txt\n" +
-         $"{AppDomain.CurrentDomain.FriendlyName} exportall Actions\n" +
-         $"{AppDomain.CurrentDomain.FriendlyName} exportall Actions True\n" +
-         $"{AppDomain.CurrentDomain.FriendlyName} importall Actions\n" +
-         $"{AppDomain.CurrentDomain.FriendlyName} importall Actions True";
+         $"{AppDomain.CurrentDomain.FriendlyName} exportall Actions text.txt\n" +
+         $"{AppDomain.CurrentDomain.FriendlyName} importall Actions text.txt\n";
+
+        public static (bool UseFilter, bool NoName) GetArgs(int Index, string[] args)
+        {
+            bool usefilter = false;
+            bool noname = false;
+
+            for (int n = Index; n < args.Length; n++)
+            {
+                switch (args[n].ToLower())
+                {
+                    case "-f":
+                    case "-filter":
+                        usefilter = true;
+                        break;
+                    case "-nn":
+                    case "-noname":
+                        noname = true;
+                        break;
+                    default:
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.WriteLine("Invalid command: " + args[n]);
+                        Console.ForegroundColor = ConsoleColor.White;
+                        break;
+                }
+            }
+            return (usefilter, noname);
+        }
+
+
+        public static void CheckArges(int Index, string[] args)
+        {
+            for (int n = 0; n < Index; n++)
+            {
+                switch (args[n].ToLower())
+                {
+                    case "-f":
+                    case "-filter":
+                        throw new Exception("Invalid number of arguments.\n\n" + commandlines);
+                    case "-nn":
+                    case "-noname":
+                        throw new Exception("Invalid number of arguments.\n\n" + commandlines);
+                }
+            }
+        }
+
 
 
         [STAThread]
@@ -41,10 +89,11 @@ namespace UE4localizationsTool
                 AttachConsole(ATTACH_PARENT_PROCESS);
                 Console.SetCursorPosition(0, Console.CursorTop + 1);
                 bool UseFilter = false;
+                bool NoName = false;
                 if (args.Length < 2)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Invalid number of arguments.\n" + commandlines);
+                    Console.WriteLine("Invalid number of arguments.\n\n" + commandlines);
                     Console.ForegroundColor = ConsoleColor.White;
                     return;
                 }
@@ -55,25 +104,18 @@ namespace UE4localizationsTool
                     {
                         if (args.Length < 3)
                         {
-                            Console.ForegroundColor = ConsoleColor.Red;
-                            Console.WriteLine("Invalid number of arguments.\n" + commandlines);
-                            Console.ForegroundColor = ConsoleColor.White;
+                            throw new Exception("Invalid number of arguments.\n\n" + commandlines);
+                        }
 
-                            return;
-                        }
-                        if (args.Length > 3)
-                        {
-                            bool.TryParse(args[3], out UseFilter);
-                        }
-                        new Commads(args[0], args[1] + "*" + args[2], UseFilter);
+                        CheckArges(3, args);
+                        (UseFilter, NoName) = GetArgs(3, args);
+                        new Commads(args[0], args[1] + "*" + args[2], UseFilter, NoName);
                     }
                     else
                     {
-                        if (args.Length > 2)
-                        {
-                            bool.TryParse(args[2], out UseFilter);
-                        }
-                        new Commads(args[0], args[1], UseFilter);
+                        CheckArges(2, args);
+                        (UseFilter, NoName) = GetArgs(2, args);
+                        new Commads(args[0], args[1], UseFilter, NoName);
                     }
 
                 }
