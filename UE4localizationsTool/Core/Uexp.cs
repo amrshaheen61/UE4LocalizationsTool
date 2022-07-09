@@ -11,6 +11,7 @@ namespace AssetParser
         public List<List<string>> Strings;  //[Text id,Text Value,...]
         private int _CurrentIndex;
         public bool IsGood = true;
+        public int ExportIndex;
         public int CurrentIndex
         {
             get
@@ -41,7 +42,7 @@ namespace AssetParser
             for (int n = 0; n < UassetData.Exports_Directory.Count; n++)
             {
 
-
+                ExportIndex = n;
 
                 using (MemoryList memoryList = new MemoryList(UassetData.Exports_Directory[n].ExportData))
                 {
@@ -54,32 +55,36 @@ namespace AssetParser
                         ConsoleMode.Print($"-----------End------------", ConsoleColor.Red);
 
 
-                        ConsoleMode.Print($"-----------{n}------------", ConsoleColor.DarkRed);
                         if (memoryList.EndofFile())
                         {
                             continue;
                         }
+                        
+                        ConsoleMode.Print($"-----------{n}------------", ConsoleColor.DarkRed);
                         switch (UassetData.GetExportPropertyName(UassetData.Exports_Directory[n].ExportClass))
                         {
                             case "StringTable":
-                                _ = new StringTable(memoryList, this, Modify);
+                                new StringTable(memoryList, this, Modify);
                                 break;
                             case "DataTable":
 
-                                _ = new DataTable(memoryList, this, Modify);
+                                new DataTable(memoryList, this, Modify);
                                 break;
                             case "Spreadsheet":
 
-                                _ = new Spreadsheet(memoryList, this, Modify);
+                                new Spreadsheet(memoryList, this, Modify);
                                 break;
                             case "Function":
-                             //   _ = new Function(memoryList, this, n, Modify);
+                             // new Function(memoryList, this, Modify);
                                 break;
                             case "REDLocalizeTextData":
-                                _ = new REDLocalizeTextData(memoryList, this, Modify);
+                                new REDLocalizeTextData(memoryList, this, Modify);
                                 break;
                             case "REDAdvTextData":
-                                _ = new REDAdvTextData(memoryList, this, Modify);
+                                new REDAdvTextData(memoryList, this, Modify);
+                                break;
+                            case "REDLibraryTextData":
+                                new REDLibraryTextData(memoryList, this, Modify);
                                 break;
                         }
                         ConsoleMode.Print($"-----------End------------", ConsoleColor.DarkRed);

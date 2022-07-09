@@ -15,6 +15,10 @@ namespace AssetParser
             int ValuesPosition = memoryList.GetPosition();
             int UncompressedSize = memoryList.GetIntValue();
             int CompressedSize = memoryList.GetIntValue();
+            if (UncompressedSize != CompressedSize)
+            {
+                throw new Exception("Can't Parse this file.");
+            }
             int StartPosition = memoryList.GetIntValue();// Uasset+Position 
             memoryList.Skip(4);
             StartPosition = memoryList.GetPosition();
@@ -26,7 +30,7 @@ namespace AssetParser
             {
                 if (!Modify)
                 {
-                    uexp.Strings.Add(new List<string>() { String[n], String[n + 1] });
+                    uexp.Strings.Add(new List<string>() { String[n],  String[n + 1] });
                 }
                 else
                 {

@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 
 namespace UE4localizationsTool
 {
-    public class Commads
+    public class Commands
     {
         private List<List<string>> Strings;
         private bool usefilter = false;
@@ -16,7 +16,7 @@ namespace UE4localizationsTool
         private bool RegularExpression = false;
         private bool ReverseMode = false;
         private List<string> ArrayValues;
-        public Commads(string Options, string SourcePath, bool UseFilter = false, bool NoNames = false)
+        public Commands(string Options, string SourcePath, bool UseFilter = false, bool NoNames = false)
         {
             usefilter = UseFilter;
             nonames = NoNames;
@@ -361,9 +361,6 @@ namespace UE4localizationsTool
                     Console.ForegroundColor = ConsoleColor.Yellow;
                     Console.WriteLine("Can't parse it, the tool will skip this file.\n" + EX.Message);
                     Console.ForegroundColor = ConsoleColor.White;
-                    if (Strings.Count != 0)
-                        Strings.RemoveAt(Strings.Count - 1);
-
                     continue;
                 }
                 Console.ForegroundColor = ConsoleColor.Green;

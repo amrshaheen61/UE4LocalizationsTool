@@ -77,8 +77,8 @@ namespace AssetParser
                             ConsoleMode.Print("Mapindex-> " + Mapindex, ConsoleColor.Blue);
                             ConsoleMode.Print("MapKey-> " + MapKey, ConsoleColor.Blue);
                             ConsoleMode.Print("MapValue-> " + MapValue, ConsoleColor.Blue);
-                            PropertyParser(PropertyName, MapKey, -1, MapData, uexp, Modify);
-                            PropertyParser(PropertyName, MapValue, -1, MapData, uexp, Modify);
+                            PropertyParser(ref PropertyName, MapKey, -1, MapData, uexp, Modify);
+                            PropertyParser(ref PropertyName, MapValue, -1, MapData, uexp, Modify);
                         }
                     }
                     catch
@@ -137,7 +137,7 @@ namespace AssetParser
 
                             for (int Arrayindex = 0; Arrayindex < ArrayCount; Arrayindex++)
                             {
-                                PropertyParser(PropertyName, StructType, -1, ArrayData, uexp, Modify);
+                                PropertyParser(ref PropertyName, StructType, -1, ArrayData, uexp, Modify);
                             }
 
 
@@ -150,7 +150,7 @@ namespace AssetParser
                         {
                             for (int Arrayindex = 0; Arrayindex < ArrayCount; Arrayindex++)
                             {
-                                PropertyParser(PropertyName, ArrayType, -1, ArrayData, uexp, Modify);
+                                PropertyParser(ref PropertyName, ArrayType, -1, ArrayData, uexp, Modify);
                             }
                         }
                     }
@@ -184,7 +184,7 @@ namespace AssetParser
 
                     if (StructType == "MovieSceneEvalTemplatePtr" || StructType == "MovieSceneTrackImplementationPtr")
                     {
-                        PropertyParser(PropertyName, StructType, PropertyLength, memoryList, uexp, Modify);
+                        PropertyParser(ref PropertyName, StructType, PropertyLength, memoryList, uexp, Modify);
                         continue;
                     }
 
@@ -271,7 +271,16 @@ namespace AssetParser
                     {
                         try
                         {
-                            new StructProperty(StructData, uexp, true, false, Modify);
+
+                            if (StructType == "MovieSceneEventParameters")
+                            {
+                                PropertyParser(ref PropertyName, StructType, PropertyLength, StructData, uexp, Modify);
+                            }
+                            else
+                            {
+
+                                new StructProperty(StructData, uexp, true, false, Modify);
+                            }
                         }
                         catch
                         {
@@ -419,7 +428,7 @@ namespace AssetParser
                     int SetCount = SetData.GetIntValue();
                     for (int n = 0; n < SetCount; n++)
                     {
-                        PropertyParser(PropertyName, SetKey, -1, SetData, uexp, Modify);
+                        PropertyParser(ref PropertyName, SetKey, -1, SetData, uexp, Modify);
                     }
 
                 }
@@ -431,7 +440,7 @@ namespace AssetParser
                     }
                     if (PropertyLength == -1)
                     {
-                        PropertyParser(PropertyName, Property, PropertyLength, memoryList, uexp, Modify);
+                        PropertyParser(ref PropertyName, Property, PropertyLength, memoryList, uexp, Modify);
                         continue;
                     }
 
@@ -439,7 +448,7 @@ namespace AssetParser
                     MemoryList TextData = new MemoryList(memoryList.GetBytes(PropertyLength));
                     try
                     {
-                        PropertyParser(PropertyName, Property, PropertyLength, TextData, uexp, Modify);
+                        PropertyParser(ref PropertyName, Property, PropertyLength, TextData, uexp, Modify);
                         if (Modify)
                         {
                             memoryList.ReplaceBytes(PropertyLength, TextData.ToArray(), false, TextDataPosition);
@@ -459,7 +468,7 @@ namespace AssetParser
         }
 
 
-        private void PropertyParser(string PropertyName, string Property, int PropertyLength, MemoryList memoryList, Uexp uexp, bool Modify = false)
+        private void PropertyParser(ref string PropertyName, string Property, int PropertyLength, MemoryList memoryList, Uexp uexp, bool Modify = false)
         {
             if (Property == "Int8Property")
             {
@@ -541,7 +550,8 @@ namespace AssetParser
             }
             else if (Property == "EnumProperty")
             {
-                memoryList.Skip(8);
+                PropertyName = uexp.UassetData.GetPropertyName(memoryList.GetIntValue());
+                memoryList.Skip(4);//null or something
             }
             else if (Property == "UserDefinedEnum")
             {
@@ -577,8 +587,8 @@ namespace AssetParser
                         ConsoleMode.Print("Mapindex2-> " + Mapindex, ConsoleColor.DarkBlue);
                         ConsoleMode.Print("MapKey2-> " + MapKey, ConsoleColor.DarkBlue);
                         ConsoleMode.Print("MapValue2-> " + MapValue, ConsoleColor.DarkBlue);
-                        PropertyParser(PropertyName, MapKey, -1, memoryList, uexp, Modify);
-                        PropertyParser(PropertyName, MapValue, -1, memoryList, uexp, Modify);
+                        PropertyParser(ref PropertyName, MapKey, -1, memoryList, uexp, Modify);
+                        PropertyParser(ref PropertyName, MapValue, -1, memoryList, uexp, Modify);
 
                     }
                 }
@@ -642,7 +652,7 @@ namespace AssetParser
                     {
                         for (int Arrayindex = 0; Arrayindex < ArrayCount; Arrayindex++)
                         {
-                            PropertyParser(PropertyName, StructType, -1, StructData, uexp, Modify);
+                            PropertyParser(ref PropertyName, StructType, -1, StructData, uexp, Modify);
                         }
                     }
                     catch
@@ -663,7 +673,7 @@ namespace AssetParser
                 {
                     for (int Arrayindex = 0; Arrayindex < ArrayCount; Arrayindex++)
                     {
-                        PropertyParser(PropertyName, ArrayType, -1, memoryList, uexp, Modify);
+                        PropertyParser(ref PropertyName, ArrayType, -1, memoryList, uexp, Modify);
                     }
                 }
 
@@ -737,7 +747,7 @@ namespace AssetParser
                 int SetCount = memoryList.GetIntValue();
                 for (int n = 0; n < SetCount; n++)
                 {
-                    PropertyParser(PropertyName, SetKey, -1, memoryList, uexp, Modify);
+                    PropertyParser(ref PropertyName, SetKey, -1, memoryList, uexp, Modify);
                 }
 
             }
@@ -791,6 +801,55 @@ namespace AssetParser
                     }
                     memoryList.Skip(4); //ImplementationPtr Index
                     ConsoleMode.Print("EndMovieSceneEvalTemplatePtr", ConsoleColor.Yellow);
+                }
+            }
+            else if (Property == "MovieSceneEventParameters")
+            {
+                ConsoleMode.Print("MovieSceneEventParameters->" + PropertyLength);
+
+                memoryList.GetInt64Value(); //unknown
+                memoryList.GetStringUE();
+                int ValuePosition = memoryList.GetPosition();
+                int Value = memoryList.GetIntValue();
+                memoryList.Skip(4);
+                int EventBlockPosition = memoryList.GetPosition();
+                int EventSize = memoryList.GetIntValue();
+                MemoryList EventBlock = new MemoryList(memoryList.GetBytes(EventSize));
+
+
+                while (EventBlock.GetPosition() < EventBlock.GetSize())
+                {
+                    string Name = EventBlock.GetStringUE();
+                    if (Name == "None")
+                    {
+                        break;
+                    }
+
+                    string PropertyType = EventBlock.GetStringUE();
+                    int SizePosition = EventBlock.GetPosition();
+                    int PropertySize = EventBlock.GetIntValue();
+                    EventBlock.Skip(4);
+                    EventBlock.Skip(1);  //null
+                    int BlockPosition = EventBlock.GetPosition();
+                    MemoryList memory = new MemoryList(EventBlock.GetBytes(PropertySize));
+
+                    PropertyParser(ref Name, PropertyType, PropertyLength, memory, uexp, Modify);
+                    if (Modify)
+                    {
+                        EventBlock.SetIntValue(memory.GetSize(), false, SizePosition);
+                        EventBlock.Seek(BlockPosition);
+                        EventBlock.ReplaceBytes(PropertySize, memory.ToArray(), true);
+                    }
+                }
+
+
+                if (Modify)
+                {
+                    memoryList.Seek(ValuePosition);
+                    memoryList.SetIntValue(Value + (EventBlock.GetSize() - EventSize));
+                    memoryList.Seek(EventBlockPosition);
+                    memoryList.SetIntValue(EventBlock.GetSize());
+                    memoryList.ReplaceBytes(EventSize, EventBlock.ToArray(), true);
                 }
             }
             else

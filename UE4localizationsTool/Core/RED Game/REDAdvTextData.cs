@@ -22,6 +22,7 @@ namespace AssetParser
             memoryList.Skip(12); //Unknown
             memoryList.GetIntValue(); //Start Data offset
             memoryList.Skip(8); //Unknown2
+            int ValuesPosition = memoryList.GetPosition();
             UncompressedSize = memoryList.GetIntValue();
             CompressedSize = memoryList.GetIntValue();
             if (UncompressedSize != CompressedSize)
@@ -145,6 +146,13 @@ namespace AssetParser
 
                 memoryList.SetSize(StartOffset);
                 memoryList.Add(ATFBlock.ToArray());
+
+
+                memoryList.Seek(ValuesPosition);
+                memoryList.SetIntValue(ATFBlock.GetSize());
+                memoryList.SetIntValue(ATFBlock.GetSize());
+
+
             }
 
 

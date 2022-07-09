@@ -109,13 +109,13 @@ namespace UE4localizationsTool
 
                         CheckArges(3, args);
                         (UseFilter, NoName) = GetArgs(3, args);
-                        new Commads(args[0], args[1] + "*" + args[2], UseFilter, NoName);
+                        new Commands(args[0], args[1] + "*" + args[2], UseFilter, NoName);
                     }
                     else
                     {
                         CheckArges(2, args);
                         (UseFilter, NoName) = GetArgs(2, args);
-                        new Commads(args[0], args[1], UseFilter, NoName);
+                        new Commands(args[0], args[1], UseFilter, NoName);
                     }
 
                 }
