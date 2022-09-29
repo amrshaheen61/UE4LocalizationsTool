@@ -65,6 +65,7 @@ namespace UE4localizationsTool
             this.rightToLeftToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.commandLinesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.donateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.TextName = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -82,7 +83,6 @@ namespace UE4localizationsTool
             this.pasteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.StateLabel = new System.Windows.Forms.Label();
             this.DataCount = new System.Windows.Forms.Label();
-            this.donateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SearchPanal.SuspendLayout();
@@ -98,6 +98,7 @@ namespace UE4localizationsTool
             this.aboutToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Padding = new System.Windows.Forms.Padding(0);
             this.menuStrip1.Size = new System.Drawing.Size(689, 24);
             this.menuStrip1.TabIndex = 1;
             this.menuStrip1.Text = "menuStrip1";
@@ -109,7 +110,7 @@ namespace UE4localizationsTool
             this.saveToolStripMenuItem,
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 24);
             this.fileToolStripMenuItem.Text = "File";
             // 
             // OpenFile
@@ -155,7 +156,7 @@ namespace UE4localizationsTool
             this.fontToolStripMenuItem,
             this.rightToLeftToolStripMenuItem});
             this.editToolStripMenuItem.Name = "editToolStripMenuItem";
-            this.editToolStripMenuItem.Size = new System.Drawing.Size(41, 20);
+            this.editToolStripMenuItem.Size = new System.Drawing.Size(41, 24);
             this.editToolStripMenuItem.Text = "Tool";
             // 
             // exportAllTextToolStripMenuItem
@@ -368,7 +369,7 @@ namespace UE4localizationsTool
             this.donateToolStripMenuItem,
             this.aboutToolStripMenuItem1});
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(52, 20);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(52, 24);
             this.aboutToolStripMenuItem.Text = "About";
             // 
             // commandLinesToolStripMenuItem
@@ -377,6 +378,13 @@ namespace UE4localizationsTool
             this.commandLinesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.commandLinesToolStripMenuItem.Text = "Command Lines";
             this.commandLinesToolStripMenuItem.Click += new System.EventHandler(this.commandLinesToolStripMenuItem_Click);
+            // 
+            // donateToolStripMenuItem
+            // 
+            this.donateToolStripMenuItem.Name = "donateToolStripMenuItem";
+            this.donateToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.donateToolStripMenuItem.Text = "Donate";
+            this.donateToolStripMenuItem.Click += new System.EventHandler(this.donateToolStripMenuItem_Click);
             // 
             // aboutToolStripMenuItem1
             // 
@@ -539,7 +547,7 @@ namespace UE4localizationsTool
             // StateLabel
             // 
             this.StateLabel.AutoSize = true;
-            this.StateLabel.Location = new System.Drawing.Point(171, 10);
+            this.StateLabel.Location = new System.Drawing.Point(143, 5);
             this.StateLabel.Name = "StateLabel";
             this.StateLabel.Size = new System.Drawing.Size(64, 13);
             this.StateLabel.TabIndex = 3;
@@ -551,20 +559,13 @@ namespace UE4localizationsTool
             this.DataCount.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.DataCount.AutoSize = true;
             this.DataCount.ImageAlign = System.Drawing.ContentAlignment.BottomCenter;
-            this.DataCount.Location = new System.Drawing.Point(658, 9);
+            this.DataCount.Location = new System.Drawing.Point(658, 5);
             this.DataCount.Name = "DataCount";
             this.DataCount.Size = new System.Drawing.Size(25, 13);
             this.DataCount.TabIndex = 5;
             this.DataCount.Text = "------";
             this.DataCount.TextAlign = System.Drawing.ContentAlignment.TopRight;
             this.DataCount.TextChanged += new System.EventHandler(this.DataCount_TextChanged);
-            // 
-            // donateToolStripMenuItem
-            // 
-            this.donateToolStripMenuItem.Name = "donateToolStripMenuItem";
-            this.donateToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.donateToolStripMenuItem.Text = "Donate";
-            this.donateToolStripMenuItem.Click += new System.EventHandler(this.donateToolStripMenuItem_Click);
             // 
             // FrmMain
             // 
