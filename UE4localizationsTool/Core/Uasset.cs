@@ -11,11 +11,6 @@ namespace AssetParser
     public class Uasset
     {
 
-
-
-
-
-
         public struct ImportsDirectory
         {
 
@@ -84,6 +79,16 @@ namespace AssetParser
         public bool IsNotUseUexp;
         public bool UseFromStruct = true;
         public bool AutoVersion=false;
+
+
+        public int Header_Size;
+        public int Name_Directory_Size;
+        public int Hash_Directory_offset;
+        public int Hash_Directory_Size;
+        public int Bundles_Offset;
+        public int GraphData_Offset;
+        public int GraphData_Size;
+        public bool IOFile = false;
         public Uasset(string FilePath)
         {
 
@@ -93,6 +98,58 @@ namespace AssetParser
                 throw new Exception("Uasset file is not exists!");
             }
             UassetFile = new MemoryList(FilePath);
+
+
+            if (UassetFile.GetUIntValue(false) != 0x9E2A83C1u)
+            {
+
+                //Todo 
+                EngineVersion = UE4Version.VER_UE4_16; //?!
+                IsNotUseUexp =true;
+                IOFile = true;
+                UassetFile.Skip(16+4);
+                Header_Size = UassetFile.GetIntValue(); 
+                Name_Directory_Offset = UassetFile.GetIntValue();
+                Name_Directory_Size  = UassetFile.GetIntValue();
+                Hash_Directory_offset = UassetFile.GetIntValue();
+                Hash_Directory_Size = UassetFile.GetIntValue();
+                Imports_Directory_Offset=UassetFile.GetIntValue();
+                Exports_Directory_Offset = UassetFile.GetIntValue();
+                Bundles_Offset = UassetFile.GetIntValue();
+                GraphData_Offset = UassetFile.GetIntValue();
+                GraphData_Size = UassetFile.GetIntValue();
+
+
+                File_Directory_Offset = GraphData_Offset + GraphData_Size;
+                Number_of_Names = Hash_Directory_Size / 8;
+                Number_Of_Exports = (Bundles_Offset - Exports_Directory_Offset) / 72 /*Block Size*/;
+                Number_Of_Imports = (Exports_Directory_Offset - Imports_Directory_Offset) / 8 /*Block Size*/;
+
+
+                //seek to position
+                UassetFile.Seek(Name_Directory_Offset, SeekOrigin.Begin);
+                //Get Names
+                NAMES_DIRECTORY = new List<string>();
+                for (int n = 0; n < Number_of_Names; n++)
+                {
+                    NAMES_DIRECTORY.Add(UassetFile.GetStringUES());
+                }
+
+
+                //UassetFile.Seek(Hash_Directory_offset, SeekOrigin.Begin);
+            
+            
+
+                //seek to position
+                UassetFile.Seek(Exports_Directory_Offset, SeekOrigin.Begin);
+                //Get Exports
+                Exports_Directory = new List<ExportsDirectory>();
+                ExportReadOrEditIO();
+
+                    return;
+            }
+
+
 
             if (UassetFile.GetIntValue(false, UassetFile.GetSize() - 4) != -1641380927)
             {
@@ -110,10 +167,7 @@ namespace AssetParser
 
 
 
-            if (UassetFile.GetIntValue() != -1641380927)
-            {
-                throw new Exception($"This file \'{FilePath}\' is not uasset file!");
-            }
+
 
 
             LegacyFileVersion = UassetFile.GetIntValue();
@@ -341,6 +395,9 @@ namespace AssetParser
 
         public void EditName(string NewStr, int Index)
         {
+
+            if (IOFile) return;
+
             NewSize = 0;
             int OldSize = UassetFile.GetSize();
             UassetFile.Seek(Name_Directory_Offset, SeekOrigin.Begin);
@@ -443,6 +500,12 @@ namespace AssetParser
 
         public void ExportReadOrEdit(bool Modify = false)
         {
+            if (IOFile)
+            {
+                ExportReadOrEditIO(Modify);
+                return;
+            }
+
             int NextExportPosition = File_Directory_Offset;
             //seek to position
             UassetFile.Seek(Exports_Directory_Offset, SeekOrigin.Begin);
@@ -547,6 +610,69 @@ namespace AssetParser
                 }
             }
         }
+
+
+        public void ExportReadOrEditIO(bool Modify=false)
+        {
+            //seek to position
+            UassetFile.Seek(Exports_Directory_Offset, SeekOrigin.Begin);
+            int NextExportPosition = File_Directory_Offset;
+
+            for (int n = 0; n < Number_Of_Exports; n++)
+            {
+                int Start = UassetFile.GetPosition();
+                ExportsDirectory ExportsDirectory = new ExportsDirectory();
+                ExportsDirectory.ExportStart = File_Directory_Offset;
+                if (!Modify)
+                {
+                    UassetFile.Skip(8);
+                    ExportsDirectory.ExportLength = (int)UassetFile.GetInt64Value();
+                }
+                else
+                {
+                    UassetFile.SetInt64Value((long)(Header_Size+(NextExportPosition-File_Directory_Offset)));
+                    UassetFile.SetInt64Value((long)Exports_Directory[n].ExportData.Count);
+                }
+                ExportsDirectory.ExportName = UassetFile.GetIntValue();
+                UassetFile.Skip(4);
+                UassetFile.Skip(8);
+
+                //Wrong way
+                ulong Class = UassetFile.GetUInt64Value();
+
+
+                if (Class == 0x71E24A29987BD1EDu)
+                {
+                    ExportsDirectory.ExportClass = NAMES_DIRECTORY.IndexOf("DataTable");
+                }
+                else if (Class == 0x70289FB93F770603u)
+                {
+                    ExportsDirectory.ExportClass = NAMES_DIRECTORY.IndexOf("StringTable");
+                }
+                else if (Class == 0x574F27AEC05072D0u)
+                {
+                    ExportsDirectory.ExportClass = NAMES_DIRECTORY.IndexOf("Function");
+                }
+                else
+                {
+                    ExportsDirectory.ExportClass = NAMES_DIRECTORY.IndexOf("StructProperty");
+                }
+
+              
+
+                if (!Modify)
+                {
+                    ExportsDirectory.ExportData = new List<byte>();
+                    ExportsDirectory.ExportData.AddRange(UassetFile.GetBytes(ExportsDirectory.ExportLength, false, NextExportPosition));
+                    Exports_Directory.Add(ExportsDirectory);
+                }
+           
+                NextExportPosition += ExportsDirectory.ExportLength;
+                UassetFile.Seek(Start + 72);
+            }
+        }
+
+
 
     }
 }

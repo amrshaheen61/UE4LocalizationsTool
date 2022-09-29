@@ -205,7 +205,7 @@ namespace UE4localizationsTool
                         Souce = ApplyFilter(Souce);
                     }
 
-                    Strings.Add(new List<string>() { "[~PATHFile~]", "[PATH]" + Souce.Count + "*" + LanguageFiles[i].Replace(FolderPath, "") + "[PATH]", "[~PATHFile~]" });
+                    Strings.Add(new List<string>() { "[~PATHFile~]", "[PATH]" + Souce.Count + "*" + Path.GetFullPath(LanguageFiles[i]).Replace(Path.GetFullPath(FolderPath), "") + "[PATH]", "[~PATHFile~]" });
                     Strings.AddRange(Souce);
                 }
                 catch (Exception EX)

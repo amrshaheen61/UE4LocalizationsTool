@@ -3,7 +3,8 @@ using System;
 using System.Collections.Generic;
 
 namespace AssetParser
-{
+{ 
+  
     public class Uexp
     {
 
@@ -49,17 +50,23 @@ namespace AssetParser
                     try
                     {
                         memoryList.Seek(0); //Seek to beginning of Block
+                        ConsoleMode.Print(UassetData.GetExportPropertyName(UassetData.Exports_Directory[n].ExportClass), ConsoleColor.DarkRed);
+                       if (memoryList.GetByteValue(false)==0 && UassetData.IOFile)
+                        {
+                            memoryList.Skip(2);
+                            goto Start;
+                        }
 
-                        ConsoleMode.Print($"-----------{n}------------", ConsoleColor.Red);
-                        _ = new StructProperty(memoryList, this, UassetData.UseFromStruct, false, Modify);
-                        ConsoleMode.Print($"-----------End------------", ConsoleColor.Red);
 
-
+                            ConsoleMode.Print($"-----------{n}------------", ConsoleColor.Red);
+                            _ = new StructProperty(memoryList, this, UassetData.UseFromStruct, false, Modify);
+                            ConsoleMode.Print($"-----------End------------", ConsoleColor.Red);
+                   
                         if (memoryList.EndofFile())
                         {
                             continue;
                         }
-                        
+                        Start:
                         ConsoleMode.Print($"-----------{n}------------", ConsoleColor.DarkRed);
                         switch (UassetData.GetExportPropertyName(UassetData.Exports_Directory[n].ExportClass))
                         {
@@ -67,15 +74,29 @@ namespace AssetParser
                                 new StringTable(memoryList, this, Modify);
                                 break;
                             case "DataTable":
-
-                                new DataTable(memoryList, this, Modify);
+                                if (memoryList.GetIntValue(false)!=-5 && !UassetData.IOFile) 
+                                {
+                                    new DataTable(memoryList, this, Modify);
+                                }
+                                else
+                                {
+                                    //For not effect in original file structure
+                                    if (memoryList.GetIntValue(false) != -5)
+                                    {
+                                        new DataTable(memoryList, this, Modify);
+                                    }   
+                                    else  
+                                    {
+                                        new ScarletNexus(memoryList, this, Modify);
+                                    }
+                                }
                                 break;
                             case "Spreadsheet":
 
                                 new Spreadsheet(memoryList, this, Modify);
                                 break;
                             case "Function":
-                             // new Function(memoryList, this, Modify);
+                                new Function(memoryList, this, Modify);
                                 break;
                             case "REDLocalizeTextData":
                                 new REDLocalizeTextData(memoryList, this, Modify);
@@ -83,16 +104,14 @@ namespace AssetParser
                             case "REDAdvTextData":
                                 new REDAdvTextData(memoryList, this, Modify);
                                 break;
-                            case "REDLibraryTextData":
-                                new REDLibraryTextData(memoryList, this, Modify);
-                                break;
+
                         }
                         ConsoleMode.Print($"-----------End------------", ConsoleColor.DarkRed);
-                 
                     }
                     catch(Exception ex)
                     {
                          ConsoleMode.Print("Skip this export:\n"+ ex.ToString(),ConsoleColor.Red);
+                         //Console.ReadLine();
                         // Skip this export
                     }
                 }
@@ -116,12 +135,12 @@ namespace AssetParser
             if (UassetData.IsNotUseUexp)
             {
                 MakeBlocks();
-                UassetData.UassetFile.WriteFile(System.IO.Path.ChangeExtension(FilPath, ".uasset"));
+                UassetData.UassetFile.WriteFile(System.IO.Path.ChangeExtension(FilPath, FilPath.ToLower().EndsWith(".umap")? ".umap" : ".uasset"));
             }
             else
             {
                 MemoryList UexpData = MakeBlocks();
-                UassetData.UassetFile.WriteFile(System.IO.Path.ChangeExtension(FilPath, ".uasset"));
+                UassetData.UassetFile.WriteFile(System.IO.Path.ChangeExtension(FilPath, FilPath.ToLower().EndsWith(".umap") ? ".umap" : ".uasset"));
                 UexpData.WriteFile(System.IO.Path.ChangeExtension(FilPath, ".uexp"));
             }
         }
@@ -136,7 +155,11 @@ namespace AssetParser
                 {
                     UassetData.UassetFile.MemoryListData.AddRange(x.ExportData);
                 });
-                UassetData.UassetFile.Add((uint)2653586369);
+
+                if (!UassetData.IOFile)
+                {
+                    UassetData.UassetFile.Add((uint)2653586369);
+                }
                 return UassetData.UassetFile;
             }
             else

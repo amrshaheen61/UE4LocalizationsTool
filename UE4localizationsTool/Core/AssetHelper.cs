@@ -11,7 +11,7 @@ namespace AssetParser
 
         public static string GetPropertyName(this Uasset SourceFile, int Index)
         {
-            if (SourceFile.NAMES_DIRECTORY.Count > Index)
+            if (SourceFile.NAMES_DIRECTORY.Count > Index && Index>0)
             {
                 return SourceFile.NAMES_DIRECTORY[Index];
             }
@@ -20,6 +20,12 @@ namespace AssetParser
 
         public static string GetExportPropertyName(this Uasset SourceFile, int Index)
         {
+            if (SourceFile.IOFile)
+            {
+               return  GetPropertyName(SourceFile,Index);
+            }
+
+
             if (Index > 0)
             {
                 return GetPropertyName(SourceFile, SourceFile.Imports_Directory[Index].NameID);
@@ -62,7 +68,41 @@ namespace AssetParser
             return Stringvalue.TrimEnd('\0');
         }
 
+        private static int GetRequiredUtf16Padding(uint NameData)
+        {
+            return (int)(NameData & 1u);
+        }
+        private static bool IsUtf16(byte NameData)
+        {
+            return (NameData & 0x80u) != 0;
+        }
+        public static string GetStringUES(this MemoryList memoryList)
+        {
+            string Stringvalue = "";
+            byte[] Data = new byte[2];
+            Data[0] = memoryList.GetByteValue();
+            Data[1] = memoryList.GetByteValue();
 
+            int len= (int)((Data[0] & 0x7Fu) << 8) + Data[1];
+
+            if (IsUtf16(Data[0]))
+            {
+                if (memoryList.GetByteValue(false)==0) //because "GetRequiredUtf16Padding" not work right :/
+                {
+                    memoryList.Skip(1);
+                }
+                Stringvalue = memoryList.GetStringValue(len*2,true,-1,Encoding.Unicode);
+            }
+            else
+            {
+                Stringvalue= memoryList.GetStringValue(len);
+            }
+            Stringvalue = Stringvalue.Replace("\r\n", "<cf>");
+            Stringvalue = Stringvalue.Replace("\r", "<cr>");
+            Stringvalue = Stringvalue.Replace("\n", "<lf>");
+
+            return Stringvalue.TrimEnd('\0');
+        }
         public static string GetStringUE(this MemoryList memoryList,Encoding encoding)
         {
             string Stringvalue = memoryList.GetStringValueN(true,-1, encoding);

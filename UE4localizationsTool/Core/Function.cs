@@ -13,16 +13,17 @@ namespace AssetParser
         int ScriptBytecodeSize;
         int scriptStorageSize;
         List<int> offsetList;
+        /// <summary>
+        /// [old] [new] [size] 
+        /// </summary>
         List<List<int>> stringOffset;
-        int Index;
         int NewSize;
-        public Function(MemoryList memoryList, Uexp Uexp, int index, bool modify = false)
+        public Function(MemoryList memoryList, Uexp Uexp, bool modify = false)
         {
             uexp = Uexp;
             Modify = modify;
             offsetList = new List<int>();
             stringOffset = new List<List<int>>();
-            Index = index;
             NewSize = 0;
             if (uexp.UassetData.EngineVersion < UE4Version.VER_UE4_16)
             {
@@ -33,13 +34,16 @@ namespace AssetParser
 
             int numIndexEntries = memoryList.GetIntValue();
 
+            // if (numIndexEntries!=0) return;
+            List<int> IndexEntries = new List<int>();
             for (int i = 0; i < numIndexEntries; i++)
             {
-                memoryList.Skip(4);
+                int ExportIndex  = memoryList.GetIntValue();
+                IndexEntries.Add(ExportIndex);
             }
-
+            
             //TODO :(
-            if (uexp.UassetData.Exports_Directory[index].Value >= 4 || uexp.UassetData.EngineVersion >= UE4Version.VER_UE4_ADDED_PACKAGE_OWNER)
+            if (uexp.UassetData.Exports_Directory[Uexp.ExportIndex].Value >= 4 || uexp.UassetData.EngineVersion >= UE4Version.VER_UE4_ADDED_PACKAGE_OWNER)
             {
                 if (uexp.UassetData.AutoVersion)
                 {
@@ -60,9 +64,10 @@ namespace AssetParser
             ConsoleMode.Print("-\n" + ScriptBytecodeSize + "\n" + scriptStorageSize + "\n-", ConsoleColor.Gray);
 
             FuncBlock = new MemoryList(memoryList.GetBytes(scriptStorageSize));
-
+            int index = 0; 
             while (FuncBlock.GetPosition() < FuncBlock.GetSize())
             {
+                ConsoleMode.Print("Start: "+(index++), ConsoleColor.Yellow);
                 ExprToken ss = ReadExpression();
                 ConsoleMode.Print(Convert.ToString(ss), ConsoleColor.Yellow);
             }
@@ -83,32 +88,38 @@ namespace AssetParser
 
             if (Modify)
             {
+                int[] list = new int[offsetList.Count];
 
-                for (int i = 0; i < stringOffset.Count; i++)
+                for (int n = 0; n < offsetList.Count; n++)
                 {
-                    //   [old] [new] [size] 
+                    list[n] = FuncBlock.GetIntValue(false, offsetList[n]);
+                }
+                int ExtraSize = 0;
 
-                    offsetList.ForEach(x =>
+                ConsoleMode.Print("stringOffset: " + stringOffset.Count, ConsoleColor.DarkYellow);
+                ConsoleMode.Print("list: " + list.Length, ConsoleColor.DarkYellow);
+
+                for (int x = 0; x < list.Length; x++)
+                {
+                    for (int i = 0; i < stringOffset.Count; i++)
                     {
+                        //   [old] [new] [size] 
 
-                        int OldOffet = FuncBlock.GetIntValue(false, x);
 
-
-                        if (OldOffet > stringOffset[i][0])
+                        if (list[x] > stringOffset[i][0])
                         {
-                            ConsoleMode.Print("offset: " + x, ConsoleColor.DarkYellow);
-                            int NewOffset = OldOffet + stringOffset[i][2];
 
-                            FuncBlock.SetIntValue(NewOffset, false, x);
+                            ConsoleMode.Print("OldVal: " + list[x], ConsoleColor.DarkYellow);
+                            ExtraSize = stringOffset[i][2];
+                            list[x] += ExtraSize;
 
-                            ConsoleMode.Print("OldVal: " + OldOffet, ConsoleColor.DarkYellow);
-                            ConsoleMode.Print("NewVal: " + NewOffset, ConsoleColor.DarkYellow);
-                            ConsoleMode.Print("TotalSize: " + stringOffset[i][2], ConsoleColor.DarkYellow);
+                            FuncBlock.SetIntValue(list[x], false, offsetList[x]);
+                            ConsoleMode.Print("NewVal: " + list[x], ConsoleColor.DarkYellow);    
+                            ConsoleMode.Print("TotalSize: " + ExtraSize, ConsoleColor.DarkYellow);
                             ConsoleMode.Print("- -  -  -  -  - - - ", ConsoleColor.Green);
-
                         }
 
-                    });
+                    }
                     ConsoleMode.Print("-------------------------", ConsoleColor.Red);
                 }
 
@@ -218,11 +229,12 @@ namespace AssetParser
                     FuncBlock.Skip(4);//name
                     FuncBlock.Skip(4);
                 }
+               // offsetList.Add(FuncBlock.GetPosition());
                 FuncBlock.Skip(4);
             }
             else
             {
-
+               // offsetList.Add(FuncBlock.GetPosition());
                 FuncBlock.Skip(4);
             }
         }
@@ -266,13 +278,13 @@ namespace AssetParser
                     break;
                 case ExprToken.EX_Jump:
                     offsetList.Add(FuncBlock.GetPosition());
-                    offset = FuncBlock.GetIntValue();
+                    offset = FuncBlock.GetIntValue();// Code offset.
 
                     break;
                 case ExprToken.EX_JumpIfNot:
                     offsetList.Add(FuncBlock.GetPosition());
                     offset = FuncBlock.GetIntValue(); //CodeOffset
-                    ReadExpression();
+                    ReadExpression();// Boolean expr.
                     break;
                 case ExprToken.EX_Assert:
                     FuncBlock.Skip(3);
@@ -324,18 +336,18 @@ namespace AssetParser
 
                 case ExprToken.EX_Context:
                     ReadExpression();
-                    offsetList.Add(FuncBlock.GetPosition());
+                   // offsetList.Add(FuncBlock.GetPosition());
                     offset = FuncBlock.GetIntValue();
                     ReadPPOINTER();
                     ReadExpression();
                     break;
 
                 case ExprToken.EX_Context_FailSilent:
-                    ReadExpression();
-                    offsetList.Add(FuncBlock.GetPosition());
-                    offset = FuncBlock.GetIntValue();
-                    ReadPPOINTER();
-                    ReadExpression();
+                    ReadExpression(); // Object expression.
+                   // offsetList.Add(FuncBlock.GetPosition());
+                    offset = FuncBlock.GetIntValue();// Code offset for NULL expressions.
+                    ReadPPOINTER();// Property corresponding to the r-value data, in case the l-value needs to be mem-zero'd
+                    ReadExpression();// Context expression.
                     break;
 
                 case ExprToken.EX_VirtualFunction:
@@ -363,7 +375,7 @@ namespace AssetParser
                     {
                         string StringConst = FuncBlock.GetStringUE(Encoding.ASCII);
                         ConsoleMode.Print(StringConst, ConsoleColor.Blue);
-                        uexp.Strings.Add(new List<string>() { "FuncText" + Index, StringConst });
+                        uexp.Strings.Add(new List<string>() { "FuncText" + uexp.ExportIndex, StringConst, "Changing this value will cause the game crash!", "#141412", "#FFFFFF" });
                     }
                     else
                     {
@@ -493,7 +505,7 @@ namespace AssetParser
                     {
                         string UnicodeStringConst = FuncBlock.GetStringUE(Encoding.Unicode);
                         ConsoleMode.Print(UnicodeStringConst, ConsoleColor.Blue);
-                        uexp.Strings.Add(new List<string>() { "FuncText" + Index, UnicodeStringConst });
+                        uexp.Strings.Add(new List<string>() { "FuncText" + uexp.ExportIndex, UnicodeStringConst, "Changing this value will cause the game crash!", "#141412", "#FFFFFF" });
                         // Console.WriteLine(UnicodeStringConst.Length);
                         //  Console.ReadLine();
                     }
@@ -618,7 +630,7 @@ namespace AssetParser
 
                 case ExprToken.EX_ComputedJump:
 
-                    ReadExpression();
+                    ReadExpression();// Integer expression, specifying code offset.
                     break;
 
                 case ExprToken.EX_PopExecutionFlowIfNot:
@@ -659,7 +671,7 @@ namespace AssetParser
                     break;
 
                 case ExprToken.EX_SkipOffsetConst:
-
+                    offsetList.Add(FuncBlock.GetPosition());
                     FuncBlock.Skip(4); //value
                     break;
 
@@ -746,11 +758,12 @@ namespace AssetParser
                     ReadExpression();
                     for (int i = 0; i < numCases; i++)
                     {
-                        ReadExpression();
-                        FuncBlock.Skip(4);
-                        ReadExpression();
+                        ReadExpression();   // case index value term
+                        offsetList.Add(FuncBlock.GetPosition());
+                        FuncBlock.Skip(4);  // offset to the next case
+                        ReadExpression();   // case term
                     }
-                    ReadExpression();
+                    ReadExpression();       //default term
                     break;
 
 

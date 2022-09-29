@@ -353,7 +353,7 @@ namespace AssetParser
                         if (uexp.UassetData.EngineVersion > UE4Version.VER_UE4_FTEXT_HISTORY)
                         {
                             TextData.Skip(4); //unkown
-                            TextHistoryType ContainText = (TextHistoryType)TextData.GetByteValue();
+                            TextHistoryType ContainText = (TextHistoryType)TextData.GetUByteValue();
 
                             switch (ContainText)
                             {
@@ -524,7 +524,7 @@ namespace AssetParser
                 memoryList.Skip(4);
                 if (!Modify)
                 {
-                    uexp.Strings.Add(new List<string>() { PropertyName, uexp.UassetData.GetPropertyName(NameIndex), "be careful with this value." });
+                    uexp.Strings.Add(new List<string>() { PropertyName, uexp.UassetData.GetPropertyName(NameIndex),!uexp.UassetData.IOFile?"be careful with this value." : "Can't edit this value.", !uexp.UassetData.IOFile ? "#FFBFB2": "#FF0000" });
                 }
                 else
                 {
@@ -703,7 +703,7 @@ namespace AssetParser
                 if (uexp.UassetData.EngineVersion > UE4Version.VER_UE4_FTEXT_HISTORY)
                 {
                     memoryList.Skip(4); //Flag
-                    TextHistoryType ContainText = (TextHistoryType)memoryList.GetByteValue();
+                    TextHistoryType ContainText = (TextHistoryType)memoryList.GetUByteValue();
 
                     switch (ContainText)
                     {
@@ -721,8 +721,8 @@ namespace AssetParser
                             new ReadStringProperty(memoryList, uexp, PropertyName + "_3", Modify);
                             break;
                         case TextHistoryType.StringTableEntry:
+                            PropertyParser(ref PropertyName, "NameProperty", -1, memoryList, uexp, Modify);
                             new ReadStringProperty(memoryList, uexp, PropertyName + "_1", Modify);
-                            new ReadStringProperty(memoryList, uexp, PropertyName + "_2", Modify);
                             break;
 
                         default:

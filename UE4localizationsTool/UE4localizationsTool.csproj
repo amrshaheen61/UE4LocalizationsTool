@@ -24,7 +24,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>7</ApplicationRevision>
+    <ApplicationRevision>11</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -93,9 +93,10 @@
     <Compile Include="Core\ConsoleMode.cs" />
     <Compile Include="Core\Enum.cs" />
     <Compile Include="Core\Function.cs" />
-    <Compile Include="Core\RED Game\REDAdvTextData.cs" />
-    <Compile Include="Core\RED Game\REDLibraryTextData.cs" />
-    <Compile Include="Core\RED Game\REDLocalizeTextData.cs" />
+    <Compile Include="Core\Games\ScarletNexus.cs" />
+    <Compile Include="Core\Games\RED Game\REDAdvTextData.cs" />
+    <Compile Include="Core\Games\RED Game\REDLibraryTextData.cs" />
+    <Compile Include="Core\Games\RED Game\REDLocalizeTextData.cs" />
     <Compile Include="Core\Spreadsheet.cs" />
     <Compile Include="Core\DataTable.cs" />
     <Compile Include="Core\locres.cs" />

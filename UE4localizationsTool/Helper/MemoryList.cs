@@ -990,7 +990,7 @@ namespace Helper.MemoryList
             {
                 Array.Reverse(array);
             }
-            return (long)(array[0] | (array[1] << 8) | (array[2] << 16) | (array[3] << 24) | (array[4] << 32) | (array[5] << 40) | (array[6] << 48) | (array[7] << 56));
+            return BitConverter.ToInt64(array,0);
         }
 
         public ulong GetUInt64Value(bool SavePosition = true, int SeekAndRead = -1, Endian _Endian = Endian.Little)

@@ -1,6 +1,7 @@
 ﻿using AssetParser;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
@@ -14,6 +15,7 @@ using System.Windows.Forms;
 
 namespace UE4localizationsTool
 {
+
     public partial class FrmMain : Form
     {
         struct DataRow
@@ -23,7 +25,6 @@ namespace UE4localizationsTool
         }
 
 
-        Uasset Uasset;
         Uexp Uexp;
         locres locres;
         String ToolName = Application.ProductName + " v" + Application.ProductVersion;
@@ -32,46 +33,47 @@ namespace UE4localizationsTool
         Stack<DataRow> BackupDataUndo;
         Stack<DataRow> BackupDataRedo;
         List<List<string>> ListrefValues;
-        bool Filter;
-        bool SortApply;
+        ReadOnlyCollection<List<string>> ListBackupValues;
+        bool Filter = false;
+        bool SortApply = false;
+        bool ClearTemp = true;
+        List<int> FindArray;
+        int FindIndex;
+        string OldFind;
         public FrmMain()
         {
             InitializeComponent();
-            this.Text = ToolName;
-            this.saveToolStripMenuItem.Enabled = false;
-            this.exportAllTextToolStripMenuItem.Enabled = false;
-            this.noNamesToolStripMenuItem.Enabled = false;
-            this.withNamesToolStripMenuItem.Enabled = false;
-            this.importAllTextToolStripMenuItem.Enabled = false;
-            this.undoToolStripMenuItem.Enabled = false;
-            this.redoToolStripMenuItem.Enabled = false;
-            this.filterToolStripMenuItem.Enabled = false;
-            this.StateLabel.Text = "";
-            this.BackupDataUndo = new Stack<DataRow>();
-            this.BackupDataRedo = new Stack<DataRow>();
-            this.dataGridView1.RowsAdded += (x, y) => this.UpdateCounter();
-            this.dataGridView1.RowsRemoved += (x, y) => this.UpdateCounter();
-            this.DataCount.Text = "";
-            this.Filter = false;
-            this.SortApply = false;
-            this.clearFilterToolStripMenuItem.Enabled = false;
+            dataGridView1.RowsAdded += (x, y) => this.UpdateCounter();
+            dataGridView1.RowsRemoved += (x, y) => this.UpdateCounter();
+            ResetControls();
         }
+
+
 
         private void AddToDataView()
         {
 
             if (ListrefValues == null) return;
             int Index = 0;
+    
             foreach (var item in ListrefValues)
             {
                 dataGridView1.Rows.Add(item[0], item[1], Index);
                 //dataGridView1.Rows[Index].Cells[1].Style.WrapMode = DataGridViewTriState.True;
                 //dataGridView1.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill; 
 
-                if (item.Count == 3)
+                if (item.Count >2)
                 {
-                    dataGridView1.Rows[Index].Cells[0].Style.BackColor = Color.FromArgb(255, 191, 178);
                     dataGridView1.Rows[Index].Cells[1].ToolTipText = item[2];
+
+                    if (item.Count>3) 
+                    {
+                        dataGridView1.Rows[Index].Cells[0].Style.BackColor = System.Drawing.ColorTranslator.FromHtml(item[3]);
+                    }
+                    if (item.Count > 4)
+                    {
+                        dataGridView1.Rows[Index].Cells[0].Style.ForeColor = System.Drawing.ColorTranslator.FromHtml(item[4]);
+                    }
                 }
 
 
@@ -82,7 +84,7 @@ namespace UE4localizationsTool
         private void OpenFile_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "All localizations files|*.uasset;*.locres|Uasset File|*.uasset|Locres File|*.locres";
+            ofd.Filter = "All localizations files|*.uasset;*.locres;*.umap|Uasset File|*.uasset|Locres File|*.locres|Umap File|*.umap";
             ofd.Title = "Open localizations File";
 
 
@@ -93,27 +95,13 @@ namespace UE4localizationsTool
             }
         }
 
+
+
+
         private async void LoadFile(string filePath)
         {
-
-            this.dataGridView1.Rows.Clear();
-            this.saveToolStripMenuItem.Enabled = false;
-            this.exportAllTextToolStripMenuItem.Enabled = false;
-            this.importAllTextToolStripMenuItem.Enabled = false;
-            this.undoToolStripMenuItem.Enabled = false;
-            this.redoToolStripMenuItem.Enabled = false;
-            this.filterToolStripMenuItem.Enabled = false;
-            this.noNamesToolStripMenuItem.Enabled = false;
-            this.withNamesToolStripMenuItem.Enabled = false;
-            this.FilePath = "";
-            this.StateLabel.Text = "";
-            this.DataCount.Text = "";
-            this.Text = ToolName;
-            this.BackupDataUndo = new Stack<DataRow>();
-            this.BackupDataRedo = new Stack<DataRow>();
-            this.Filter = false;
-            this.SortApply = false;
-            this.clearFilterToolStripMenuItem.Enabled = false;
+            ResetControls();
+            ControlsMode(false);
             try
             {
                 state = new FrmState(this, "loading File", "loading File please wait...");
@@ -124,14 +112,15 @@ namespace UE4localizationsTool
                 {
                     locres = await Task.Run(() => new locres(filePath));
                     ListrefValues = locres.Strings;
+                    ListBackupValues = ListrefValues.AsReadOnly();
                     AddToDataView();
-
                 }
-                else if (filePath.ToLower().EndsWith(".uasset"))
+                else if (filePath.ToLower().EndsWith(".uasset")|| filePath.ToLower().EndsWith(".umap"))
                 {
-                    Uasset = await Task.Run(() => new Uasset(filePath));
+                    Uasset Uasset = await Task.Run(() => new Uasset(filePath));
                     Uexp = await Task.Run(() => new Uexp(Uasset));
                     ListrefValues = Uexp.Strings;
+                    ListBackupValues = ListrefValues.AsReadOnly();
                     AddToDataView();
                     if (!Uexp.IsGood)
                     {
@@ -139,16 +128,10 @@ namespace UE4localizationsTool
                     }
 
                 }
-                this.undoToolStripMenuItem.Enabled = true;
-                this.redoToolStripMenuItem.Enabled = true;
-                this.saveToolStripMenuItem.Enabled = true;
-                this.exportAllTextToolStripMenuItem.Enabled = true;
-                this.importAllTextToolStripMenuItem.Enabled = true;
-                this.noNamesToolStripMenuItem.Enabled = true;
-                this.withNamesToolStripMenuItem.Enabled = true;
-                this.filterToolStripMenuItem.Enabled = true;
+
                 this.FilePath = filePath;
                 this.Text = ToolName + " - " + Path.GetFileName(FilePath);
+                ControlsMode(true);
                 state.Close();
             }
             catch (Exception ex)
@@ -159,6 +142,36 @@ namespace UE4localizationsTool
 
         }
 
+        private void ResetControls()
+        {
+            dataGridView1.Rows.Clear();
+            FilePath = "";
+            StateLabel.Text = "";
+            DataCount.Text = "";
+            Text = ToolName;
+            BackupDataUndo = new Stack<DataRow>();
+            BackupDataRedo = new Stack<DataRow>();
+            Filter = false;
+            SortApply = false;
+            FindArray = new List<int>();
+            ClearTemp = true;
+            FindIndex = 0;
+            OldFind = "";
+            searchcount.Text="";
+        }
+  
+        private void ControlsMode(bool Enabled)
+        {
+            saveToolStripMenuItem.Enabled = Enabled;
+            exportAllTextToolStripMenuItem.Enabled = Enabled;
+            importAllTextToolStripMenuItem.Enabled = Enabled;
+            undoToolStripMenuItem.Enabled = Enabled;
+            redoToolStripMenuItem.Enabled = Enabled;
+            filterToolStripMenuItem.Enabled = Enabled;
+            noNamesToolStripMenuItem.Enabled = Enabled;
+            withNamesToolStripMenuItem.Enabled = Enabled;
+            clearFilterToolStripMenuItem.Enabled = Enabled;
+        }
         enum ExportType
         {
             NoNames = 0,
@@ -285,6 +298,11 @@ namespace UE4localizationsTool
             {
                 sfd.Filter = "Uasset File|*.uasset";
             }
+            else if (FilePath.ToLower().EndsWith(".umap"))
+            {
+                sfd.Filter = "Umap File|*.umap";
+            }
+
             sfd.Title = "Save localizations file";
             sfd.FileName = Path.GetFileNameWithoutExtension(FilePath) + "_NEW";
             if (sfd.ShowDialog() == DialogResult.OK)
@@ -298,10 +316,10 @@ namespace UE4localizationsTool
                         await Task.Run(() => locres.SaveFile(sfd.FileName));
 
                     }
-                    else if (FilePath.ToLower().EndsWith(".uasset"))
+                    else if (FilePath.ToLower().EndsWith(".uasset") || FilePath.ToLower().EndsWith(".umap"))
                     {
-
-                        await Task.Run(() => Uexp.SaveFile(sfd.FileName));
+                      
+                       await Task.Run(() => Uexp.SaveFile(sfd.FileName));
                     }
                 }
                 catch (Exception ex)
@@ -324,7 +342,12 @@ namespace UE4localizationsTool
             SearchPanal.Visible = !SearchPanal.Visible;
             if (SearchPanal.Visible)
             {
+
                 dataGridView1.Height -= SearchPanal.Height;
+                if (dataGridView1.SelectedCells.Count > 0)
+                {
+                    InputSearch.Text=ObjectToString( dataGridView1.SelectedCells[0].Value);
+                }
                 InputSearch.Focus();
                 InputSearch.SelectAll();
             }
@@ -336,9 +359,7 @@ namespace UE4localizationsTool
 
         }
 
-        List<int> FindArray = new List<int>();
-        int FindIndex = 0;
-        string OldFind = "";
+
         private void Find_Click(object sender, EventArgs e)
         {
             FindArray.Clear();
@@ -464,20 +485,7 @@ namespace UE4localizationsTool
             dataGridView1.Rows[dataGridView1.FirstDisplayedScrollingRowIndex].Selected = true;
         }
 
-        private void FrmMain_DragDrop(object sender, DragEventArgs e)
-        {
-            string[] array = (string[])e.Data.GetData(DataFormats.FileDrop);
-            LoadFile(array[0]);
-        }
 
-        private void dataGridView1_CellValueChanged(object sender, DataGridViewCellEventArgs e)
-        {
-            if (dataGridView1.Created)
-            {
-                ListrefValues[int.Parse(dataGridView1.Rows[e.RowIndex].Cells[2].Value.ToString())][1] = ObjectToString(dataGridView1.Rows[e.RowIndex].Cells[1].Value);
-                dataGridView1.Rows[e.RowIndex].Cells[1].Style.BackColor = System.Drawing.Color.FromArgb(255, 204, 153);
-            }
-        }
 
         private void fontToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -532,11 +540,37 @@ namespace UE4localizationsTool
 
         private void dataGridView1_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
         {
+            BackupDataUndo.Push(new DataRow() { Index = e.RowIndex, StringValue = ObjectToString(dataGridView1.Rows[e.RowIndex].Cells[1].Value) });
+        }
+
+        private void dataGridView1_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+        {
+
+            if (BackupDataUndo.Peek().StringValue == ObjectToString(dataGridView1.Rows[e.RowIndex].Cells[1].Value))
+            {
+                BackupDataUndo.Pop();
+                return;
+            }
+
             if (BackupDataUndo.Count == 0)
             {
                 BackupDataRedo.Clear();
             }
-            BackupDataUndo.Push(new DataRow() { Index = e.RowIndex, StringValue = ObjectToString(dataGridView1.Rows[e.RowIndex].Cells[1].Value) });
+        }
+
+        private void dataGridView1_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        {
+            if (dataGridView1.Created)
+            {
+                ListrefValues[int.Parse(dataGridView1.Rows[e.RowIndex].Cells[2].Value.ToString())][1] = ObjectToString(dataGridView1.Rows[e.RowIndex].Cells[1].Value);
+                dataGridView1.Rows[e.RowIndex].Cells[1].Style.BackColor = System.Drawing.Color.FromArgb(255, 204, 153);
+                this.Text = ToolName + " - " + Path.GetFileName(FilePath) + "*";
+                if (ClearTemp)
+                {
+                    BackupDataRedo.Clear();
+                    ClearTemp = false;
+                }
+            }
         }
 
         private void undoToolStripMenuItem_Click(object sender, EventArgs e)
@@ -547,10 +581,11 @@ namespace UE4localizationsTool
 
                 DataRow dataRow = BackupDataUndo.Pop();
                 BackupDataRedo.Push(new DataRow() { Index = dataRow.Index, StringValue = ObjectToString(dataGridView1.Rows[dataRow.Index].Cells[1].Value) });
-
+                ClearTemp = false;
                 //MessageBox.Show(dataRow.StringValue);
                 dataGridView1.Rows[dataRow.Index].Cells[1].Value = dataRow.StringValue;
-                if (dataRow.StringValue == ListrefValues[dataRow.Index][1])
+                ClearTemp = true;
+                if (dataRow.StringValue == ListBackupValues[dataRow.Index][1])
                     dataGridView1.Rows[dataRow.Index].Cells[1].Style.BackColor = System.Drawing.Color.FromArgb(255, 255, 255);
                 else
                 {
@@ -558,6 +593,10 @@ namespace UE4localizationsTool
                 }
                 dataGridView1.ClearSelection();
                 dataGridView1.Rows[dataRow.Index].Selected = true;
+                if (BackupDataUndo.Count==0)
+                {
+                    this.Text = ToolName + " - " + Path.GetFileName(FilePath);
+                }
             }
 
         }
@@ -570,14 +609,13 @@ namespace UE4localizationsTool
                 //MessageBox.Show(BackupDataRedo.Peek().StringValue);
 
                 DataRow dataRow = BackupDataRedo.Pop();
+                
                 BackupDataUndo.Push(new DataRow() { Index = dataRow.Index, StringValue = ObjectToString(dataGridView1.Rows[dataRow.Index].Cells[1].Value) });
+                ClearTemp = false;
                 dataGridView1.Rows[dataRow.Index].Cells[1].Value = dataRow.StringValue;
-                if (dataRow.StringValue == ListrefValues[dataRow.Index][1])
-                    dataGridView1.Rows[dataRow.Index].Cells[1].Style.BackColor = System.Drawing.Color.FromArgb(255, 255, 255);
-                else
-                {
-                    dataGridView1.Rows[dataRow.Index].Cells[1].Style.BackColor = System.Drawing.Color.FromArgb(255, 204, 153);
-                }
+                ClearTemp = true;
+                dataGridView1.Rows[dataRow.Index].Cells[1].Style.BackColor = System.Drawing.Color.FromArgb(255, 204, 153);
+               
 
                 dataGridView1.ClearSelection();
                 dataGridView1.Rows[dataRow.Index].Selected = true;
@@ -736,7 +774,7 @@ namespace UE4localizationsTool
             return "";
         }
 
-        private void FrmMain_Load(object sender, EventArgs e)
+        private async void FrmMain_Load(object sender, EventArgs e)
         {
 
             float ToolVer = 0;
@@ -746,7 +784,7 @@ namespace UE4localizationsTool
             {
                 try
                 {
-                    string UpdateScript = client.DownloadString("https://raw.githubusercontent.com/amrshaheen61/UE4LocalizationsTool/master/UE4localizationsTool/UpdateInfo.txt");
+                    string UpdateScript = await Task.Run(()=> client.DownloadString("https://raw.githubusercontent.com/amrshaheen61/UE4LocalizationsTool/master/UE4localizationsTool/UpdateInfo.txt"));
 
                     if (UpdateScript.StartsWith("UpdateFile", false, CultureInfo.InvariantCulture))
                     {
@@ -841,6 +879,31 @@ namespace UE4localizationsTool
         private void dataGridView1_Sorted(object sender, EventArgs e)
         {
             this.SortApply = true;
+        }
+
+        private void FrmMain_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effect = DragDropEffects.All;
+            }
+        }
+
+        private void FrmMain_DragDrop(object sender, DragEventArgs e)
+        {
+            string[] array = (string[])e.Data.GetData(DataFormats.FileDrop);
+            LoadFile(array[0]);
+
+        }
+
+        private void DataCount_TextChanged(object sender, EventArgs e)
+        {
+            DataCount.Location =new Point( Width - DataCount.Width - 22 /*padding*/ , label1.Location.Y);
+        }
+
+        private void donateToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Process.Start("https://www.paypal.me/amrshaheen60");
         }
     }
 }

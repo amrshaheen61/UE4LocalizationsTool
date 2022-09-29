@@ -7,7 +7,7 @@ namespace UE4localizationsTool
     public partial class FrmState : Form
     {
 
-        private int Timer = 0;
+        DateTime dateTime;
 
         public FrmState()
         {
@@ -15,11 +15,13 @@ namespace UE4localizationsTool
         }
         public FrmState(Form form, string Title, string state)
         {
+            dateTime = DateTime.Now;
             InitializeComponent();
             label1.Text = state;
             this.Text = Title;
             this.Location = new Point(form.Location.X + (form.Width - this.Width) / 2, form.Location.Y + (form.Height - this.Height) / 2);
             timer1.Start();
+
         }
 
         public FrmState(string Title, string state)
@@ -28,6 +30,7 @@ namespace UE4localizationsTool
             label1.Text = state;
             this.Text = Title;
             timer1.Start();
+            timer1_Tick(null,null);
         }
 
 
@@ -38,8 +41,10 @@ namespace UE4localizationsTool
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            label2.Text = "Elapsed time:" + TimeSpan.FromSeconds(Timer).ToString("hh':'mm':'ss");
-            Timer++;
+
+            TimeSpan DateElapsed = DateTime.Now - dateTime;
+
+            label2.Text = "Elapsed time:" + DateElapsed.ToString("hh':'mm':'ss");
         }
     }
 }
