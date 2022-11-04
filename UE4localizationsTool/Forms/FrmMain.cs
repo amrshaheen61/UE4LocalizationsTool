@@ -46,6 +46,7 @@ namespace UE4localizationsTool
             dataGridView1.RowsAdded += (x, y) => this.UpdateCounter();
             dataGridView1.RowsRemoved += (x, y) => this.UpdateCounter();
             ResetControls();
+            pictureBox1.Height = menuStrip1.Height;
         }
 
 
@@ -118,6 +119,7 @@ namespace UE4localizationsTool
                 else if (filePath.ToLower().EndsWith(".uasset")|| filePath.ToLower().EndsWith(".umap"))
                 {
                     Uasset Uasset = await Task.Run(() => new Uasset(filePath));
+                    Uasset.UseMethod2 = Method2.Checked;
                     Uexp = await Task.Run(() => new Uexp(Uasset));
                     ListrefValues = Uexp.Strings;
                     ListBackupValues = ListrefValues.AsReadOnly();
@@ -624,7 +626,7 @@ namespace UE4localizationsTool
 
         private void commandLinesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(Program.commandlines, "Command Lines", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show(Program.commandlines, "Command Lines", MessageBoxButtons.OK);
         }
 
         private void aboutToolStripMenuItem1_Click(object sender, EventArgs e)
@@ -898,12 +900,29 @@ namespace UE4localizationsTool
 
         private void DataCount_TextChanged(object sender, EventArgs e)
         {
-            DataCount.Location =new Point( Width - DataCount.Width - 22 /*padding*/ , label1.Location.Y);
+            DataCount.Location = new Point(Width - DataCount.Width - 22 /*padding*/ , DataCount.Location.Y);
         }
 
         private void donateToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Process.Start("https://www.paypal.me/amrshaheen60");
+        }
+
+        private void Method2_CheckedChanged(object sender, EventArgs e)
+        {
+            
+            if (Method2.Checked)
+            {
+                pictureBox1.Visible=true;
+                fileToolStripMenuItem.Margin = new Padding(5, 0, 0, 0);
+            }
+            else
+            {
+                pictureBox1.Visible = false;
+                fileToolStripMenuItem.Margin = new Padding(0, 0, 0, 0);
+            }
+            
+            
         }
     }
 }

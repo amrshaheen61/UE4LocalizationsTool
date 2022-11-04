@@ -12,7 +12,7 @@ namespace UE4localizationsTool
 
 
         public static string commandlines =
-         $"{AppDomain.CurrentDomain.FriendlyName}  export     <(Locres/Uasset) FilePath>  <Options>\n" +
+         $"{AppDomain.CurrentDomain.FriendlyName}  export     <(Locres/Uasset/Umap) FilePath>  <Options>\n" +
          $"{AppDomain.CurrentDomain.FriendlyName}  import     <(txt) FilePath>  <Options>\n" +
          $"{AppDomain.CurrentDomain.FriendlyName} -import     <(txt) FilePath>  <Options>\n" +
          $"{AppDomain.CurrentDomain.FriendlyName}  exportall  <Folder> <TxtFile> <Options>\n" +
@@ -22,9 +22,13 @@ namespace UE4localizationsTool
 
           "Options:\n" +
           "To use last filter you applied before in GUI, add (-f \\ -filter) after command line\n" +
-          "filter will apply only in name table (Remember to apply the same filter when importing)\n\n" +
+          "filter will apply only in name table " +
+            "\n(Remember to apply the same filter when importing)\n\n" +
 
           "To export file without including the names use (-nn \\ -NoName)" +
+          "\n(Remember to use this command when importing)\n\n" +
+
+          "To use method 2 (-m2 \\ -method2)" +
           "\n(Remember to use this command when importing)\n\n" +
 
           "Examples:\n" +
@@ -33,10 +37,9 @@ namespace UE4localizationsTool
          $"{AppDomain.CurrentDomain.FriendlyName} exportall Actions text.txt\n" +
          $"{AppDomain.CurrentDomain.FriendlyName} importall Actions text.txt\n";
 
-        public static (bool UseFilter, bool NoName) GetArgs(int Index, string[] args)
+        public static Args GetArgs(int Index, string[] args)
         {
-            bool usefilter = false;
-            bool noname = false;
+            Args args1 = new Args();
 
             for (int n = Index; n < args.Length; n++)
             {
@@ -44,11 +47,15 @@ namespace UE4localizationsTool
                 {
                     case "-f":
                     case "-filter":
-                        usefilter = true;
+                        args1 |= Args.filter;
                         break;
                     case "-nn":
                     case "-noname":
-                        noname = true;
+                        args1 |= Args.noname;
+                        break;
+                    case "-m2":
+                    case "-method2":
+                        args1 |= Args.method2;
                         break;
                     default:
                         Console.ForegroundColor = ConsoleColor.Yellow;
@@ -57,7 +64,7 @@ namespace UE4localizationsTool
                         break;
                 }
             }
-            return (usefilter, noname);
+            return args1;
         }
 
 
@@ -69,9 +76,10 @@ namespace UE4localizationsTool
                 {
                     case "-f":
                     case "-filter":
-                        throw new Exception("Invalid number of arguments.\n\n" + commandlines);
                     case "-nn":
                     case "-noname":
+                    case "-method2":
+                    case "-m2":
                         throw new Exception("Invalid number of arguments.\n\n" + commandlines);
                 }
             }
@@ -87,9 +95,8 @@ namespace UE4localizationsTool
             if (args.Length > 0)
             {
                 AttachConsole(ATTACH_PARENT_PROCESS);
-                Console.SetCursorPosition(0, Console.CursorTop + 1);
-                bool UseFilter = false;
-                bool NoName = false;
+              //  Console.SetCursorPosition(0, Console.CursorTop + 1);
+
                 if (args.Length < 2)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
@@ -108,14 +115,18 @@ namespace UE4localizationsTool
                         }
 
                         CheckArges(3, args);
-                        (UseFilter, NoName) = GetArgs(3, args);
-                        new Commands(args[0], args[1] + "*" + args[2], UseFilter, NoName);
+                        new Commands(args[0], args[1] + "*" + args[2])
+                        {
+                            Flags = GetArgs(3, args)
+                        };
                     }
                     else
                     {
                         CheckArges(2, args);
-                        (UseFilter, NoName) = GetArgs(2, args);
-                        new Commands(args[0], args[1], UseFilter, NoName);
+                        new Commands(args[0], args[1])
+                        {
+                            Flags = GetArgs(3, args)
+                        };
                     }
 
                 }

@@ -1,4 +1,5 @@
 ﻿using AssetParser;
+using Microsoft.SqlServer.Server;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,20 +8,29 @@ using System.Text.RegularExpressions;
 
 namespace UE4localizationsTool
 {
+    [Flags]
+    public enum Args
+    {
+        filter = 1 << 0,
+        noname = 1 << 1,
+        method2 = 1 << 2
+    }
+
+
+
     public class Commands
     {
         private List<List<string>> Strings;
-        private bool usefilter = false;
-        private bool nonames = false;
+
+        public Args Flags;
+
         private bool UseMatching = false;
         private bool RegularExpression = false;
         private bool ReverseMode = false;
         private List<string> ArrayValues;
-        public Commands(string Options, string SourcePath, bool UseFilter = false, bool NoNames = false)
+        public Commands(string Options, string SourcePath)
         {
-            usefilter = UseFilter;
-            nonames = NoNames;
-            if (usefilter)
+            if (Flags.HasFlag(Args.filter))
             {
                 GetFilterValues();
             }
@@ -39,7 +49,7 @@ namespace UE4localizationsTool
 
                     Strings = Export(SourcePath);
 
-                    if (usefilter)
+                    if (Flags.HasFlag(Args.filter))
                     {
                         Strings = ApplyFilter(Strings);
                     }
@@ -117,7 +127,7 @@ namespace UE4localizationsTool
                 }
                 else
                 {
-                    if (!nonames)
+                    if (!Flags.HasFlag(Args.noname))
                     {
                         stringsArray[i] = item[0] + "=" + item[1];
                     }
@@ -151,9 +161,15 @@ namespace UE4localizationsTool
                 return locres.Strings;
                 //  SizeOfRecord = locres.Strings.Count;
             }
-            else if (FilePath.EndsWith(".uasset", StringComparison.OrdinalIgnoreCase))
+            else if (FilePath.EndsWith(".uasset", StringComparison.OrdinalIgnoreCase)|| FilePath.EndsWith(".umap", StringComparison.OrdinalIgnoreCase))
             {
                 Uasset Uasset = new Uasset(FilePath);
+                
+                if (Flags.HasFlag(Args.method2))
+                {
+                    Uasset.UseMethod2 = true;
+                }
+
                 Uexp Uexp = new Uexp(Uasset);
                 return Uexp.Strings;
                 //  SizeOfRecord = Uexp.Strings.Count;
@@ -176,7 +192,7 @@ namespace UE4localizationsTool
             Console.WriteLine(ConsoleText);
             Console.ForegroundColor = ConsoleColor.White;
 
-            string[] LanguageFiles = Directory.GetFiles(FolderPath, "*.*", SearchOption.AllDirectories).Where(x => x.EndsWith(".locres", StringComparison.OrdinalIgnoreCase) || x.EndsWith(".uasset", StringComparison.OrdinalIgnoreCase)).ToArray<string>();
+            string[] LanguageFiles = Directory.GetFiles(FolderPath, "*.*", SearchOption.AllDirectories).Where(x => x.EndsWith(".locres", StringComparison.OrdinalIgnoreCase) || x.EndsWith(".uasset", StringComparison.OrdinalIgnoreCase)|| x.EndsWith(".umap", StringComparison.OrdinalIgnoreCase)).ToArray<string>();
             Console.ForegroundColor = ConsoleColor.Green;
             Console.SetCursorPosition(ConsoleText.Length, Console.CursorTop - 1);
             Console.WriteLine("Done");
@@ -200,7 +216,7 @@ namespace UE4localizationsTool
 
                     List<List<string>> Souce = Export(LanguageFiles[i]);
 
-                    if (usefilter)
+                    if (Flags.HasFlag(Args.filter))
                     {
                         Souce = ApplyFilter(Souce);
                     }
@@ -232,7 +248,7 @@ namespace UE4localizationsTool
         void EditList(List<List<string>> Strings, string[] StringValues)
         {
 
-            if (usefilter)
+            if (Flags.HasFlag(Args.filter))
             {
                 ApplyFilter(Strings, StringValues);
                 return;
@@ -246,7 +262,7 @@ namespace UE4localizationsTool
             {
                 try
                 {
-                    if (!nonames)
+                    if (!Flags.HasFlag(Args.noname))
                     {
                         Strings[i][1] = StringValues[i].Split(new char[] { '=' }, 2)[1];
                     }
@@ -286,9 +302,14 @@ namespace UE4localizationsTool
                 FilePath = Path.ChangeExtension(FilePath, null) + "_NEW.locres";
                 locres.SaveFile(FilePath);
             }
-            else if (FilePath.EndsWith(".uasset", StringComparison.OrdinalIgnoreCase))
+            else if (FilePath.EndsWith(".uasset", StringComparison.OrdinalIgnoreCase)|| FilePath.EndsWith(".umap", StringComparison.OrdinalIgnoreCase))
             {
                 Uasset Uasset = new Uasset(FilePath);
+                if (Flags.HasFlag(Args.method2))
+                {
+                    Uasset.UseMethod2 = true;
+                }
+                
                 Uexp Uexp = new Uexp(Uasset);
                 EditList(Uexp.Strings, Values);
 
@@ -297,8 +318,16 @@ namespace UE4localizationsTool
                     Uexp.SaveFile(FilePath);
                     return;
                 }
-
-                FilePath = Path.ChangeExtension(FilePath, null) + "_NEW.uasset";
+              
+                if (FilePath.EndsWith(".uasset", StringComparison.OrdinalIgnoreCase)) 
+                {
+                    FilePath = Path.ChangeExtension(FilePath, null) + "_NEW.uasset";
+                }
+                else if (FilePath.EndsWith(".umap", StringComparison.OrdinalIgnoreCase))
+                {
+                    FilePath = Path.ChangeExtension(FilePath, null) + "_NEW.umap";
+                }
+                
                 Uexp.SaveFile(FilePath);
             }
             else
@@ -534,7 +563,7 @@ namespace UE4localizationsTool
 
                         try
                         {
-                            if (!nonames)
+                            if (!Flags.HasFlag(Args.noname))
                             {
                                 Strings[x][1] = Array[i].Split(new char[] { '=' }, 2)[1];
                                 i++;
@@ -555,7 +584,7 @@ namespace UE4localizationsTool
                 {
                     try
                     {
-                        if (!nonames)
+                        if (!Flags.HasFlag(Args.noname))
                         {
                             Strings[x][1] = Array[i].Split(new char[] { '=' }, 2)[1];
                             i++;

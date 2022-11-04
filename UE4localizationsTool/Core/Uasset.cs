@@ -89,6 +89,12 @@ namespace AssetParser
         public int GraphData_Offset;
         public int GraphData_Size;
         public bool IOFile = false;
+        public int PathCount = 0;
+        public bool PathModify = true;
+        public bool UseMethod2 = false;
+
+
+
         public Uasset(string FilePath)
         {
 
@@ -133,6 +139,14 @@ namespace AssetParser
                 for (int n = 0; n < Number_of_Names; n++)
                 {
                     NAMES_DIRECTORY.Add(UassetFile.GetStringUES());
+                    if (NAMES_DIRECTORY[n].Contains(@"/")&& PathModify)
+                    {
+                        PathCount++;
+                    }
+                    else
+                    {
+                        PathModify = false;
+                    }
                 }
 
 
@@ -363,6 +377,16 @@ namespace AssetParser
             for (int n = 0; n < Number_of_Names; n++)
             {
                 NAMES_DIRECTORY.Add(UassetFile.GetStringUE());
+
+                if (NAMES_DIRECTORY[n].Contains(@"/") && PathModify)
+                {
+                    PathCount++;
+                }
+                else
+                {
+                    PathModify = false;
+                }
+
                 //Flags
                 if (EngineVersion >= UE4Version.VER_UE4_NAME_HASHES_SERIALIZED)
                     UassetFile.Skip(4);
@@ -672,7 +696,23 @@ namespace AssetParser
             }
         }
 
-
+        int ExportSize()
+        {
+            int Totalsize = 0;
+            foreach (ExportsDirectory Size in Exports_Directory)
+            {
+                Totalsize+= Size.ExportData.Count;
+            }
+            return Totalsize;
+        }
+       public void UpdateOffset()
+        {
+            //for textures 🤔
+            if (FBulkDataStartOffset>0&& BulkDataStartOffset>0) 
+            {
+                UassetFile.SetIntValue(IsNotUseUexp ? UassetFile.GetSize() : UassetFile.GetSize() + ExportSize(), false, FBulkDataStartOffset);
+            }
+            }
 
     }
 }

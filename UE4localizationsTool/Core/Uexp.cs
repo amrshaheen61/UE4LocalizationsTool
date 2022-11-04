@@ -50,8 +50,15 @@ namespace AssetParser
                     try
                     {
                         memoryList.Seek(0); //Seek to beginning of Block
+
+                        if (UassetData.UseMethod2)
+                        {
+                            new UDataTable(memoryList, this, Modify);
+                            continue;
+                        }
+  
                         ConsoleMode.Print(UassetData.GetExportPropertyName(UassetData.Exports_Directory[n].ExportClass), ConsoleColor.DarkRed);
-                       if (memoryList.GetByteValue(false)==0 && UassetData.IOFile)
+                       if (memoryList.GetByteValue(false)==0)
                         {
                             memoryList.Skip(2);
                             goto Start;
@@ -74,7 +81,7 @@ namespace AssetParser
                                 new StringTable(memoryList, this, Modify);
                                 break;
                             case "DataTable":
-                                if (memoryList.GetIntValue(false)!=-5 && !UassetData.IOFile) 
+                                if (memoryList.GetIntValue(false)!=-5) 
                                 {
                                     new DataTable(memoryList, this, Modify);
                                 }
@@ -87,7 +94,7 @@ namespace AssetParser
                                     }   
                                     else  
                                     {
-                                        new ScarletNexus(memoryList, this, Modify);
+                                        new UDataTable(memoryList, this, Modify);
                                     }
                                 }
                                 break;
@@ -104,7 +111,9 @@ namespace AssetParser
                             case "REDAdvTextData":
                                 new REDAdvTextData(memoryList, this, Modify);
                                 break;
-
+                            case "MuseStringTable":
+                                new MuseStringTable(memoryList, this, Modify);
+                                break;
                         }
                         ConsoleMode.Print($"-----------End------------", ConsoleColor.DarkRed);
                     }
@@ -132,6 +141,7 @@ namespace AssetParser
         {
             ModifyStrings();
             UassetData.ExportReadOrEdit(true);
+            UassetData.UpdateOffset();
             if (UassetData.IsNotUseUexp)
             {
                 MakeBlocks();
