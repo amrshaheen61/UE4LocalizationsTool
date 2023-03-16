@@ -1,6 +1,7 @@
 ﻿using Helper.MemoryList;
 using System;
 using System.Collections.Generic;
+using UE4localizationsTool.Core.Games;
 
 namespace AssetParser
 {
@@ -148,9 +149,19 @@ namespace AssetParser
                         }
                         else
                         {
-                            for (int Arrayindex = 0; Arrayindex < ArrayCount; Arrayindex++)
+
+                            if (ArrayType == "ByteProperty" && PropertyName == "bytes")
                             {
-                                PropertyParser(ref PropertyName, ArrayType, -1, ArrayData, uexp, Modify);
+                                new TheLastOricru(ArrayData, PropertyName, uexp, Modify);
+                            }
+                            else
+                            {
+
+
+                                for (int Arrayindex = 0; Arrayindex < ArrayCount; Arrayindex++)
+                                {
+                                    PropertyParser(ref PropertyName, ArrayType, -1, ArrayData, uexp, Modify);
+                                }
                             }
                         }
                     }
@@ -524,7 +535,7 @@ namespace AssetParser
                 memoryList.Skip(4);
                 if (!Modify)
                 {
-                    uexp.Strings.Add(new List<string>() { PropertyName, uexp.UassetData.GetPropertyName(NameIndex),!uexp.UassetData.IOFile?"be careful with this value." : "Can't edit this value.", !uexp.UassetData.IOFile ? "#FFBFB2": "#FF0000" });
+                    uexp.Strings.Add(new List<string>() { PropertyName, uexp.UassetData.GetPropertyName(NameIndex), !uexp.UassetData.IOFile ? "be careful with this value." : "Can't edit this value.", !uexp.UassetData.IOFile ? "#FFBFB2" : "#FF0000", "#000000" });
                 }
                 else
                 {
@@ -650,9 +661,16 @@ namespace AssetParser
                     MemoryList StructData = new MemoryList(memoryList.GetBytes(StructLength));
                     try
                     {
-                        for (int Arrayindex = 0; Arrayindex < ArrayCount; Arrayindex++)
+                        if (ArrayType == "ByteProperty" && PropertyName == "bytes")
                         {
-                            PropertyParser(ref PropertyName, StructType, -1, StructData, uexp, Modify);
+                            new TheLastOricru(StructData, PropertyName, uexp, Modify);
+                        }
+                        else
+                        {
+                            for (int Arrayindex = 0; Arrayindex < ArrayCount; Arrayindex++)
+                            {
+                                PropertyParser(ref PropertyName, ArrayType, -1, StructData, uexp, Modify);
+                            }
                         }
                     }
                     catch

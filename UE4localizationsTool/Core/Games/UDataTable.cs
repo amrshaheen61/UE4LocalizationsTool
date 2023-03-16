@@ -1,7 +1,6 @@
 ﻿using Helper.MemoryList;
 using System;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace AssetParser
 {
@@ -24,6 +23,11 @@ namespace AssetParser
                 int StringSize = memoryList.GetIntValue();
                 BlockSize = StringSize;
                 string Text;
+                if (StringSize > 2000)
+                {
+                    memoryList.Seek(pos + 1);
+                    continue;
+                }
                 if (StringSize < 0)
                 {
                     StringSize = (StringSize * -1);
@@ -37,7 +41,7 @@ namespace AssetParser
 
                 if ((uexp.UassetData.NAMES_DIRECTORY.Count > ID1 && ID1 >= uexp.UassetData.PathCount) && (uexp.UassetData.NAMES_DIRECTORY.Count > ID2 && ID2 >= 0))
                 {
-                    if (uexp.UassetData.GetPropertyName((int)ID1)!= "None")
+                    if (uexp.UassetData.GetPropertyName(ID1) != "None")
                     {
                         Name = ID1;
                     }
@@ -70,7 +74,7 @@ namespace AssetParser
                     }
 
                     memoryList.Seek(pos);
-                    new ReadStringProperty(memoryList, uexp, uexp.UassetData.GetPropertyName((int)Name), Modify);
+                    new ReadStringProperty(memoryList, uexp, uexp.UassetData.GetPropertyName(Name), Modify);
                 }
                 else
                 {
@@ -85,11 +89,11 @@ namespace AssetParser
         }
 
 
-        public bool IsGoodText(string text)
+        public static bool IsGoodText(string text)
         {
             if (String.IsNullOrEmpty(text))
             {
-                return false; 
+                return false;
             }
 
             //if (Regex.IsMatch(text, @"[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]"))
@@ -97,19 +101,19 @@ namespace AssetParser
             //    return false;
             //}
 
-            foreach(char c in text)
+            foreach (char c in text)
             {
-                if ((c >= 0x00 && c <= 0x1F || c == 0x7f) && c != 0x09 && c != 0x0A && c != 0x0D )
+                if ((c >= 0x00 && c <= 0x1F || c == 0x7f) && c != 0x09 && c != 0x0A && c != 0x0D)
                 {
 
-                        return false;
+                    return false;
                 }
             }
 
             return true;
 
         }
-            
+
     }
 }
 

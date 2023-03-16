@@ -30,7 +30,7 @@ namespace AssetParser
             {
                 if (!Modify)
                 {
-                    uexp.Strings.Add(new List<string>() { String[n],  String[n + 1] });
+                    uexp.Strings.Add(new List<string>() { String[n], String[n + 1] });
                 }
                 else
                 {

@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
+using UE4localizationsTool.Controls;
 
 namespace UE4localizationsTool
 {
-    public partial class FrmFilter : Form
+    public partial class FrmFilter : NForm
     {
         public bool UseMatching;
         public bool RegularExpression;

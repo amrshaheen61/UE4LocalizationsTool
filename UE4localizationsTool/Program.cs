@@ -94,8 +94,21 @@ namespace UE4localizationsTool
 
             if (args.Length > 0)
             {
+                if (args.Length == 1 && (args[0].EndsWith(".uasset") || args[0].EndsWith(".umap") || args[0].EndsWith(".locres")))
+                {
+                    Application.EnableVisualStyles();
+                    Application.SetCompatibleTextRenderingDefault(false);
+                    var FrmMain = new FrmMain();
+                    FrmMain.Show();
+                    FrmMain.LoadFile(args[0]);
+                    Application.Run(FrmMain);
+                    return;
+                }
+
+
                 AttachConsole(ATTACH_PARENT_PROCESS);
-              //  Console.SetCursorPosition(0, Console.CursorTop + 1);
+                Console.WriteLine("");
+                //  Console.SetCursorPosition(0, Console.CursorTop + 1);
 
                 if (args.Length < 2)
                 {
@@ -115,18 +128,12 @@ namespace UE4localizationsTool
                         }
 
                         CheckArges(3, args);
-                        new Commands(args[0], args[1] + "*" + args[2])
-                        {
-                            Flags = GetArgs(3, args)
-                        };
+                        new Commands(args[0], args[1] + "*" + args[2], GetArgs(3, args));
                     }
                     else
                     {
                         CheckArges(2, args);
-                        new Commands(args[0], args[1])
-                        {
-                            Flags = GetArgs(3, args)
-                        };
+                        new Commands(args[0], args[1], GetArgs(2, args));
                     }
 
                 }

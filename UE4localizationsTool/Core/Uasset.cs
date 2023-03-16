@@ -78,7 +78,7 @@ namespace AssetParser
         public MemoryList UexpFile;
         public bool IsNotUseUexp;
         public bool UseFromStruct = true;
-        public bool AutoVersion=false;
+        public bool AutoVersion = false;
 
 
         public int Header_Size;
@@ -98,11 +98,6 @@ namespace AssetParser
         public Uasset(string FilePath)
         {
 
-
-            if (!File.Exists(FilePath))
-            {
-                throw new Exception("Uasset file is not exists!");
-            }
             UassetFile = new MemoryList(FilePath);
 
 
@@ -111,15 +106,15 @@ namespace AssetParser
 
                 //Todo 
                 EngineVersion = UE4Version.VER_UE4_16; //?!
-                IsNotUseUexp =true;
+                IsNotUseUexp = true;
                 IOFile = true;
-                UassetFile.Skip(16+4);
-                Header_Size = UassetFile.GetIntValue(); 
+                UassetFile.Skip(16 + 4);
+                Header_Size = UassetFile.GetIntValue();
                 Name_Directory_Offset = UassetFile.GetIntValue();
-                Name_Directory_Size  = UassetFile.GetIntValue();
+                Name_Directory_Size = UassetFile.GetIntValue();
                 Hash_Directory_offset = UassetFile.GetIntValue();
                 Hash_Directory_Size = UassetFile.GetIntValue();
-                Imports_Directory_Offset=UassetFile.GetIntValue();
+                Imports_Directory_Offset = UassetFile.GetIntValue();
                 Exports_Directory_Offset = UassetFile.GetIntValue();
                 Bundles_Offset = UassetFile.GetIntValue();
                 GraphData_Offset = UassetFile.GetIntValue();
@@ -139,7 +134,7 @@ namespace AssetParser
                 for (int n = 0; n < Number_of_Names; n++)
                 {
                     NAMES_DIRECTORY.Add(UassetFile.GetStringUES());
-                    if (NAMES_DIRECTORY[n].Contains(@"/")&& PathModify)
+                    if (NAMES_DIRECTORY[n].Contains(@"/") && PathModify)
                     {
                         PathCount++;
                     }
@@ -151,8 +146,8 @@ namespace AssetParser
 
 
                 //UassetFile.Seek(Hash_Directory_offset, SeekOrigin.Begin);
-            
-            
+
+
 
                 //seek to position
                 UassetFile.Seek(Exports_Directory_Offset, SeekOrigin.Begin);
@@ -160,7 +155,7 @@ namespace AssetParser
                 Exports_Directory = new List<ExportsDirectory>();
                 ExportReadOrEditIO();
 
-                    return;
+                return;
             }
 
 
@@ -636,7 +631,7 @@ namespace AssetParser
         }
 
 
-        public void ExportReadOrEditIO(bool Modify=false)
+        public void ExportReadOrEditIO(bool Modify = false)
         {
             //seek to position
             UassetFile.Seek(Exports_Directory_Offset, SeekOrigin.Begin);
@@ -654,8 +649,8 @@ namespace AssetParser
                 }
                 else
                 {
-                    UassetFile.SetInt64Value((long)(Header_Size+(NextExportPosition-File_Directory_Offset)));
-                    UassetFile.SetInt64Value((long)Exports_Directory[n].ExportData.Count);
+                    UassetFile.SetInt64Value(Header_Size + (NextExportPosition - File_Directory_Offset));
+                    UassetFile.SetInt64Value(Exports_Directory[n].ExportData.Count);
                 }
                 ExportsDirectory.ExportName = UassetFile.GetIntValue();
                 UassetFile.Skip(4);
@@ -682,7 +677,7 @@ namespace AssetParser
                     ExportsDirectory.ExportClass = NAMES_DIRECTORY.IndexOf("StructProperty");
                 }
 
-              
+
 
                 if (!Modify)
                 {
@@ -690,7 +685,7 @@ namespace AssetParser
                     ExportsDirectory.ExportData.AddRange(UassetFile.GetBytes(ExportsDirectory.ExportLength, false, NextExportPosition));
                     Exports_Directory.Add(ExportsDirectory);
                 }
-           
+
                 NextExportPosition += ExportsDirectory.ExportLength;
                 UassetFile.Seek(Start + 72);
             }
@@ -701,18 +696,18 @@ namespace AssetParser
             int Totalsize = 0;
             foreach (ExportsDirectory Size in Exports_Directory)
             {
-                Totalsize+= Size.ExportData.Count;
+                Totalsize += Size.ExportData.Count;
             }
             return Totalsize;
         }
-       public void UpdateOffset()
+        public void UpdateOffset()
         {
             //for textures 🤔
-            if (FBulkDataStartOffset>0&& BulkDataStartOffset>0) 
+            if (FBulkDataStartOffset > 0 && BulkDataStartOffset > 0)
             {
                 UassetFile.SetIntValue(IsNotUseUexp ? UassetFile.GetSize() : UassetFile.GetSize() + ExportSize(), false, FBulkDataStartOffset);
             }
-            }
+        }
 
     }
 }

@@ -55,10 +55,10 @@ namespace AssetParser
             {
                 for (int i = 0; i < StringCount; i++)
                 {
-                    uexp.Strings.Add(new List<string>() { IdValues[i], Block.GetStringUE(Encoding.Unicode)});
+                    uexp.Strings.Add(new List<string>() { IdValues[i], Block.GetStringUE(Encoding.Unicode) });
                 }
             }
-            else 
+            else
             {
                 Block.SetSize(Block.GetPosition());
 
@@ -73,7 +73,7 @@ namespace AssetParser
                 memoryList.SetIntValue(Block.GetSize());
 
                 memoryList.SetSize(StartOffset);
-                
+
                 memoryList.Seek(StartOffset);
                 memoryList.Add(Block.ToArray());
             }

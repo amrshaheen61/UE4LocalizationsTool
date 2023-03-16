@@ -1,7 +1,6 @@
 ﻿using Helper.MemoryList;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Text;
 
 namespace AssetParser
@@ -11,7 +10,7 @@ namespace AssetParser
 
         public static string GetPropertyName(this Uasset SourceFile, int Index)
         {
-            if (SourceFile.NAMES_DIRECTORY.Count > Index && Index>0)
+            if (SourceFile.NAMES_DIRECTORY.Count > Index && Index > 0)
             {
                 return SourceFile.NAMES_DIRECTORY[Index];
             }
@@ -22,7 +21,7 @@ namespace AssetParser
         {
             if (SourceFile.IOFile)
             {
-               return  GetPropertyName(SourceFile,Index);
+                return GetPropertyName(SourceFile, Index);
             }
 
 
@@ -61,11 +60,9 @@ namespace AssetParser
                     Stringvalue = memoryList.GetStringValue(StringLength);
                 }
             }
-            Stringvalue = Stringvalue.Replace("\r\n", "<cf>");
-            Stringvalue = Stringvalue.Replace("\r", "<cr>");
-            Stringvalue = Stringvalue.Replace("\n", "<lf>");
 
-            return Stringvalue.TrimEnd('\0');
+
+            return ReplaceBreaklines(Stringvalue).TrimEnd('\0');
         }
 
         private static int GetRequiredUtf16Padding(uint NameData)
@@ -83,59 +80,44 @@ namespace AssetParser
             Data[0] = memoryList.GetByteValue();
             Data[1] = memoryList.GetByteValue();
 
-            int len= (int)((Data[0] & 0x7Fu) << 8) + Data[1];
+            int len = (int)((Data[0] & 0x7Fu) << 8) + Data[1];
 
             if (IsUtf16(Data[0]))
             {
-                if (memoryList.GetByteValue(false)==0) //because "GetRequiredUtf16Padding" not work right :/
+                if (memoryList.GetByteValue(false) == 0) //because "GetRequiredUtf16Padding" not work right :/
                 {
                     memoryList.Skip(1);
                 }
-                Stringvalue = memoryList.GetStringValue(len*2,true,-1,Encoding.Unicode);
+                Stringvalue = memoryList.GetStringValue(len * 2, true, -1, Encoding.Unicode);
             }
             else
             {
-                Stringvalue= memoryList.GetStringValue(len);
+                Stringvalue = memoryList.GetStringValue(len);
             }
-            Stringvalue = Stringvalue.Replace("\r\n", "<cf>");
-            Stringvalue = Stringvalue.Replace("\r", "<cr>");
-            Stringvalue = Stringvalue.Replace("\n", "<lf>");
 
-            return Stringvalue.TrimEnd('\0');
+
+            return ReplaceBreaklines(Stringvalue).TrimEnd('\0');
         }
-        public static string GetStringUE(this MemoryList memoryList,Encoding encoding)
+        public static string GetStringUE(this MemoryList memoryList, Encoding encoding)
         {
-            string Stringvalue = memoryList.GetStringValueN(true,-1, encoding);
-            Stringvalue = Stringvalue.Replace("\r\n", "<cf>");
-            Stringvalue = Stringvalue.Replace("\r", "<cr>");
-            Stringvalue = Stringvalue.Replace("\n", "<lf>");
+            string Stringvalue = ReplaceBreaklines(memoryList.GetStringValueN(true, -1, encoding));
             return Stringvalue.TrimEnd('\0');
         }
 
-        public static string GetStringUE(this MemoryList memoryList,int Lenght, bool SavePosition = true, int SeekAndRead = -1, Encoding encoding = null)
+        public static string GetStringUE(this MemoryList memoryList, int Lenght, bool SavePosition = true, int SeekAndRead = -1, Encoding encoding = null)
         {
-            string Stringvalue = memoryList.GetStringValue(Lenght, SavePosition, SeekAndRead, encoding);
-            Stringvalue = Stringvalue.Replace("\r\n", "<cf>");
-            Stringvalue = Stringvalue.Replace("\r", "<cr>");
-            Stringvalue = Stringvalue.Replace("\n", "<lf>");
+            string Stringvalue = ReplaceBreaklines(memoryList.GetStringValue(Lenght, SavePosition, SeekAndRead, encoding));
             return Stringvalue.TrimEnd('\0');
         }
 
 
-        public static string ReplaceString(string Str)
-        {
-            Str = Str.Replace("<cf>", "\r\n");
-            Str = Str.Replace("<cr>", "\r");
-            return Str.Replace("<lf>", "\n");  
-        }
+
 
 
         public static void ReplaceStringUE_Func(this MemoryList memoryList, string StringValue)
         {
 
-            StringValue = StringValue.Replace("<cf>", "\r\n");
-            StringValue = StringValue.Replace("<cr>", "\r");
-            StringValue = StringValue.Replace("<lf>", "\n");
+            ReplaceBreaklines(StringValue, true);
 
             memoryList.Skip(-1);
             ExprToken eExpr = (ExprToken)memoryList.GetByteValue();
@@ -159,7 +141,7 @@ namespace AssetParser
             if (encoding == Encoding.ASCII)
             {
                 memoryList.SetByteValue((byte)ExprToken.EX_StringConst);
-                memoryList.InsertStringValueN(StringValue,true,-1, encoding);
+                memoryList.InsertStringValueN(StringValue, true, -1, encoding);
             }
             else
             {
@@ -170,7 +152,7 @@ namespace AssetParser
 
 
 
-            public static bool IsASCII(string StringValue)
+        public static bool IsASCII(string StringValue)
         {
             for (int n = 0; n < StringValue.Length; n++)
             {
@@ -196,20 +178,36 @@ namespace AssetParser
             memoryList.DeleteBytes(4 + StringLength);
         }
 
+        public static string ReplaceBreaklines(string StringValue, bool Back = false)
+        {
+            if (!Back)
+            {
+                StringValue = StringValue.Replace("\r\n", "<cf>");
+                StringValue = StringValue.Replace("\r", "<cr>");
+                StringValue = StringValue.Replace("\n", "<lf>");
+            }
+            else
+            {
+                StringValue = StringValue.Replace("<cf>", "\r\n");
+                StringValue = StringValue.Replace("<cr>", "\r");
+                StringValue = StringValue.Replace("<lf>", "\n");
+            }
+
+            return StringValue;
+        }
+
         public static void ReplaceStringUE(this MemoryList memoryList, string StringValue)
         {
 
 
-            StringValue = StringValue.Replace("<cf>", "\r\n");
-            StringValue = StringValue.Replace("<cr>", "\r");
-            StringValue = StringValue.Replace("<lf>", "\n");
+            ReplaceBreaklines(StringValue, true);
 
             //To save time
             int ThisPosition = memoryList.GetPosition();
             string TempString = memoryList.GetStringUE();
             if (StringValue == TempString)
             {
-              return;
+                return;
             }
 
             memoryList.Seek(ThisPosition);
@@ -231,7 +229,7 @@ namespace AssetParser
                 encoding = Encoding.ASCII;
             }
 
-           byte[] TextBytes= encoding.GetBytes(StringValue);
+            byte[] TextBytes = encoding.GetBytes(StringValue);
 
             if (encoding == Encoding.ASCII)
             {
@@ -240,7 +238,7 @@ namespace AssetParser
             }
             else
             {
-                memoryList.InsertIntValue(TextBytes.Length/-2);
+                memoryList.InsertIntValue(TextBytes.Length / -2);
                 memoryList.InsertBytes(TextBytes);
             }
         }

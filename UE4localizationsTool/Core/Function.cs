@@ -64,7 +64,7 @@ namespace AssetParser
             ConsoleMode.Print("-\n" + ScriptBytecodeSize + "\n" + scriptStorageSize + "\n-", ConsoleColor.Gray);
 
             FuncBlock = new MemoryList(memoryList.GetBytes(scriptStorageSize));
-            int index = 0; 
+            int index = 0;
             while (FuncBlock.GetPosition() < FuncBlock.GetSize())
             {
                 ConsoleMode.Print("Start: "+(index++), ConsoleColor.Yellow);
@@ -114,7 +114,7 @@ namespace AssetParser
                             list[x] += ExtraSize;
 
                             FuncBlock.SetIntValue(list[x], false, offsetList[x]);
-                            ConsoleMode.Print("NewVal: " + list[x], ConsoleColor.DarkYellow);    
+                            ConsoleMode.Print("NewVal: " + list[x], ConsoleColor.DarkYellow);
                             ConsoleMode.Print("TotalSize: " + ExtraSize, ConsoleColor.DarkYellow);
                             ConsoleMode.Print("- -  -  -  -  - - - ", ConsoleColor.Green);
                         }
@@ -229,12 +229,12 @@ namespace AssetParser
                     FuncBlock.Skip(4);//name
                     FuncBlock.Skip(4);
                 }
-               // offsetList.Add(FuncBlock.GetPosition());
+                // offsetList.Add(FuncBlock.GetPosition());
                 FuncBlock.Skip(4);
             }
             else
             {
-               // offsetList.Add(FuncBlock.GetPosition());
+                // offsetList.Add(FuncBlock.GetPosition());
                 FuncBlock.Skip(4);
             }
         }
@@ -336,7 +336,7 @@ namespace AssetParser
 
                 case ExprToken.EX_Context:
                     ReadExpression();
-                   // offsetList.Add(FuncBlock.GetPosition());
+                    // offsetList.Add(FuncBlock.GetPosition());
                     offset = FuncBlock.GetIntValue();
                     ReadPPOINTER();
                     ReadExpression();
@@ -344,7 +344,7 @@ namespace AssetParser
 
                 case ExprToken.EX_Context_FailSilent:
                     ReadExpression(); // Object expression.
-                   // offsetList.Add(FuncBlock.GetPosition());
+                                      // offsetList.Add(FuncBlock.GetPosition());
                     offset = FuncBlock.GetIntValue();// Code offset for NULL expressions.
                     ReadPPOINTER();// Property corresponding to the r-value data, in case the l-value needs to be mem-zero'd
                     ReadExpression();// Context expression.

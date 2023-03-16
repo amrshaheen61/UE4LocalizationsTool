@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace AssetParser
 {
-    public class locres
+    public class locres : IAsset
     {
         public enum LocresVersion : byte
         {
@@ -16,14 +16,30 @@ namespace AssetParser
         }
 
         //{7574140E-4A67-FC03-4A15-909DC3377F1B}
-        private readonly byte[] MagicGUID = { (byte)0x0E, (byte)0x14, (byte)0x74, (byte)0x75, (byte)0x67, (byte)0x4A, (byte)0x03, (byte)0xFC, (byte)0x4A, (byte)0x15, (byte)0x90, (byte)0x9D, (byte)0xC3, (byte)0x37, (byte)0x7F, (byte)0x1B };
+        private readonly byte[] MagicGUID = { 0x0E, 0x14, 0x74, 0x75, 0x67, 0x4A, 0x03, 0xFC, 0x4A, 0x15, 0x90, 0x9D, 0xC3, 0x37, 0x7F, 0x1B };
+
+        bool IAsset.IsGood
+        {
+            get
+            {
+                return true;
+            }
+        }
+
+        List<List<string>> IAsset.Strings
+        {
+            get
+            {
+                return Strings;
+            }
+        }
 
         public List<List<string>> Strings;
         public int CurrentIndex;
         MemoryList locresData;
         public locres(string FilePath)
         {
-            Strings = new List<List<string>>();//[Text id,Text Value,...] -> Text id = TextIndex
+            Strings = new List<List<string>>();//[Text id,Text Value,...]
             locresData = new MemoryList(FilePath);
             ReadOrEdit();
 
@@ -49,11 +65,9 @@ namespace AssetParser
                 throw new Exception("Unsupported locres version");
             }
 
-            // Console.WriteLine(Version);
 
             if (Version >= LocresVersion.Compact)
             {
-                // Console.WriteLine("Compact");
 
                 int localizedStringOffset = (int)locresData.GetInt64Value();
                 int currentFileOffset = locresData.GetPosition();
@@ -165,9 +179,8 @@ namespace AssetParser
                         int localizedStringIndex = locresData.GetIntValue();
                         if (Strings.Count > localizedStringIndex)
                         {
-                            Strings[localizedStringIndex][0] = KeyStr;
+                            Strings[localizedStringIndex][0] = nameSpaceStr + "::" + KeyStr;
                         }
-
                     }
 
                 }

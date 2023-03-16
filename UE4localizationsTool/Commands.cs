@@ -1,5 +1,4 @@
 ﻿using AssetParser;
-using Microsoft.SqlServer.Server;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -28,8 +27,9 @@ namespace UE4localizationsTool
         private bool RegularExpression = false;
         private bool ReverseMode = false;
         private List<string> ArrayValues;
-        public Commands(string Options, string SourcePath)
+        public Commands(string Options, string SourcePath, Args args)
         {
+            Flags = args;
             if (Flags.HasFlag(Args.filter))
             {
                 GetFilterValues();
@@ -161,10 +161,10 @@ namespace UE4localizationsTool
                 return locres.Strings;
                 //  SizeOfRecord = locres.Strings.Count;
             }
-            else if (FilePath.EndsWith(".uasset", StringComparison.OrdinalIgnoreCase)|| FilePath.EndsWith(".umap", StringComparison.OrdinalIgnoreCase))
+            else if (FilePath.EndsWith(".uasset", StringComparison.OrdinalIgnoreCase) || FilePath.EndsWith(".umap", StringComparison.OrdinalIgnoreCase))
             {
                 Uasset Uasset = new Uasset(FilePath);
-                
+
                 if (Flags.HasFlag(Args.method2))
                 {
                     Uasset.UseMethod2 = true;
@@ -192,7 +192,7 @@ namespace UE4localizationsTool
             Console.WriteLine(ConsoleText);
             Console.ForegroundColor = ConsoleColor.White;
 
-            string[] LanguageFiles = Directory.GetFiles(FolderPath, "*.*", SearchOption.AllDirectories).Where(x => x.EndsWith(".locres", StringComparison.OrdinalIgnoreCase) || x.EndsWith(".uasset", StringComparison.OrdinalIgnoreCase)|| x.EndsWith(".umap", StringComparison.OrdinalIgnoreCase)).ToArray<string>();
+            string[] LanguageFiles = Directory.GetFiles(FolderPath, "*.*", SearchOption.AllDirectories).Where(x => x.EndsWith(".locres", StringComparison.OrdinalIgnoreCase) || x.EndsWith(".uasset", StringComparison.OrdinalIgnoreCase) || x.EndsWith(".umap", StringComparison.OrdinalIgnoreCase)).ToArray<string>();
             Console.ForegroundColor = ConsoleColor.Green;
             Console.SetCursorPosition(ConsoleText.Length, Console.CursorTop - 1);
             Console.WriteLine("Done");
@@ -206,7 +206,7 @@ namespace UE4localizationsTool
             for (int i = 0; i < LanguageFiles.Count(); i++)
             {
                 Console.ForegroundColor = ConsoleColor.Blue;
-                ConsoleText = $"[{ i + 1}:{LanguageFiles.Count()}] Exporting... '{Path.GetFileName(LanguageFiles[i])}' ";
+                ConsoleText = $"[{i + 1}:{LanguageFiles.Count()}] Exporting... '{Path.GetFileName(LanguageFiles[i])}' ";
                 Console.WriteLine(ConsoleText);
                 Console.ForegroundColor = ConsoleColor.White;
 
@@ -302,14 +302,14 @@ namespace UE4localizationsTool
                 FilePath = Path.ChangeExtension(FilePath, null) + "_NEW.locres";
                 locres.SaveFile(FilePath);
             }
-            else if (FilePath.EndsWith(".uasset", StringComparison.OrdinalIgnoreCase)|| FilePath.EndsWith(".umap", StringComparison.OrdinalIgnoreCase))
+            else if (FilePath.EndsWith(".uasset", StringComparison.OrdinalIgnoreCase) || FilePath.EndsWith(".umap", StringComparison.OrdinalIgnoreCase))
             {
                 Uasset Uasset = new Uasset(FilePath);
                 if (Flags.HasFlag(Args.method2))
                 {
                     Uasset.UseMethod2 = true;
                 }
-                
+
                 Uexp Uexp = new Uexp(Uasset);
                 EditList(Uexp.Strings, Values);
 
@@ -318,8 +318,8 @@ namespace UE4localizationsTool
                     Uexp.SaveFile(FilePath);
                     return;
                 }
-              
-                if (FilePath.EndsWith(".uasset", StringComparison.OrdinalIgnoreCase)) 
+
+                if (FilePath.EndsWith(".uasset", StringComparison.OrdinalIgnoreCase))
                 {
                     FilePath = Path.ChangeExtension(FilePath, null) + "_NEW.uasset";
                 }
@@ -327,7 +327,7 @@ namespace UE4localizationsTool
                 {
                     FilePath = Path.ChangeExtension(FilePath, null) + "_NEW.umap";
                 }
-                
+
                 Uexp.SaveFile(FilePath);
             }
             else

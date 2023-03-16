@@ -38,7 +38,7 @@
             this.RemoveSelected = new System.Windows.Forms.Button();
             this.ClearList = new System.Windows.Forms.Button();
             this.matchcase = new System.Windows.Forms.CheckBox();
-            this.Close = new System.Windows.Forms.Button();
+            this.BtnClose = new System.Windows.Forms.Button();
             this.regularexpression = new System.Windows.Forms.CheckBox();
             this.reversemode = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
@@ -136,15 +136,15 @@
             // 
             // Close
             // 
-            this.Close.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.Close.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.Close.Location = new System.Drawing.Point(441, 110);
-            this.Close.Name = "Close";
-            this.Close.Size = new System.Drawing.Size(113, 23);
-            this.Close.TabIndex = 10;
-            this.Close.Text = "Close";
-            this.Close.UseVisualStyleBackColor = true;
-            this.Close.Click += new System.EventHandler(this.Close_Click);
+            this.BtnClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.BtnClose.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.BtnClose.Location = new System.Drawing.Point(441, 110);
+            this.BtnClose.Name = "Close";
+            this.BtnClose.Size = new System.Drawing.Size(113, 23);
+            this.BtnClose.TabIndex = 10;
+            this.BtnClose.Text = "Close";
+            this.BtnClose.UseVisualStyleBackColor = true;
+            this.BtnClose.Click += new System.EventHandler(this.Close_Click);
             // 
             // regularexpression
             // 
@@ -176,7 +176,7 @@
             this.ClientSize = new System.Drawing.Size(584, 261);
             this.Controls.Add(this.reversemode);
             this.Controls.Add(this.regularexpression);
-            this.Controls.Add(this.Close);
+            this.Controls.Add(this.BtnClose);
             this.Controls.Add(this.matchcase);
             this.Controls.Add(this.ClearList);
             this.Controls.Add(this.RemoveSelected);
@@ -214,7 +214,7 @@
         private System.Windows.Forms.Button RemoveSelected;
         private System.Windows.Forms.Button ClearList;
         private System.Windows.Forms.CheckBox matchcase;
-        private System.Windows.Forms.Button Close;
+        private System.Windows.Forms.Button BtnClose;
         private System.Windows.Forms.CheckBox regularexpression;
         private System.Windows.Forms.CheckBox reversemode;
     }

@@ -56,12 +56,12 @@
             this.textBox1.BackColor = System.Drawing.SystemColors.Control;
             this.textBox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox1.Location = new System.Drawing.Point(3, 37);
+            this.textBox1.Location = new System.Drawing.Point(5, 37);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
             this.textBox1.ReadOnly = true;
             this.textBox1.ShortcutsEnabled = false;
-            this.textBox1.Size = new System.Drawing.Size(383, 73);
+            this.textBox1.Size = new System.Drawing.Size(387, 73);
             this.textBox1.TabIndex = 2;
             this.textBox1.Text = "UE4 localizations Tool is a simple tool to edit unreal engine 4 text files.\r\n\r\nAu" +
     "thor: amr shaheeen(@amrshaheen61)\r\n";
@@ -73,17 +73,15 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.ClientSize = new System.Drawing.Size(384, 167);
+            this.ClientSize = new System.Drawing.Size(396, 167);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.label2);
             this.Cursor = System.Windows.Forms.Cursors.AppStarting;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MaximizeBox = false;
-            this.MaximumSize = new System.Drawing.Size(400, 206);
-            this.MinimizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(400, 206);
+            this.MaximumSize = new System.Drawing.Size(412, 206);
+            this.MinimumSize = new System.Drawing.Size(412, 206);
             this.Name = "FrmAbout";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;

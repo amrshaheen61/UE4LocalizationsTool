@@ -37,7 +37,7 @@ namespace AssetParser
 
             MemoryList ATFBlock = new MemoryList(memoryList.GetBytes(UncompressedSize));
 
-            MagicId = ATFBlock.GetStringValueN(); 
+            MagicId = ATFBlock.GetStringValueN();
 
             if (MagicId != "ATF")
             {
@@ -90,7 +90,7 @@ namespace AssetParser
 
                     //  Console.WriteLine(n+": " + tagsOffsets +" - "+ tagsLength + " - "+ stringOffsets + " - "+ stringLength);
                     uexp.Strings.Add(new List<string>() { StringsTags.GetStringUE(tagsLength, false, tagsOffsets), StringsBlock.GetStringUE(stringLength * 2, false, stringOffsets * 2, System.Text.Encoding.Unicode) });
-                
+
                 }
             }
             else
@@ -99,7 +99,7 @@ namespace AssetParser
                 for (int n = 0; n < StringCount; n++)
                 {
 
-                    byte[] StrBytes = Encoding.Unicode.GetBytes(AssetHelper.ReplaceString(uexp.Strings[uexp.CurrentIndex][1] + '\0'));
+                    byte[] StrBytes = Encoding.Unicode.GetBytes(AssetHelper.ReplaceBreaklines(uexp.Strings[uexp.CurrentIndex][1] + '\0', true));
                     uexp.CurrentIndex++;
 
                     StringsInfo.GetIntValue(); //tagsOffsets

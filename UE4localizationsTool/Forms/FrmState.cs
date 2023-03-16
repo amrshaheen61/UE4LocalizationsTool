@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
+using UE4localizationsTool.Controls;
 
 namespace UE4localizationsTool
 {
-    public partial class FrmState : Form
+    public partial class FrmState : NForm
     {
 
         DateTime dateTime;
@@ -30,7 +31,7 @@ namespace UE4localizationsTool
             label1.Text = state;
             this.Text = Title;
             timer1.Start();
-            timer1_Tick(null,null);
+            timer1_Tick(null, null);
         }
 
 

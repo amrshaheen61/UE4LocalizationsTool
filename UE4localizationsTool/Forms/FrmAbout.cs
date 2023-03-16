@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
+using UE4localizationsTool.Controls;
 
 namespace UE4localizationsTool
 {
-    public partial class FrmAbout : Form
+    public partial class FrmAbout : NForm
     {
         public FrmAbout(Form form)
         {

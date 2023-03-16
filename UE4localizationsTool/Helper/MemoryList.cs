@@ -91,11 +91,6 @@ namespace Helper.MemoryList
 
         public MemoryList(string FilePath)
         {
-            if (!File.Exists(FilePath))
-            {
-                throw new Exception("File not found");
-            }
-
             if (new FileInfo(FilePath).Length > int.MaxValue)
             {
                 throw new Exception("Can't read this file: " + FilePath);
@@ -359,7 +354,7 @@ namespace Helper.MemoryList
             {
                 byte value = MemoryListData[MemoryListPosition];
                 MemoryListPosition++;
-                return (byte)value;
+                return value;
             }
 
             return MemoryListData[MemoryListPosition];
@@ -750,7 +745,7 @@ namespace Helper.MemoryList
             {
                 Array.Reverse(array);
             }
-            return (int)(array[0] | (array[1] << 8) | (array[2] << 16) | (array[3] << 24));
+            return array[0] | (array[1] << 8) | (array[2] << 16) | (array[3] << 24);
         }
 
         public uint GetUIntValue(bool SavePosition = true, int SeekAndRead = -1, Endian _Endian = Endian.Little)
@@ -990,7 +985,7 @@ namespace Helper.MemoryList
             {
                 Array.Reverse(array);
             }
-            return BitConverter.ToInt64(array,0);
+            return BitConverter.ToInt64(array, 0);
         }
 
         public ulong GetUInt64Value(bool SavePosition = true, int SeekAndRead = -1, Endian _Endian = Endian.Little)
@@ -1383,7 +1378,7 @@ namespace Helper.MemoryList
         public T GetStructureValues<T>(bool SavePosition = true, int SeekAndRead = -1)
         {
             var structureSize = Marshal.SizeOf(typeof(T));
-            var buffer = GetBytes((int)structureSize, SavePosition, SeekAndRead);
+            var buffer = GetBytes(structureSize, SavePosition, SeekAndRead);
 
             if (buffer.Length != structureSize)
             {
