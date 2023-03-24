@@ -117,7 +117,7 @@ namespace AssetParser
         public static void ReplaceStringUE_Func(this MemoryList memoryList, string StringValue)
         {
 
-            ReplaceBreaklines(StringValue, true);
+            StringValue = ReplaceBreaklines(StringValue, true);
 
             memoryList.Skip(-1);
             ExprToken eExpr = (ExprToken)memoryList.GetByteValue();
@@ -200,7 +200,7 @@ namespace AssetParser
         {
 
 
-            ReplaceBreaklines(StringValue, true);
+            StringValue = ReplaceBreaklines(StringValue, true);
 
             //To save time
             int ThisPosition = memoryList.GetPosition();
