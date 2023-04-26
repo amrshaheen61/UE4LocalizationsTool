@@ -17,24 +17,8 @@ namespace AssetParser
 
         //{7574140E-4A67-FC03-4A15-909DC3377F1B}
         private readonly byte[] MagicGUID = { 0x0E, 0x14, 0x74, 0x75, 0x67, 0x4A, 0x03, 0xFC, 0x4A, 0x15, 0x90, 0x9D, 0xC3, 0x37, 0x7F, 0x1B };
-
-        bool IAsset.IsGood
-        {
-            get
-            {
-                return true;
-            }
-        }
-
-        List<List<string>> IAsset.Strings
-        {
-            get
-            {
-                return Strings;
-            }
-        }
-
-        public List<List<string>> Strings;
+        public bool IsGood { get; set; } = true;
+        public List<List<string>> Strings { get; set; }
         public int CurrentIndex;
         MemoryList locresData;
         public locres(string FilePath)

@@ -8,17 +8,10 @@ namespace AssetParser
     {
 
         public Uasset UassetData;
-        List<List<string>> IAsset.Strings
-        {
-            get { return Strings; }
-        }
 
-
-
-        public List<List<string>> Strings;  //[Text id,Text Value,...]
+        public List<List<string>> Strings { get; set; }  //[Text id,Text Value,...]
         private int _CurrentIndex;
-        bool IAsset.IsGood { get { return IsGood; } }
-        public bool IsGood = true;
+        public bool IsGood { get; set; } = true;
         public int ExportIndex;
         public int CurrentIndex
         {
@@ -136,14 +129,13 @@ namespace AssetParser
                     }
                     catch (Exception ex)
                     {
-                        ConsoleMode.Print("Skip this export:\n" + ex.ToString(), ConsoleColor.Red);
-                        // Console.ReadLine();
+                        ConsoleMode.Print("Skip this export:\n" + ex.ToString(), ConsoleColor.Red,ConsoleMode.ConsoleModeType.Error);
                         // Skip this export
                     }
                 }
 
             }
-
+            
 
         }
 

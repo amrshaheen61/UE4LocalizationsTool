@@ -25,7 +25,7 @@ namespace AssetParser
             offsetList = new List<int>();
             stringOffset = new List<List<int>>();
             NewSize = 0;
-            if (uexp.UassetData.EngineVersion < UE4Version.VER_UE4_16)
+            if (uexp.UassetData.EngineVersion < UEVersions.VER_UE4_16)
             {
                 return;
             }
@@ -43,11 +43,11 @@ namespace AssetParser
             }
             
             //TODO :(
-            if (uexp.UassetData.Exports_Directory[Uexp.ExportIndex].Value >= 4 || uexp.UassetData.EngineVersion >= UE4Version.VER_UE4_ADDED_PACKAGE_OWNER)
+            if (uexp.UassetData.Exports_Directory[Uexp.ExportIndex].Value >= 4 || uexp.UassetData.EngineVersion >= UEVersions.VER_UE4_ADDED_PACKAGE_OWNER)
             {
                 if (uexp.UassetData.AutoVersion)
                 {
-                    uexp.UassetData.EngineVersion = UE4Version.VER_UE4_26;
+                    uexp.UassetData.EngineVersion = UEVersions.VER_UE4_26;
                 }
 
                 int num = memoryList.GetIntValue();
@@ -221,7 +221,7 @@ namespace AssetParser
 
         void ReadPPOINTER()
         {
-            if (uexp.UassetData.EngineVersion >= UE4Version.VER_UE4_25)
+            if (uexp.UassetData.EngineVersion >= UEVersions.VER_UE4_25)
             {
                 int num = FuncBlock.GetIntValue();
                 for (int i = 0; i < num; i++)
@@ -479,7 +479,7 @@ namespace AssetParser
 
                 case ExprToken.EX_SetArray:
 
-                    if (uexp.UassetData.EngineVersion >= UE4Version.VER_UE4_CHANGE_SETARRAY_BYTECODE)
+                    if (uexp.UassetData.EngineVersion >= UEVersions.VER_UE4_CHANGE_SETARRAY_BYTECODE)
                     {
                         ReadExpression();
                     }

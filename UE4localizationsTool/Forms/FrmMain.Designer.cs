@@ -67,6 +67,7 @@ namespace UE4localizationsTool
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.Method2 = new System.Windows.Forms.ToolStripMenuItem();
             this.UseFixedSize = new System.Windows.Forms.ToolStripMenuItem();
+            this.Checkforupdates = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.commandLinesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.donateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -163,6 +164,7 @@ namespace UE4localizationsTool
             this.fontToolStripMenuItem,
             this.rightToLeftToolStripMenuItem,
             this.darkModeToolStripMenuItem,
+            this.Checkforupdates,
             this.toolStripSeparator4,
             this.Method2,
             this.UseFixedSize});
@@ -382,7 +384,6 @@ namespace UE4localizationsTool
             | System.Windows.Forms.Keys.D)));
             this.darkModeToolStripMenuItem.Size = new System.Drawing.Size(229, 22);
             this.darkModeToolStripMenuItem.Text = "Dark mode";
-            this.darkModeToolStripMenuItem.Visible = false;
             this.darkModeToolStripMenuItem.CheckedChanged += new System.EventHandler(this.darkModeToolStripMenuItem_CheckedChanged);
             // 
             // toolStripSeparator4
@@ -409,6 +410,14 @@ namespace UE4localizationsTool
             this.UseFixedSize.Size = new System.Drawing.Size(229, 22);
             this.UseFixedSize.Text = "Fixed Size";
             this.UseFixedSize.Visible = false;
+            // 
+            // Checkforupdates
+            // 
+            this.Checkforupdates.CheckOnClick = true;
+            this.Checkforupdates.Name = "Checkforupdates";
+            this.Checkforupdates.Size = new System.Drawing.Size(229, 22);
+            this.Checkforupdates.Text = "Check for Updates";
+            this.Checkforupdates.CheckedChanged += new System.EventHandler(this.Checkforupdates_CheckedChanged);
             // 
             // aboutToolStripMenuItem
             // 
@@ -724,6 +733,7 @@ namespace UE4localizationsTool
         private System.Windows.Forms.DataGridViewTextBoxColumn TextName;
         private System.Windows.Forms.DataGridViewTextBoxColumn TextValue;
         private System.Windows.Forms.DataGridViewTextBoxColumn Index;
+        private System.Windows.Forms.ToolStripMenuItem Checkforupdates;
     }
 }
 

@@ -38,7 +38,7 @@ namespace AssetParser
 
         public static void ReadExtraByte(this MemoryList memoryList, Uexp SourceFile, bool fromStruct)
         {
-            if (fromStruct && SourceFile.UassetData.EngineVersion >= UE4Version.VER_UE4_NAME_HASHES_SERIALIZED)
+            if (fromStruct && SourceFile.UassetData.EngineVersion >= UEVersions.VER_UE4_NAME_HASHES_SERIALIZED)
             {
                 memoryList.Skip(1);
             }
@@ -103,6 +103,11 @@ namespace AssetParser
             string Stringvalue = ReplaceBreaklines(memoryList.GetStringValueN(true, -1, encoding));
             return Stringvalue.TrimEnd('\0');
         }
+        public static void SetStringUE(this MemoryList memoryList, string str, Encoding encoding)
+        {
+            memoryList.SetStringValueN(ReplaceBreaklines(str, true), true, -1, encoding);
+        }
+
 
         public static string GetStringUE(this MemoryList memoryList, int Lenght, bool SavePosition = true, int SeekAndRead = -1, Encoding encoding = null)
         {
@@ -262,6 +267,103 @@ namespace AssetParser
             }
         }
     }
+
+    public class FName
+    {
+        public FName(MemoryList memoryList, Uexp uexp, string PropertyName, bool Modify = false)
+        {
+            int NameIndex = memoryList.GetIntValue();
+            memoryList.Skip(4);
+            if (!Modify)
+            {
+                uexp.Strings.Add(new List<string>() { PropertyName, uexp.UassetData.GetPropertyName(NameIndex), !uexp.UassetData.IOFile ? "be careful with this value." : "Can't edit this value.", !uexp.UassetData.IOFile ? "#FFBFB2" : "#FF0000", "#000000" });
+            }
+            else
+            {
+                uexp.UassetData.EditName(uexp.Strings[uexp.CurrentIndex][1], NameIndex);
+                uexp.CurrentIndex++;
+            }
+        }
+    }
+
+
+    public class TextHistory
+    {
+        public TextHistory(MemoryList memoryList, Uexp uexp, string PropertyName, bool Modify = false)
+        {
+            memoryList.Skip(4); //unkown
+            TextHistoryType texthistorytype = (TextHistoryType)memoryList.GetUByteValue();
+            switch (texthistorytype)
+            {
+                case TextHistoryType.None:
+                    if (memoryList.GetIntValue() != 0)
+                    {
+                        new ReadStringProperty(memoryList, uexp, PropertyName, Modify);
+                    }
+                    break;
+
+                case TextHistoryType.Base:
+                    new ReadStringProperty(memoryList, uexp, PropertyName + "_1", Modify);
+                    new ReadStringProperty(memoryList, uexp, PropertyName + "_2", Modify);
+                    new ReadStringProperty(memoryList, uexp, PropertyName + "_3", Modify);
+                    break;
+                case TextHistoryType.NamedFormat:
+                case TextHistoryType.OrderedFormat:
+                    {
+                        new TextHistory(memoryList, uexp, PropertyName, Modify);
+                        int ArgumentsCount = memoryList.GetIntValue();
+                        for (int i = 0; i < ArgumentsCount; i++)
+                        {
+                            GetArgumentValue(memoryList, uexp, PropertyName, Modify);
+                        }
+                    }
+                    break;
+
+                case TextHistoryType.AsNumber:
+                case TextHistoryType.AsPercent:
+                case TextHistoryType.AsCurrency:
+                    {
+                        GetArgumentValue(memoryList, uexp, PropertyName, Modify);
+                        new ReadStringProperty(memoryList, uexp, PropertyName + "_1", Modify);
+                        new ReadStringProperty(memoryList, uexp, PropertyName + "_2", Modify);
+                    }
+                    break;
+                case TextHistoryType.StringTableEntry:
+                    new FName(memoryList, uexp, PropertyName, Modify);
+                    new ReadStringProperty(memoryList, uexp, PropertyName + "_1", Modify);
+                    break;
+
+                default:
+                    throw new Exception("UnKnown 'TextProperty' type: " + texthistorytype.ToString());
+            }
+        }
+
+        private static void GetArgumentValue(MemoryList memoryList, Uexp uexp, string PropertyName, bool Modify)
+        {
+            FormatArgumentType Type = (FormatArgumentType)memoryList.GetUByteValue();
+
+            switch (Type)
+            {
+                case FormatArgumentType.Text:
+                    new TextHistory(memoryList, uexp, PropertyName, Modify);
+                    break;
+                case FormatArgumentType.Int:
+                case FormatArgumentType.UInt:
+                case FormatArgumentType.Double:
+                    memoryList.Skip(8);
+                    break;
+                case FormatArgumentType.Float:
+                    memoryList.Skip(4);
+                    break;
+                case FormatArgumentType.Gender:
+                    memoryList.Skip(1);
+                    break;
+                default:
+                    throw new Exception("Unkown argument type: " + Type.ToString());
+            }
+        }
+    }
+
 
 
 }

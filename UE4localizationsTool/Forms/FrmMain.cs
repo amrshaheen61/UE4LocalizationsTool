@@ -31,7 +31,7 @@ namespace UE4localizationsTool
         Stack<DataRow> BackupDataUndo;
         Stack<DataRow> BackupDataRedo;
         List<List<string>> ListrefValues;
-        List<List<string>> ListBackupValues;
+        List<string> ListBackupValues;
         bool Filter = false;
         bool SortApply = false;
         bool ClearTemp = true;
@@ -46,6 +46,7 @@ namespace UE4localizationsTool
             ResetControls();
             pictureBox1.Height = menuStrip1.Height;
             darkModeToolStripMenuItem.Checked = Properties.Settings.Default.DarkMode;
+            Checkforupdates.Checked = Properties.Settings.Default.CheckForUpdates;
         }
 
 
@@ -143,9 +144,9 @@ namespace UE4localizationsTool
 
         private void CreateBackupList()
         {
-            ListBackupValues = new List<List<string>>();
+            ListBackupValues = new List<string>();
             ListrefValues = Asset.Strings;
-            ListrefValues.ForEach(x => ListBackupValues.Add(new List<string>(x)));
+            ListrefValues.ForEach(Text => ListBackupValues.Add(Text[1]));
             AddToDataView();
         }
 
@@ -561,13 +562,16 @@ namespace UE4localizationsTool
             if (dataGridView1.Created)
             {
                 ListrefValues[int.Parse(dataGridView1.Rows[e.RowIndex].Cells[2].Value.ToString())][1] = ObjectToString(dataGridView1.Rows[e.RowIndex].Cells[1].Value);
-                if (ListrefValues[int.Parse(dataGridView1.Rows[e.RowIndex].Cells[2].Value.ToString())][1] != ListBackupValues[int.Parse(dataGridView1.Rows[e.RowIndex].Cells[2].Value.ToString())][1])
+                if (ListrefValues[int.Parse(dataGridView1.Rows[e.RowIndex].Cells[2].Value.ToString())][1] != ListBackupValues[int.Parse(dataGridView1.Rows[e.RowIndex].Cells[2].Value.ToString())])
                 {
                     dataGridView1.Rows[e.RowIndex].Cells[1].Style.BackColor = System.Drawing.Color.FromArgb(255, 204, 153);
+                    dataGridView1.Rows[e.RowIndex].Cells[1].Style.ForeColor = Color.Black;
                 }
                 else
                 {
-                    dataGridView1.Rows[e.RowIndex].Cells[1].Style.BackColor = System.Drawing.Color.FromArgb(255, 255, 255);
+                    dataGridView1.Rows[e.RowIndex].Cells[1].Style.BackColor = dataGridView1.DefaultCellStyle.BackColor;
+                    dataGridView1.Rows[e.RowIndex].Cells[1].Style.ForeColor = dataGridView1.DefaultCellStyle.ForeColor;
+
                 }
                 this.Text = ToolName + " - " + Path.GetFileName(FilePath) + "*";
                 if (ClearTemp)
@@ -590,11 +594,15 @@ namespace UE4localizationsTool
                 //MessageBox.Show(dataRow.StringValue);
                 dataGridView1.Rows[dataRow.Index].Cells[1].Value = dataRow.StringValue;
                 ClearTemp = true;
-                if (dataRow.StringValue == ListBackupValues[dataRow.Index][1])
-                    dataGridView1.Rows[dataRow.Index].Cells[1].Style.BackColor = System.Drawing.Color.FromArgb(255, 255, 255);
+                if (dataRow.StringValue == ListBackupValues[dataRow.Index])
+                {
+                    dataGridView1.Rows[dataRow.Index].Cells[1].Style.BackColor = dataGridView1.DefaultCellStyle.BackColor;
+                    dataGridView1.Rows[dataRow.Index].Cells[1].Style.ForeColor = dataGridView1.DefaultCellStyle.ForeColor;
+                }
                 else
                 {
                     dataGridView1.Rows[dataRow.Index].Cells[1].Style.BackColor = System.Drawing.Color.FromArgb(255, 204, 153);
+                    dataGridView1.Rows[dataRow.Index].Cells[1].Style.ForeColor = Color.Black;
                 }
                 dataGridView1.ClearSelection();
                 dataGridView1.Rows[dataRow.Index].Selected = true;
@@ -620,7 +628,7 @@ namespace UE4localizationsTool
                 dataGridView1.Rows[dataRow.Index].Cells[1].Value = dataRow.StringValue;
                 ClearTemp = true;
                 dataGridView1.Rows[dataRow.Index].Cells[1].Style.BackColor = System.Drawing.Color.FromArgb(255, 204, 153);
-
+                dataGridView1.Rows[dataRow.Index].Cells[1].Style.ForeColor = Color.Black;
 
                 dataGridView1.ClearSelection();
                 dataGridView1.Rows[dataRow.Index].Selected = true;
@@ -782,57 +790,60 @@ namespace UE4localizationsTool
 
         private void FrmMain_Load(object sender, EventArgs e)
         {
-            this.Invoke(new Action(() =>
-               {
-                   float ToolVer = 0;
-                   string ToolSite = "";
-
-                   using (WebClient client = new WebClient())
+            if (Properties.Settings.Default.CheckForUpdates)
+            { 
+                this.Invoke(new Action(() =>
                    {
-                       try
-                       {
-                           string UpdateScript = client.DownloadString("https://raw.githubusercontent.com/amrshaheen61/UE4LocalizationsTool/master/UE4localizationsTool/UpdateInfo.txt");
+                       float ToolVer = 0;
+                       string ToolSite = "";
 
-                           if (UpdateScript.StartsWith("UpdateFile", false, CultureInfo.InvariantCulture))
+                       using (WebClient client = new WebClient())
+                       {
+                           try
                            {
-                               var lines = Regex.Split(UpdateScript, "\r\n|\r|\n");
-                               foreach (string Line in lines)
-                               {
+                               string UpdateScript = client.DownloadString("https://raw.githubusercontent.com/amrshaheen61/UE4LocalizationsTool/master/UE4localizationsTool/UpdateInfo.txt");
 
-                                   if (Line.StartsWith("Tool_UpdateVer", false, CultureInfo.InvariantCulture))
+                               if (UpdateScript.StartsWith("UpdateFile", false, CultureInfo.InvariantCulture))
+                               {
+                                   var lines = Regex.Split(UpdateScript, "\r\n|\r|\n");
+                                   foreach (string Line in lines)
                                    {
-                                       ToolVer = float.Parse(Line.Split(new char[] { '=' }, 2)[1].Trim());
+
+                                       if (Line.StartsWith("Tool_UpdateVer", false, CultureInfo.InvariantCulture))
+                                       {
+                                           ToolVer = float.Parse(Line.Split(new char[] { '=' }, 2)[1].Trim());
+                                       }
+                                       if (Line.StartsWith("Tool_UpdateSite", false, CultureInfo.InvariantCulture))
+                                       {
+                                           ToolSite = Line.Split(new char[] { '=' }, 2)[1].Trim();
+                                       }
                                    }
-                                   if (Line.StartsWith("Tool_UpdateSite", false, CultureInfo.InvariantCulture))
+
+                                   if (ToolVer > float.Parse(Application.ProductVersion))
                                    {
-                                       ToolSite = Line.Split(new char[] { '=' }, 2)[1].Trim();
+
+                                       DialogResult message = MessageBox.Show("There is an update available\nDo you want to download it?", "Update available", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                                       if (message == DialogResult.Yes)
+                                       {
+                                           Process.Start(new ProcessStartInfo { FileName = ToolSite, UseShellExecute = true });
+                                           Application.Exit();
+                                       }
+
+
                                    }
                                }
 
-                               if (ToolVer > float.Parse(Application.ProductVersion))
-                               {
-
-                                   DialogResult message = MessageBox.Show("There is an update available\nDo you want to download it?", "Update available", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-
-                                   if (message == DialogResult.Yes)
-                                   {
-                                       Process.Start(new ProcessStartInfo { FileName = ToolSite, UseShellExecute = true });
-                                       Application.Exit();
-                                   }
-
-
-                               }
                            }
-
+                           catch
+                           {
+                               //n
+                           }
                        }
-                       catch
-                       {
-                           //n
-                       }
-                   }
-               })
+                   })
 
-                   );
+                       );
+        }
 
         }
 
@@ -956,7 +967,7 @@ namespace UE4localizationsTool
             }
 
             Encoding encoding = Encoding.ASCII;
-            if (!AssetHelper.IsASCII(ListBackupValues[int.Parse(dataGridView1.Rows[e.RowIndex].Cells[2].Value.ToString())][1]))
+            if (!AssetHelper.IsASCII(ListBackupValues[int.Parse(dataGridView1.Rows[e.RowIndex].Cells[2].Value.ToString())]))
             {
                 encoding = Encoding.Unicode;
             }
@@ -967,7 +978,7 @@ namespace UE4localizationsTool
             }
 
 
-            if (encoding.GetBytes(ListBackupValues[int.Parse(dataGridView1.Rows[e.RowIndex].Cells[2].Value.ToString())][1]).Length < encoding1.GetBytes(e.FormattedValue.ToString()).Length)
+            if (encoding.GetBytes(ListBackupValues[int.Parse(dataGridView1.Rows[e.RowIndex].Cells[2].Value.ToString())]).Length < encoding1.GetBytes(e.FormattedValue.ToString()).Length)
             {
                 dataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].ErrorText = "The value is too long";
             }
@@ -988,5 +999,10 @@ namespace UE4localizationsTool
                 Application.Restart();
         }
 
+        private void Checkforupdates_CheckedChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.CheckForUpdates = Checkforupdates.Checked;
+            Properties.Settings.Default.Save();
+        }
     }
 }

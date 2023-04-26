@@ -7,12 +7,6 @@ namespace AssetParser
 {
     public class REDLibraryTextData
     {
-
-        int StartOffset;
-        int UncompressedSize;
-        int CompressedSize;
-        int StringCount;
-
         public REDLibraryTextData(MemoryList memoryList, Uexp uexp, bool Modify = false)
         {
             memoryList.GetIntValue();//Null
@@ -21,8 +15,8 @@ namespace AssetParser
             memoryList.GetIntValue(); //Start Data offset
             memoryList.Skip(8); //Unknown2
             int ValuesPosition = memoryList.GetPosition();
-            UncompressedSize = memoryList.GetIntValue();
-            CompressedSize = memoryList.GetIntValue();
+            int UncompressedSize = memoryList.GetIntValue();
+            int CompressedSize = memoryList.GetIntValue();
             if (UncompressedSize != CompressedSize)
             {
                 throw new Exception("Can't Parse this file.");
@@ -31,11 +25,11 @@ namespace AssetParser
 
             memoryList.GetIntValue();//Null
 
-            StartOffset = memoryList.GetPosition();
+            int StartOffset = memoryList.GetPosition();
 
             MemoryList Block = new MemoryList(memoryList.GetBytes(UncompressedSize));
 
-            StringCount = Block.GetIntValue();
+            int StringCount = Block.GetIntValue();
 
 
             string[] IdValues = new string[StringCount];
@@ -64,7 +58,7 @@ namespace AssetParser
 
                 for (int i = 0; i < StringCount; i++)
                 {
-                    Block.SetStringValueN(uexp.Strings[uexp.CurrentIndex][1]);
+                    Block.SetStringUE(uexp.Strings[uexp.CurrentIndex][1], Encoding.Unicode);
                     uexp.CurrentIndex++;
                 }
 

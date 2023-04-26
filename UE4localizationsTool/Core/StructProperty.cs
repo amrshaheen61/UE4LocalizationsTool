@@ -1,6 +1,5 @@
 ﻿using Helper.MemoryList;
 using System;
-using System.Collections.Generic;
 using UE4localizationsTool.Core.Games;
 
 namespace AssetParser
@@ -19,7 +18,7 @@ namespace AssetParser
                     GetPropertyName = memoryList.GetUInt64Value();
 
                     ConsoleMode.Print($"PropertyNameMoving- {GetPropertyName} > " + memoryList.GetPosition(), ConsoleColor.DarkBlue);
-                    if (GetPropertyName > (uint)uexp.UassetData.Number_of_Names)
+                    if (GetPropertyName > (uint)uexp.UassetData.Number_of_Names && (int)GetPropertyName > 0)
                     {
                         memoryList.Skip(-4);
                         continue;
@@ -82,11 +81,10 @@ namespace AssetParser
                             PropertyParser(ref PropertyName, MapValue, -1, MapData, uexp, Modify);
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
                         uexp.IsGood = false;
-                        ConsoleMode.Print("Bug here.", ConsoleColor.Red);
-                        //Console.ReadLine();
+                        ConsoleMode.Print("Bug here: " + ex.Message, ConsoleColor.Red, ConsoleMode.ConsoleModeType.Error);
                     }
 
                     ConsoleMode.Print("EndMapProperty", ConsoleColor.Blue);
@@ -165,11 +163,10 @@ namespace AssetParser
                             }
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
                         uexp.IsGood = false;
-                        ConsoleMode.Print("Bug here.", ConsoleColor.Red);
-                        //Console.ReadLine();
+                        ConsoleMode.Print("Bug here: " + ex.Message, ConsoleColor.Red, ConsoleMode.ConsoleModeType.Error);
                     }
 
                     if (Modify)
@@ -293,11 +290,10 @@ namespace AssetParser
                                 new StructProperty(StructData, uexp, true, false, Modify);
                             }
                         }
-                        catch
+                        catch (Exception ex)
                         {
                             uexp.IsGood = false;
-                            ConsoleMode.Print("Bug here.", ConsoleColor.Red);
-                            //Console.ReadLine();
+                            ConsoleMode.Print("Bug here: " + ex.Message, ConsoleColor.Red, ConsoleMode.ConsoleModeType.Error);
                         }
                     }
 
@@ -345,11 +341,11 @@ namespace AssetParser
 
                     try
                     {
-                        if (uexp.UassetData.EngineVersion < UE4Version.VER_UE4_FTEXT_HISTORY)
+                        if (uexp.UassetData.EngineVersion < UEVersions.VER_UE4_FTEXT_HISTORY)
                         {
 
                             new ReadStringProperty(TextData, uexp, PropertyName + "_0", Modify);
-                            if (uexp.UassetData.EngineVersion >= UE4Version.VER_UE4_ADDED_NAMESPACE_AND_KEY_DATA_TO_FTEXT)
+                            if (uexp.UassetData.EngineVersion >= UEVersions.VER_UE4_ADDED_NAMESPACE_AND_KEY_DATA_TO_FTEXT)
                             {
                                 new ReadStringProperty(TextData, uexp, PropertyName + "_1", Modify);
                                 new ReadStringProperty(TextData, uexp, PropertyName + "_2", Modify);
@@ -361,34 +357,9 @@ namespace AssetParser
 
                         }
 
-                        if (uexp.UassetData.EngineVersion > UE4Version.VER_UE4_FTEXT_HISTORY)
+                        if (uexp.UassetData.EngineVersion > UEVersions.VER_UE4_FTEXT_HISTORY)
                         {
-                            TextData.Skip(4); //unkown
-                            TextHistoryType ContainText = (TextHistoryType)TextData.GetUByteValue();
-
-                            switch (ContainText)
-                            {
-                                case TextHistoryType.None:
-                                    int TextLinesCount = TextData.GetIntValue();
-                                    for (int i = 0; i < TextLinesCount; i++)
-                                    {
-                                        new ReadStringProperty(TextData, uexp, PropertyName + "_" + (i + 1), Modify);
-                                    }
-                                    break;
-
-                                case TextHistoryType.Base:
-                                    new ReadStringProperty(TextData, uexp, PropertyName + "_1", Modify);
-                                    new ReadStringProperty(TextData, uexp, PropertyName + "_2", Modify);
-                                    new ReadStringProperty(TextData, uexp, PropertyName + "_3", Modify);
-                                    break;
-                                case TextHistoryType.StringTableEntry:
-                                    TextData.Skip(8); //Id
-                                    new ReadStringProperty(TextData, uexp, PropertyName + "_1", Modify);
-                                    break;
-
-                                default:
-                                    throw new Exception("UnKnown 'TextProperty' type: " + ContainText.ToString());
-                            }
+                            new TextHistory(TextData, uexp, PropertyName, Modify);
                         }
 
                         if (Modify)
@@ -398,10 +369,10 @@ namespace AssetParser
                             memoryList.SetIntValue(TextData.GetSize(), false, ThisPosition);
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
                         uexp.IsGood = false;
-                        ConsoleMode.Print("Bug here.", ConsoleColor.Red);
+                        ConsoleMode.Print("Bug here: " + ex.Message, ConsoleColor.Red, ConsoleMode.ConsoleModeType.Error);
                     }
                 }
                 else if (Property == "ByteProperty")
@@ -467,11 +438,10 @@ namespace AssetParser
                             memoryList.SetIntValue(TextData.GetSize(), false, ThisPosition);
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
                         uexp.IsGood = false;
-                        ConsoleMode.Print("Bug here.", ConsoleColor.Red);
-                        //Console.ReadLine();
+                        ConsoleMode.Print("Bug here: " + ex.Message, ConsoleColor.Red, ConsoleMode.ConsoleModeType.Error);
                     }
                 }
 
@@ -531,17 +501,7 @@ namespace AssetParser
             }
             else if (Property == "NameProperty")
             {
-                int NameIndex = memoryList.GetIntValue();
-                memoryList.Skip(4);
-                if (!Modify)
-                {
-                    uexp.Strings.Add(new List<string>() { PropertyName, uexp.UassetData.GetPropertyName(NameIndex), !uexp.UassetData.IOFile ? "be careful with this value." : "Can't edit this value.", !uexp.UassetData.IOFile ? "#FFBFB2" : "#FF0000", "#000000" });
-                }
-                else
-                {
-                    uexp.UassetData.EditName(uexp.Strings[uexp.CurrentIndex][1], NameIndex);
-                    uexp.CurrentIndex++;
-                }
+                new FName(memoryList, uexp, PropertyName, Modify);
             }
             else if (Property == "MulticastSparseDelegateProperty")
             {
@@ -603,11 +563,10 @@ namespace AssetParser
 
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
                     uexp.IsGood = false;
-                    ConsoleMode.Print("Bug here.", ConsoleColor.Red);
-                    //Console.ReadLine();
+                    ConsoleMode.Print("Bug here: " + ex.Message, ConsoleColor.Red, ConsoleMode.ConsoleModeType.Error);
                 }
                 ConsoleMode.Print("EndMap", ConsoleColor.DarkBlue);
             }
@@ -673,11 +632,10 @@ namespace AssetParser
                             }
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
                         uexp.IsGood = false;
-                        ConsoleMode.Print("Bug here.", ConsoleColor.Red);
-                        //Console.ReadLine();
+                        ConsoleMode.Print("Bug here: " + ex.Message, ConsoleColor.Red, ConsoleMode.ConsoleModeType.Error);
                     }
 
                     if (Modify)
@@ -702,11 +660,11 @@ namespace AssetParser
             }
             else if (Property == "TextProperty")
             {
-                if (uexp.UassetData.EngineVersion < UE4Version.VER_UE4_FTEXT_HISTORY)
+                if (uexp.UassetData.EngineVersion < UEVersions.VER_UE4_FTEXT_HISTORY)
                 {
 
                     new ReadStringProperty(memoryList, uexp, PropertyName + "_0", Modify);
-                    if (uexp.UassetData.EngineVersion >= UE4Version.VER_UE4_ADDED_NAMESPACE_AND_KEY_DATA_TO_FTEXT)
+                    if (uexp.UassetData.EngineVersion >= UEVersions.VER_UE4_ADDED_NAMESPACE_AND_KEY_DATA_TO_FTEXT)
                     {
                         new ReadStringProperty(memoryList, uexp, PropertyName + "_1", Modify);
                         new ReadStringProperty(memoryList, uexp, PropertyName + "_2", Modify);
@@ -718,34 +676,9 @@ namespace AssetParser
 
                 }
 
-                if (uexp.UassetData.EngineVersion > UE4Version.VER_UE4_FTEXT_HISTORY)
+                if (uexp.UassetData.EngineVersion > UEVersions.VER_UE4_FTEXT_HISTORY)
                 {
-                    memoryList.Skip(4); //Flag
-                    TextHistoryType ContainText = (TextHistoryType)memoryList.GetUByteValue();
-
-                    switch (ContainText)
-                    {
-                        case TextHistoryType.None:
-                            int TextLinesCount = memoryList.GetIntValue();
-                            for (int i = 0; i < TextLinesCount; i++)
-                            {
-                                new ReadStringProperty(memoryList, uexp, PropertyName + "_" + (i + 1), Modify);
-                            }
-                            break;
-
-                        case TextHistoryType.Base:
-                            new ReadStringProperty(memoryList, uexp, PropertyName + "_1", Modify);
-                            new ReadStringProperty(memoryList, uexp, PropertyName + "_2", Modify);
-                            new ReadStringProperty(memoryList, uexp, PropertyName + "_3", Modify);
-                            break;
-                        case TextHistoryType.StringTableEntry:
-                            PropertyParser(ref PropertyName, "NameProperty", -1, memoryList, uexp, Modify);
-                            new ReadStringProperty(memoryList, uexp, PropertyName + "_1", Modify);
-                            break;
-
-                        default:
-                            throw new Exception("UnKnown 'TextProperty' type: " + ContainText.ToString());
-                    }
+                    new TextHistory(memoryList, uexp, PropertyName, Modify);
                 }
 
             }
@@ -790,11 +723,10 @@ namespace AssetParser
                         new StructProperty(memoryList, uexp, uexp.UassetData.UseFromStruct, true, Modify);
                         ConsoleMode.Print("MovieSceneEvalTemplatePtr--> EndStructProperty", ConsoleColor.Red);
                     }
-                    catch
+                    catch (Exception ex)
                     {
                         uexp.IsGood = false;
-                        ConsoleMode.Print("Bug here.", ConsoleColor.Red);
-                        //Console.ReadLine();
+                        ConsoleMode.Print("Bug here: " + ex.Message, ConsoleColor.Red, ConsoleMode.ConsoleModeType.Error);
                     }
                 }
             }
@@ -811,11 +743,10 @@ namespace AssetParser
                         new StructProperty(memoryList, uexp, true, true, Modify);
                         ConsoleMode.Print("MovieSceneTrackImplementationPtr--> EndStructProperty", ConsoleColor.DarkYellow);
                     }
-                    catch
+                    catch (Exception ex)
                     {
                         uexp.IsGood = false;
-                        ConsoleMode.Print("Bug here.", ConsoleColor.Red);
-                        //Console.ReadLine();
+                        ConsoleMode.Print("Bug here: " + ex.Message, ConsoleColor.Red, ConsoleMode.ConsoleModeType.Error);
                     }
                     memoryList.Skip(4); //ImplementationPtr Index
                     ConsoleMode.Print("EndMovieSceneEvalTemplatePtr", ConsoleColor.Yellow);
@@ -876,6 +807,8 @@ namespace AssetParser
             }
 
         }
+
+
     }
 
 }
