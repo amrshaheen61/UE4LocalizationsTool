@@ -1318,7 +1318,7 @@ namespace Helper.MemoryList
         }
 
 
-        public void DeleteStringN(int SeekAndRead = -1, Encoding encoding = null)
+        public int DeleteStringN(int SeekAndRead = -1, Encoding encoding = null)
         {
             if (encoding == null)
             {
@@ -1326,13 +1326,19 @@ namespace Helper.MemoryList
             }
 
             int ThisPosition = GetPosition();
+            int StringLength;
             if (SeekAndRead != -1)
             {
-                DeleteBytes(GetString(encoding, false).Length, SeekAndRead);
-                return;
+                Seek(SeekAndRead);
+                StringLength = GetString(encoding, false).Length;
+                DeleteBytes(StringLength);
+                Seek(ThisPosition);
+                return StringLength;
             }
-
+           
+            StringLength = GetString(encoding, false).Length;
             DeleteBytes(GetString(encoding, false).Length);
+            return StringLength;
         }
 
 

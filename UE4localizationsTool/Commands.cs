@@ -44,7 +44,7 @@ namespace UE4localizationsTool
                     Strings = new List<List<string>>();
                     Console.ForegroundColor = ConsoleColor.Blue;
                     ConsoleText = $"Exporting... '{Path.GetFileName(SourcePath)}' ";
-                    Console.WriteLine(ConsoleText);
+                    Console.Write(ConsoleText);
                     Console.ForegroundColor = ConsoleColor.White;
 
                     Strings = Export(SourcePath);
@@ -55,8 +55,7 @@ namespace UE4localizationsTool
                     }
 
                     Console.ForegroundColor = ConsoleColor.Green;
-                    Console.SetCursorPosition(ConsoleText.Length, Console.CursorTop - 1);
-                    Console.WriteLine("Done");
+                    Console.Write("Done\n");
                     Console.ForegroundColor = ConsoleColor.White;
 
                     SaveTextFile(SourcePath + ".txt");
@@ -74,7 +73,7 @@ namespace UE4localizationsTool
                 case "-import"://Single File Without rename
                     Console.ForegroundColor = ConsoleColor.Blue;
                     ConsoleText = $"Importing... '{Path.GetFileName(SourcePath)}' ";
-                    Console.WriteLine(ConsoleText);
+                    Console.Write(ConsoleText);
                     Console.ForegroundColor = ConsoleColor.White;
 
                     if (!SourcePath.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
@@ -84,8 +83,7 @@ namespace UE4localizationsTool
 
                     Import(Path.ChangeExtension(SourcePath, null), File.ReadAllLines(SourcePath), Options.ToLower());
                     Console.ForegroundColor = ConsoleColor.Green;
-                    Console.SetCursorPosition(ConsoleText.Length, Console.CursorTop - 1);
-                    Console.WriteLine("Done");
+                    Console.Write("Done\n");
                     Console.ForegroundColor = ConsoleColor.White;
 
 
@@ -113,7 +111,7 @@ namespace UE4localizationsTool
         {
             Console.ForegroundColor = ConsoleColor.Blue;
             string ConsoleText = "Saving text file... ";
-            Console.WriteLine(ConsoleText);
+            Console.Write(ConsoleText);
             Console.ForegroundColor = ConsoleColor.White;
 
             string[] stringsArray = new string[Strings.Count];
@@ -141,8 +139,7 @@ namespace UE4localizationsTool
             File.WriteAllLines(FilePath, stringsArray);
 
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.SetCursorPosition(ConsoleText.Length, Console.CursorTop - 1);
-            Console.WriteLine("Done");
+            Console.Write("Done\n");
             Console.ForegroundColor = ConsoleColor.White;
         }
 
@@ -163,16 +160,16 @@ namespace UE4localizationsTool
             }
             else if (FilePath.EndsWith(".uasset", StringComparison.OrdinalIgnoreCase) || FilePath.EndsWith(".umap", StringComparison.OrdinalIgnoreCase))
             {
-                Uasset Uasset = new Uasset(FilePath);
+                IUasset Uasset = Uexp.GetUasset(FilePath);
 
                 if (Flags.HasFlag(Args.method2))
                 {
                     Uasset.UseMethod2 = true;
                 }
 
-                Uexp Uexp = new Uexp(Uasset);
-                return Uexp.Strings;
-                //  SizeOfRecord = Uexp.Strings.Count;
+                Uexp uexp = new Uexp(Uasset);
+                return uexp.Strings;
+                //  SizeOfRecord = uexp.Strings.Count;
             }
             else
             {
@@ -189,13 +186,12 @@ namespace UE4localizationsTool
             }
             Console.ForegroundColor = ConsoleColor.Blue;
             string ConsoleText = "Scaning for files...";
-            Console.WriteLine(ConsoleText);
+            Console.Write(ConsoleText);
             Console.ForegroundColor = ConsoleColor.White;
 
             string[] LanguageFiles = Directory.GetFiles(FolderPath, "*.*", SearchOption.AllDirectories).Where(x => x.EndsWith(".locres", StringComparison.OrdinalIgnoreCase) || x.EndsWith(".uasset", StringComparison.OrdinalIgnoreCase) || x.EndsWith(".umap", StringComparison.OrdinalIgnoreCase)).ToArray<string>();
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.SetCursorPosition(ConsoleText.Length, Console.CursorTop - 1);
-            Console.WriteLine("Done");
+            Console.Write("Done\n");
             Console.ForegroundColor = ConsoleColor.White;
 
             if (LanguageFiles.Count() == 0)
@@ -207,7 +203,7 @@ namespace UE4localizationsTool
             {
                 Console.ForegroundColor = ConsoleColor.Blue;
                 ConsoleText = $"[{i + 1}:{LanguageFiles.Count()}] Exporting... '{Path.GetFileName(LanguageFiles[i])}' ";
-                Console.WriteLine(ConsoleText);
+                Console.Write(ConsoleText);
                 Console.ForegroundColor = ConsoleColor.White;
 
                 int ThisPosition = Strings.Count - 1;
@@ -227,8 +223,7 @@ namespace UE4localizationsTool
                 catch (Exception EX)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.SetCursorPosition(ConsoleText.Length, Console.CursorTop - 1);
-                    Console.WriteLine("Fail");
+                    Console.Write("Fail\n");
                     Console.ForegroundColor = ConsoleColor.White;
 
                     Console.ForegroundColor = ConsoleColor.Yellow;
@@ -238,8 +233,7 @@ namespace UE4localizationsTool
 
                 }
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.SetCursorPosition(ConsoleText.Length, Console.CursorTop - 1);
-                Console.WriteLine("Done");
+                Console.Write("Done\n");
                 Console.ForegroundColor = ConsoleColor.White;
             }
         }
@@ -304,18 +298,18 @@ namespace UE4localizationsTool
             }
             else if (FilePath.EndsWith(".uasset", StringComparison.OrdinalIgnoreCase) || FilePath.EndsWith(".umap", StringComparison.OrdinalIgnoreCase))
             {
-                Uasset Uasset = new Uasset(FilePath);
+                IUasset Uasset = Uexp.GetUasset(FilePath);
                 if (Flags.HasFlag(Args.method2))
                 {
                     Uasset.UseMethod2 = true;
                 }
 
-                Uexp Uexp = new Uexp(Uasset);
-                EditList(Uexp.Strings, Values);
+                Uexp uexp = new Uexp(Uasset);
+                EditList(uexp.Strings, Values);
 
                 if (Option == "-import")
                 {
-                    Uexp.SaveFile(FilePath);
+                    uexp.SaveFile(FilePath);
                     return;
                 }
 
@@ -328,7 +322,7 @@ namespace UE4localizationsTool
                     FilePath = Path.ChangeExtension(FilePath, null) + "_NEW.umap";
                 }
 
-                Uexp.SaveFile(FilePath);
+                uexp.SaveFile(FilePath);
             }
             else
             {
@@ -368,7 +362,7 @@ namespace UE4localizationsTool
                 FilePath = FilePath.Replace(@"\\", @"\");
                 Console.ForegroundColor = ConsoleColor.Blue;
                 string ConsoleText = $"[{PathIndex + 1}:{Indexs.Length}] Importing... '{Path.GetFileName(FilePath)}' ";
-                Console.WriteLine(ConsoleText);
+                Console.Write(ConsoleText);
                 Console.ForegroundColor = ConsoleColor.White;
                 string[] StringArrayValues = new string[ArraySize];
                 Array.Copy(Values, Indexs[PathIndex] + 1, StringArrayValues, 0, ArraySize);
@@ -383,8 +377,7 @@ namespace UE4localizationsTool
                 catch (Exception EX)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.SetCursorPosition(ConsoleText.Length, Console.CursorTop - 1);
-                    Console.WriteLine("Fail");
+                    Console.Write("Fail\n");
                     Console.ForegroundColor = ConsoleColor.White;
 
                     Console.ForegroundColor = ConsoleColor.Yellow;
@@ -393,8 +386,7 @@ namespace UE4localizationsTool
                     continue;
                 }
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.SetCursorPosition(ConsoleText.Length, Console.CursorTop - 1);
-                Console.WriteLine("Done");
+                Console.Write("Done\n");
                 Console.ForegroundColor = ConsoleColor.White;
             }
 

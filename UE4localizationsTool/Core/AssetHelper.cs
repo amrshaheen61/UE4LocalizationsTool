@@ -8,7 +8,7 @@ namespace AssetParser
     public static class AssetHelper
     {
 
-        public static string GetPropertyName(this Uasset SourceFile, int Index)
+        public static string GetPropertyName(this IUasset SourceFile, int Index)
         {
             if (SourceFile.NAMES_DIRECTORY.Count > Index && Index > 0)
             {
@@ -17,7 +17,7 @@ namespace AssetParser
             return Index.ToString();
         }
 
-        public static string GetExportPropertyName(this Uasset SourceFile, int Index)
+        public static string GetExportPropertyName(this IUasset SourceFile, int Index)
         {
             if (SourceFile.IOFile)
             {
@@ -69,10 +69,11 @@ namespace AssetParser
         {
             return (int)(NameData & 1u);
         }
-        private static bool IsUtf16(byte NameData)
+        public static bool IsUtf16(byte NameData)
         {
             return (NameData & 0x80u) != 0;
         }
+
         public static string GetStringUES(this MemoryList memoryList)
         {
             string Stringvalue = "";
@@ -98,6 +99,29 @@ namespace AssetParser
 
             return ReplaceBreaklines(Stringvalue).TrimEnd('\0');
         }
+
+        public static string GetStringUES(this MemoryList memoryList, short namedata)
+        {
+            string Stringvalue;
+            byte[] Data = new byte[2];
+            Data[0] = (byte)(namedata & 0xff);
+            Data[1] = (byte)(namedata >> 8);
+
+            int len = (int)((Data[0] & 0x7Fu) << 8) + Data[1];
+
+            if (IsUtf16(Data[0]))
+            {
+                Stringvalue = memoryList.GetStringValue(len * 2, true, -1, Encoding.Unicode);
+            }
+            else
+            {
+                Stringvalue = memoryList.GetStringValue(len);
+            }
+
+
+            return ReplaceBreaklines(Stringvalue).TrimEnd('\0');
+        }
+
         public static string GetStringUE(this MemoryList memoryList, Encoding encoding)
         {
             string Stringvalue = ReplaceBreaklines(memoryList.GetStringValueN(true, -1, encoding));
@@ -119,20 +143,20 @@ namespace AssetParser
 
 
 
-        public static void ReplaceStringUE_Func(this MemoryList memoryList, string StringValue)
+        public static int ReplaceStringUE_Func(this MemoryList memoryList, string StringValue)
         {
-
+            int StringLength = 0;
             StringValue = ReplaceBreaklines(StringValue, true);
 
             memoryList.Skip(-1);
             ExprToken eExpr = (ExprToken)memoryList.GetByteValue();
             if (eExpr == ExprToken.EX_StringConst)
             {
-                memoryList.DeleteStringN(-1, Encoding.ASCII);
+                StringLength = memoryList.DeleteStringN(-1, Encoding.ASCII);
             }
             else if (eExpr == ExprToken.EX_UnicodeStringConst)
             {
-                memoryList.DeleteStringN(-1, Encoding.Unicode);
+                StringLength = memoryList.DeleteStringN(-1, Encoding.Unicode);
             }
             memoryList.Skip(-1);
 
@@ -153,6 +177,7 @@ namespace AssetParser
                 memoryList.SetByteValue((byte)ExprToken.EX_UnicodeStringConst);
                 memoryList.InsertStringValueN(StringValue, true, -1, encoding);
             }
+            return StringLength;
         }
 
 

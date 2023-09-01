@@ -140,7 +140,7 @@ namespace UE4localizationsTool
                 catch (Exception ex)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine(ex.Message);
+                    Console.WriteLine("\n"+ex.Message);
                     Console.ForegroundColor = ConsoleColor.White;
                 }
                 return;

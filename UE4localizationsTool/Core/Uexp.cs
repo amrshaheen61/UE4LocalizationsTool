@@ -1,13 +1,15 @@
 ﻿using Helper.MemoryList;
 using System;
 using System.Collections.Generic;
+using System.IO;
+
 namespace AssetParser
 {
 
     public class Uexp : IAsset
     {
 
-        public Uasset UassetData;
+        public IUasset UassetData;
 
         public List<List<string>> Strings { get; set; }  //[Text id,Text Value,...]
         private int _CurrentIndex;
@@ -29,16 +31,33 @@ namespace AssetParser
 
 
 
-        public Uexp(Uasset assets)
+        public Uexp(IUasset UassetObject)
         {
-            UassetData = assets;
+            UassetData = UassetObject;
             Strings = new List<List<string>>();
             CurrentIndex = 0;
             ReadOrEdit();
         }
 
 
+        public static IUasset GetUasset(string uassetpath)
+        {
+            var StreamFile = File.Open(uassetpath, FileMode.Open, FileAccess.Read);
+            var array = new byte[4];
+            StreamFile.Read(array, 0, array.Length);
+            StreamFile.Close();
 
+            //Todo
+            if (array[0] == 0xC1 && array[1] == 0x83 && array[2] == 0x2A && array[3] == 0x9E)//pak -> uasset
+            {
+                return new Uasset(uassetpath);
+            }
+            else//utoc -> uasset
+            {
+                return new IoPackage(uassetpath);
+            }
+
+        }
 
         private void ReadOrEdit(bool Modify = false)
         {
@@ -124,18 +143,21 @@ namespace AssetParser
                             case "MuseStringTable":
                                 new MuseStringTable(memoryList, this, Modify);
                                 break;
+                            case "SubtitlesText":
+                                new MuseStringTable(memoryList, this, Modify);
+                                break;
                         }
                         ConsoleMode.Print($"-----------End------------", ConsoleColor.DarkRed);
                     }
                     catch (Exception ex)
                     {
-                        ConsoleMode.Print("Skip this export:\n" + ex.ToString(), ConsoleColor.Red,ConsoleMode.ConsoleModeType.Error);
+                        ConsoleMode.Print("Skip this export:\n" + ex.ToString(), ConsoleColor.Red, ConsoleMode.ConsoleModeType.Error);
                         // Skip this export
                     }
                 }
 
             }
-            
+
 
         }
 

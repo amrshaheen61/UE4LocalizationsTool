@@ -12,9 +12,12 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using UE4localizationsTool.Controls;
+using UE4localizationsTool.Helper;
 
 namespace UE4localizationsTool
 {
+
+
 
     public partial class FrmMain : NForm
     {
@@ -119,8 +122,8 @@ namespace UE4localizationsTool
                 }
                 else if (filePath.ToLower().EndsWith(".uasset") || filePath.ToLower().EndsWith(".umap"))
                 {
-                    Uasset Uasset = await Task.Run(() => new Uasset(filePath));
-                    Uasset.UseMethod2 = Method2.Checked;
+                    IUasset Uasset = await Task.Run(() => Uexp.GetUasset(filePath));
+                    Uasset.UseMethod2 = Uasset.UseMethod2? Uasset.UseMethod2 : Method2.Checked;
                     Asset = await Task.Run(() => new Uexp(Uasset));
                     CreateBackupList();
                     if (!Asset.IsGood)
@@ -179,6 +182,7 @@ namespace UE4localizationsTool
             noNamesToolStripMenuItem.Enabled = Enabled;
             withNamesToolStripMenuItem.Enabled = Enabled;
             clearFilterToolStripMenuItem.Enabled = Enabled;
+            csvFileToolStripMenuItem.Enabled = Enabled;
         }
         enum ExportType
         {
@@ -236,12 +240,32 @@ namespace UE4localizationsTool
 
         private void importAllTextToolStripMenuItem_Click(object sender, EventArgs e)
         {
+              
             OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "Text File|*.txt";
+            ofd.Filter = "Text File|*.txt;*.csv";
             ofd.Title = "Import All Text";
 
             if (ofd.ShowDialog() == DialogResult.OK)
             {
+                if (this.SortApply) SortDataGrid(2, true);
+
+                if (ofd.FileName.EndsWith(".csv",StringComparison.InvariantCulture))
+                {
+                    try
+                    {
+                        CSVFile.Instance.Load(this.dataGridView1, ofd.FileName);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message, ToolName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+
+                    MessageBox.Show("Successful import!", "Done", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+
+                
                 string[] DataGridStrings;
                 try
                 {
@@ -279,8 +303,6 @@ namespace UE4localizationsTool
 
                 }
 
-
-                if (this.SortApply) SortDataGrid(2, true);
                 for (int n = 0; n < dataGridView1.Rows.Count; n++)
                 {
                     dataGridView1.Rows[n].Cells[1].Value = DataGridStrings[n];
@@ -791,7 +813,7 @@ namespace UE4localizationsTool
         private void FrmMain_Load(object sender, EventArgs e)
         {
             if (Properties.Settings.Default.CheckForUpdates)
-            { 
+            {
                 this.Invoke(new Action(() =>
                    {
                        float ToolVer = 0;
@@ -843,7 +865,7 @@ namespace UE4localizationsTool
                    })
 
                        );
-        }
+            }
 
         }
 
@@ -1003,6 +1025,36 @@ namespace UE4localizationsTool
         {
             Properties.Settings.Default.CheckForUpdates = Checkforupdates.Checked;
             Properties.Settings.Default.Save();
+        }
+
+        private void csvFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "CSV File|*.csv";
+            sfd.Title = "Export All Text";
+            sfd.FileName = Path.GetFileName(FilePath) + ".csv";
+
+
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    CSVFile.Instance.Save(this.dataGridView1, sfd.FileName);
+
+                    if (Filter)
+                    {
+                        MessageBox.Show("Successful export!\n Remember to apply the same filter you using right now before 'import'.", "Done", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Successful export!", "Done", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+                catch
+                {
+                    MessageBox.Show("Can't write export file!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                }
+            }
         }
     }
 }

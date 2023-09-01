@@ -41,6 +41,7 @@ namespace UE4localizationsTool
             this.exportAllTextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.noNamesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.withNamesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.csvFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importAllTextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.find = new System.Windows.Forms.ToolStripMenuItem();
@@ -64,10 +65,10 @@ namespace UE4localizationsTool
             this.fontToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.rightToLeftToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.darkModeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.Checkforupdates = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.Method2 = new System.Windows.Forms.ToolStripMenuItem();
             this.UseFixedSize = new System.Windows.Forms.ToolStripMenuItem();
-            this.Checkforupdates = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.commandLinesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.donateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -176,7 +177,8 @@ namespace UE4localizationsTool
             // 
             this.exportAllTextToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.noNamesToolStripMenuItem,
-            this.withNamesToolStripMenuItem});
+            this.withNamesToolStripMenuItem,
+            this.csvFileToolStripMenuItem});
             this.exportAllTextToolStripMenuItem.Enabled = false;
             this.exportAllTextToolStripMenuItem.Name = "exportAllTextToolStripMenuItem";
             this.exportAllTextToolStripMenuItem.Size = new System.Drawing.Size(229, 22);
@@ -187,7 +189,7 @@ namespace UE4localizationsTool
             this.noNamesToolStripMenuItem.Enabled = false;
             this.noNamesToolStripMenuItem.Name = "noNamesToolStripMenuItem";
             this.noNamesToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.E)));
-            this.noNamesToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
+            this.noNamesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.noNamesToolStripMenuItem.Text = "No names";
             this.noNamesToolStripMenuItem.Click += new System.EventHandler(this.noNamesToolStripMenuItem_Click);
             // 
@@ -196,9 +198,16 @@ namespace UE4localizationsTool
             this.withNamesToolStripMenuItem.Enabled = false;
             this.withNamesToolStripMenuItem.Name = "withNamesToolStripMenuItem";
             this.withNamesToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.R)));
-            this.withNamesToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
+            this.withNamesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.withNamesToolStripMenuItem.Text = "With names";
             this.withNamesToolStripMenuItem.Click += new System.EventHandler(this.withNamesToolStripMenuItem_Click);
+            // 
+            // csvFileToolStripMenuItem
+            // 
+            this.csvFileToolStripMenuItem.Name = "csvFileToolStripMenuItem";
+            this.csvFileToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.csvFileToolStripMenuItem.Text = "CSV file";
+            this.csvFileToolStripMenuItem.Click += new System.EventHandler(this.csvFileToolStripMenuItem_Click);
             // 
             // importAllTextToolStripMenuItem
             // 
@@ -386,6 +395,14 @@ namespace UE4localizationsTool
             this.darkModeToolStripMenuItem.Text = "Dark mode";
             this.darkModeToolStripMenuItem.CheckedChanged += new System.EventHandler(this.darkModeToolStripMenuItem_CheckedChanged);
             // 
+            // Checkforupdates
+            // 
+            this.Checkforupdates.CheckOnClick = true;
+            this.Checkforupdates.Name = "Checkforupdates";
+            this.Checkforupdates.Size = new System.Drawing.Size(229, 22);
+            this.Checkforupdates.Text = "Check for Updates";
+            this.Checkforupdates.CheckedChanged += new System.EventHandler(this.Checkforupdates_CheckedChanged);
+            // 
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
@@ -410,14 +427,6 @@ namespace UE4localizationsTool
             this.UseFixedSize.Size = new System.Drawing.Size(229, 22);
             this.UseFixedSize.Text = "Fixed Size";
             this.UseFixedSize.Visible = false;
-            // 
-            // Checkforupdates
-            // 
-            this.Checkforupdates.CheckOnClick = true;
-            this.Checkforupdates.Name = "Checkforupdates";
-            this.Checkforupdates.Size = new System.Drawing.Size(229, 22);
-            this.Checkforupdates.Text = "Check for Updates";
-            this.Checkforupdates.CheckedChanged += new System.EventHandler(this.Checkforupdates_CheckedChanged);
             // 
             // aboutToolStripMenuItem
             // 
@@ -734,6 +743,7 @@ namespace UE4localizationsTool
         private System.Windows.Forms.DataGridViewTextBoxColumn TextValue;
         private System.Windows.Forms.DataGridViewTextBoxColumn Index;
         private System.Windows.Forms.ToolStripMenuItem Checkforupdates;
+        private System.Windows.Forms.ToolStripMenuItem csvFileToolStripMenuItem;
     }
 }
 

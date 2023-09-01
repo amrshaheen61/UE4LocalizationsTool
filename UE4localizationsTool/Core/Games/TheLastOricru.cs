@@ -1,10 +1,9 @@
-﻿using AssetParser;
-using Helper.MemoryList;
+﻿using Helper.MemoryList;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace UE4localizationsTool.Core.Games
+namespace AssetParser
 {
     public class TheLastOricru
     {

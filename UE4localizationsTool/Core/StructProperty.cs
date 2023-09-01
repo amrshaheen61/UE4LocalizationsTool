@@ -1,6 +1,6 @@
 ﻿using Helper.MemoryList;
 using System;
-using UE4localizationsTool.Core.Games;
+
 
 namespace AssetParser
 {
@@ -120,13 +120,13 @@ namespace AssetParser
                         {
                             string ArrayName /*?*/ = uexp.UassetData.GetPropertyName(ArrayData.GetIntValue());
                             ConsoleMode.Print("ArrayName-> " + ArrayName, ConsoleColor.DarkYellow);
-                            ArrayData.Skip(12); //null bytes
+                            ArrayData.Skip(12); //null Databytes
                             int StructpositionEdit = ArrayData.GetPosition();
                             int StructLength = ArrayData.GetIntValue();
                             ArrayData.Skip(4); //null or something
                             string StructType = uexp.UassetData.GetPropertyName(ArrayData.GetIntValue());
                             ConsoleMode.Print("ArrayStructType-> " + StructType, ConsoleColor.DarkYellow);
-                            ArrayData.Skip(20); //Unkown bytes
+                            ArrayData.Skip(20); //Unkown Databytes
                             if (FromStruct)
                             {
                                 ArrayData.Skip(1);  //null For "Struct"
@@ -147,20 +147,7 @@ namespace AssetParser
                         }
                         else
                         {
-
-                            if (ArrayType == "ByteProperty" && PropertyName == "bytes")
-                            {
-                                new TheLastOricru(ArrayData, PropertyName, uexp, Modify);
-                            }
-                            else
-                            {
-
-
-                                for (int Arrayindex = 0; Arrayindex < ArrayCount; Arrayindex++)
-                                {
-                                    PropertyParser(ref PropertyName, ArrayType, -1, ArrayData, uexp, Modify);
-                                }
-                            }
+                            PropertyName = ReadArrayData(uexp, Modify, PropertyName, ArrayType, ArrayData, ArrayCount);
                         }
                     }
                     catch (Exception ex)
@@ -183,7 +170,7 @@ namespace AssetParser
                     string StructType = uexp.UassetData.GetPropertyName(memoryList.GetIntValue());
                     ConsoleMode.Print("StructType-> " + StructType, ConsoleColor.Gray);
                     memoryList.Skip(4);  //null or something
-                    memoryList.Skip(16); //null bytes
+                    memoryList.Skip(16); //null Databytes
                     if (FromStruct)
                     {
                         memoryList.Skip(1);  //null For "Struct"
@@ -449,6 +436,7 @@ namespace AssetParser
         }
 
 
+
         private void PropertyParser(ref string PropertyName, string Property, int PropertyLength, MemoryList memoryList, Uexp uexp, bool Modify = false)
         {
             if (Property == "Int8Property")
@@ -513,7 +501,7 @@ namespace AssetParser
             }
             else if (Property == "LazyObjectProperty")
             {
-                memoryList.Skip(16);// bytes range
+                memoryList.Skip(16);// Databytes range
             }
             else if (Property == "InterfaceProperty")
             {
@@ -610,26 +598,20 @@ namespace AssetParser
                 if (ArrayType == "StructProperty")
                 {
                     string ArrayName /*?*/ = uexp.UassetData.GetPropertyName(memoryList.GetIntValue());
-                    memoryList.Skip(12); //null bytes
+                    memoryList.Skip(12); //null Databytes
                     int StructpositionEdit = memoryList.GetPosition();
                     int StructLength = memoryList.GetIntValue();
                     memoryList.Skip(4); //null or something
                     string StructType = uexp.UassetData.GetPropertyName(memoryList.GetIntValue());
-                    memoryList.Skip(20); //Unkown bytes
+                    memoryList.Skip(20); //Unkown Databytes
                     int StructPosition = memoryList.GetPosition();
                     MemoryList StructData = new MemoryList(memoryList.GetBytes(StructLength));
                     try
                     {
-                        if (ArrayType == "ByteProperty" && PropertyName == "bytes")
+
+                        for (int Arrayindex = 0; Arrayindex < ArrayCount; Arrayindex++)
                         {
-                            new TheLastOricru(StructData, PropertyName, uexp, Modify);
-                        }
-                        else
-                        {
-                            for (int Arrayindex = 0; Arrayindex < ArrayCount; Arrayindex++)
-                            {
-                                PropertyParser(ref PropertyName, ArrayType, -1, StructData, uexp, Modify);
-                            }
+                            PropertyParser(ref PropertyName, ArrayType, -1, StructData, uexp, Modify);
                         }
                     }
                     catch (Exception ex)
@@ -647,10 +629,7 @@ namespace AssetParser
                 }
                 else
                 {
-                    for (int Arrayindex = 0; Arrayindex < ArrayCount; Arrayindex++)
-                    {
-                        PropertyParser(ref PropertyName, ArrayType, -1, memoryList, uexp, Modify);
-                    }
+                    PropertyName = ReadArrayData(uexp, Modify, PropertyName, ArrayType, memoryList, ArrayCount);
                 }
 
             }
@@ -808,7 +787,38 @@ namespace AssetParser
 
         }
 
+        private string ReadArrayData(Uexp uexp, bool Modify, string PropertyName, string ArrayType, MemoryList ArrayData, int ArrayCount)
+        {
+            if (ArrayType == "ByteProperty" && PropertyName == "Databytes" ||
+                ArrayType == "ByteProperty" && PropertyName == "BinaryData")
+            {
 
+                int StartPosition = ArrayData.GetPosition() - 4; //for get ArrayCount
+                var data = new MemoryList(ArrayData.GetBytes(ArrayCount));
+
+                if (ArrayType == "ByteProperty" && PropertyName == "Databytes")
+                    new TheLastOricru(data, PropertyName, uexp, Modify);
+
+                if (ArrayType == "ByteProperty" && PropertyName == "BinaryData")
+                    new OctopathTraveler(data, PropertyName, uexp, Modify);
+
+                if (Modify)
+                {
+                    ArrayData.Seek(StartPosition);
+                    ArrayData.SetIntValue(data.GetSize());
+                    ArrayData.ReplaceBytes(ArrayCount, data.ToArray());
+                }
+            }
+            else
+            {
+                for (int Arrayindex = 0; Arrayindex < ArrayCount; Arrayindex++)
+                {
+                    PropertyParser(ref PropertyName, ArrayType, -1, ArrayData, uexp, Modify);
+                }
+            }
+
+            return PropertyName;
+        }
     }
 
 }

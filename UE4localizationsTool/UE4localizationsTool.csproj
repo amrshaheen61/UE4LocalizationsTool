@@ -11,9 +11,9 @@
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
     <IsWebBootstrapper>false</IsWebBootstrapper>
+    <Deterministic>false</Deterministic>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -24,7 +24,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>28</ApplicationRevision>
+    <ApplicationRevision>30</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -34,7 +34,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
+    <Optimize>true</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -78,22 +78,13 @@
   <PropertyGroup>
     <TargetZone>LocalIntranet</TargetZone>
   </PropertyGroup>
+  <PropertyGroup />
+  <PropertyGroup />
+  <PropertyGroup />
+  <PropertyGroup />
   <PropertyGroup>
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Deployment" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
-  </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands.cs" />
     <Compile Include="Controls\NForm.cs">
@@ -104,12 +95,16 @@
     <Compile Include="Core\Enum.cs" />
     <Compile Include="Core\Function.cs" />
     <Compile Include="Core\Games\MuseStringTable.cs" />
+    <Compile Include="Core\Games\OctopathTraveler.cs" />
     <Compile Include="Core\Games\TheLastOricru.cs" />
     <Compile Include="Core\Games\UDataTable.cs" />
     <Compile Include="Core\Games\RED Game\REDAdvTextData.cs" />
     <Compile Include="Core\Games\RED Game\REDLibraryTextData.cs" />
     <Compile Include="Core\Games\RED Game\REDLocalizeTextData.cs" />
     <Compile Include="Core\IAsset.cs" />
+    <Compile Include="Core\IoPackage.cs" />
+    <Compile Include="Core\IUasset.cs" />
+    <Compile Include="Core\Object\Objects.cs" />
     <Compile Include="Core\Spreadsheet.cs" />
     <Compile Include="Core\DataTable.cs" />
     <Compile Include="Core\locres.cs" />
@@ -141,6 +136,7 @@
     <Compile Include="Forms\FrmState.Designer.cs">
       <DependentUpon>FrmState.cs</DependentUpon>
     </Compile>
+    <Compile Include="Helper\CSVFile.cs" />
     <Compile Include="Helper\MemoryList.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -197,6 +193,12 @@
   <ItemGroup>
     <Content Include="UpdateInfo.txt" />
     <Content Include="UE4.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="System" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,54 +1,28 @@
-﻿using Helper.MemoryList;
+﻿using AssetParser.Object;
+using Helper.MemoryList;
 using System;
 using System.Collections.Generic;
 using System.IO;
 
 namespace AssetParser
 {
-
-
-
-    public class Uasset
+    public class Uasset : IUasset
     {
-
-        public struct ImportsDirectory
-        {
-
-            public long ParentDirectoryNameID { get; set; }
-            public long ClassID { get; set; }
-            public int ParentImportObjectID { get; set; }
-            public int NameID { get; set; }
-
-        }
-        public struct ExportsDirectory
-        {
-            public int ExportClass { get; set; }
-            public int ExportParent_1 { get; set; }
-            public int ExportParent_2 { get; set; }
-            public int Value { get; set; }
-            public int ExportName { get; set; }
-            public short ExportMemberType { get; set; }
-            public int ExportLength { get; set; }
-            public int ExportStart { get; set; }
-
-            public List<byte> ExportData;
-        }
-
         List<int> OffsetsList = new List<int>();
         private int NewSize;
-        public int LegacyFileVersion;
-        public UEVersions EngineVersion;
+        public int LegacyFileVersion { get; set; }
+        public UEVersions EngineVersion { get; set; }
         int numCustomVersions;
-        public EPackageFlags PackageFlags;
-        public int File_Directory_Offset;
-        public int Number_of_Names;
-        public int Name_Directory_Offset;
-        public int Number_Of_Exports;
+        public EPackageFlags PackageFlags { get; set; }
+        public int File_Directory_Offset { get; set; }
+        public int Number_of_Names { get; set; }
+        public int Name_Directory_Offset { get; set; }
+        public int Number_Of_Exports { get; set; }
         public int GatherableTextDataCount;
         public int GatherableTextDataOffset;
-        public int Exports_Directory_Offset;
-        public int Number_Of_Imports;
-        public int Imports_Directory_Offset;
+        public int Exports_Directory_Offset { get; set; }
+        public int Number_Of_Imports { get; set; }
+        public int Imports_Directory_Offset { get; set; }
         public int DependsOffset;
         public int SoftPackageReferencesCount;
         public int SoftPackageReferencesOffset;
@@ -60,27 +34,18 @@ namespace AssetParser
         public int WorldTileInfoDataOffset;
         public int PreloadDependencyCount;
         public int PreloadDependencyOffset;
-        public List<string> NAMES_DIRECTORY;
-        public List<ImportsDirectory> Imports_Directory;
-        public List<ExportsDirectory> Exports_Directory;
-        public MemoryList UassetFile;
-        public MemoryList UexpFile;
-        public bool IsNotUseUexp;
-        public bool UseFromStruct = true;
-        public bool AutoVersion = false;
-
-
-        public int Header_Size;
-        public int Name_Directory_Size;
-        public int Hash_Directory_offset;
-        public int Hash_Directory_Size;
-        public int Bundles_Offset;
-        public int GraphData_Offset;
-        public int GraphData_Size;
-        public bool IOFile = false;
-        public int PathCount = 0;
-        public bool PathModify = true;
-        public bool UseMethod2 = false;
+        public List<string> NAMES_DIRECTORY { get; set; }
+        public List<ImportsDirectory> Imports_Directory { get; set; }
+        public List<ExportsDirectory> Exports_Directory { get; set; }
+        public MemoryList UassetFile { get; set; }
+        public MemoryList UexpFile { get; set; }
+        public bool IsNotUseUexp { get; set; }
+        public bool UseFromStruct { get; set; } = true;
+        public bool AutoVersion { get; set; } = false;
+        public bool IOFile { get; set; } = false;
+        public int PathCount { get; set; } = 0;
+        public bool PathModify { get; set; } = true;
+        public bool UseMethod2 { get; set; } = false;
 
 
 
@@ -90,62 +55,13 @@ namespace AssetParser
             UassetFile = new MemoryList(FilePath);
 
 
-            if (UassetFile.GetUIntValue(false) != 0x9E2A83C1u)
-            {
-
-                //Todo 
-                EngineVersion = UEVersions.VER_UE4_16; //?!
-                IsNotUseUexp = true;
-                IOFile = true;
-                UassetFile.Skip(16 + 4);
-                Header_Size = UassetFile.GetIntValue();
-                Name_Directory_Offset = UassetFile.GetIntValue();
-                Name_Directory_Size = UassetFile.GetIntValue();
-                Hash_Directory_offset = UassetFile.GetIntValue();
-                Hash_Directory_Size = UassetFile.GetIntValue();
-                Imports_Directory_Offset = UassetFile.GetIntValue();
-                Exports_Directory_Offset = UassetFile.GetIntValue();
-                Bundles_Offset = UassetFile.GetIntValue();
-                GraphData_Offset = UassetFile.GetIntValue();
-                GraphData_Size = UassetFile.GetIntValue();
-
-
-                File_Directory_Offset = GraphData_Offset + GraphData_Size;
-                Number_of_Names = Hash_Directory_Size / 8;
-                Number_Of_Exports = (Bundles_Offset - Exports_Directory_Offset) / 72 /*Block Size*/;
-                Number_Of_Imports = (Exports_Directory_Offset - Imports_Directory_Offset) / 8 /*Block Size*/;
-
-
-                //seek to position
-                UassetFile.Seek(Name_Directory_Offset, SeekOrigin.Begin);
-                //Get Names
-                NAMES_DIRECTORY = new List<string>();
-                for (int n = 0; n < Number_of_Names; n++)
-                {
-                    NAMES_DIRECTORY.Add(UassetFile.GetStringUES());
-                    if (NAMES_DIRECTORY[n].Contains(@"/") && PathModify)
-                    {
-                        PathCount++;
-                    }
-                    else
-                    {
-                        PathModify = false;
-                    }
-                }
-
-
-                //UassetFile.Seek(Hash_Directory_offset, SeekOrigin.Begin);
+            //if (UassetFile.GetUIntValue(false) != 0x9E2A83C1u)
+            //{
 
 
 
-                //seek to position
-                UassetFile.Seek(Exports_Directory_Offset, SeekOrigin.Begin);
-                //Get Exports
-                Exports_Directory = new List<ExportsDirectory>();
-                ExportReadOrEditIO();
-
-                return;
-            }
+            //    return;
+            //}
 
 
 
@@ -186,6 +102,8 @@ namespace AssetParser
                     UassetFile.Skip(4);
             }
 
+
+
             //seek to position
             UassetFile.Seek(Imports_Directory_Offset, SeekOrigin.Begin);
             //Get Imports
@@ -223,8 +141,11 @@ namespace AssetParser
 
             if (LegacyFileVersion <= -8)
             {
-                UassetFile.GetIntValue(); //FileVersionUE5
-                EngineVersion = UEVersions.VER_UE5_0;
+                int FileVersionUE5 = UassetFile.GetIntValue(); //FileVersionUE5
+                if (FileVersionUE5 > 0)
+                    EngineVersion = (UEVersions)FileVersionUE5;
+                else
+                    EngineVersion = UEVersions.VER_UE5_0;
             }
 
             UassetFile.Skip(4);//FileVersionLicenseeUE 
@@ -332,6 +253,12 @@ namespace AssetParser
             DependsOffset = UassetFile.GetIntValue();
 
 
+            if (EngineVersion < UEVersions.VER_UE4_OLDEST_LOADABLE_PACKAGE || EngineVersion >= UEVersions.AUTOMATIC_VERSION)
+            {
+                return;
+            }
+
+
             if (EngineVersion >= UEVersions.VER_UE4_ADD_STRING_ASSET_REFERENCES_MAP)
             {
                 SoftPackageReferencesCount = UassetFile.GetIntValue();
@@ -434,8 +361,6 @@ namespace AssetParser
 
         public void EditName(string NewStr, int Index)
         {
-            if (IOFile) return;
-
             if (NAMES_DIRECTORY[Index] == NewStr)
             {
                 return;
@@ -481,12 +406,6 @@ namespace AssetParser
 
         public void ExportReadOrEdit(bool Modify = false)
         {
-            if (IOFile)
-            {
-                ExportReadOrEditIO(Modify);
-                return;
-            }
-
             int NextExportPosition = File_Directory_Offset;
             //seek to position
             UassetFile.Seek(Exports_Directory_Offset, SeekOrigin.Begin);
@@ -552,11 +471,22 @@ namespace AssetParser
 
 
                 UassetFile.Skip(4 * 3);
+                if (EngineVersion < UEVersions.REMOVE_OBJECT_EXPORT_PACKAGE_GUID)
+                    UassetFile.Skip(16);// PackageGuid
 
-                UassetFile.Skip(16);// PackageGuid
+                if (EngineVersion >= UEVersions.TRACK_OBJECT_EXPORT_IS_INHERITED)
+                {
+                    UassetFile.Skip(4);
+                }
+
                 UassetFile.Skip(4); // PackageFlags
 
                 if (EngineVersion >= UEVersions.VER_UE4_LOAD_FOR_EDITOR_GAME)
+                {
+                    UassetFile.Skip(4);
+                }
+
+                if (EngineVersion >= UEVersions.OPTIONAL_RESOURCES)
                 {
                     UassetFile.Skip(4);
                 }
@@ -592,66 +522,6 @@ namespace AssetParser
             }
         }
 
-
-        public void ExportReadOrEditIO(bool Modify = false)
-        {
-            //seek to position
-            UassetFile.Seek(Exports_Directory_Offset, SeekOrigin.Begin);
-            int NextExportPosition = File_Directory_Offset;
-
-            for (int n = 0; n < Number_Of_Exports; n++)
-            {
-                int Start = UassetFile.GetPosition();
-                ExportsDirectory ExportsDirectory = new ExportsDirectory();
-                ExportsDirectory.ExportStart = File_Directory_Offset;
-                if (!Modify)
-                {
-                    UassetFile.Skip(8);
-                    ExportsDirectory.ExportLength = (int)UassetFile.GetInt64Value();
-                }
-                else
-                {
-                    UassetFile.SetInt64Value(Header_Size + (NextExportPosition - File_Directory_Offset));
-                    UassetFile.SetInt64Value(Exports_Directory[n].ExportData.Count);
-                }
-                ExportsDirectory.ExportName = UassetFile.GetIntValue();
-                UassetFile.Skip(4);
-                UassetFile.Skip(8);
-
-                //Wrong way
-                ulong Class = UassetFile.GetUInt64Value();
-
-
-                if (Class == 0x71E24A29987BD1EDu)
-                {
-                    ExportsDirectory.ExportClass = NAMES_DIRECTORY.IndexOf("DataTable");
-                }
-                else if (Class == 0x70289FB93F770603u)
-                {
-                    ExportsDirectory.ExportClass = NAMES_DIRECTORY.IndexOf("StringTable");
-                }
-                else if (Class == 0x574F27AEC05072D0u)
-                {
-                    ExportsDirectory.ExportClass = NAMES_DIRECTORY.IndexOf("Function");
-                }
-                else
-                {
-                    ExportsDirectory.ExportClass = NAMES_DIRECTORY.IndexOf("StructProperty");
-                }
-
-
-
-                if (!Modify)
-                {
-                    ExportsDirectory.ExportData = new List<byte>();
-                    ExportsDirectory.ExportData.AddRange(UassetFile.GetBytes(ExportsDirectory.ExportLength, false, NextExportPosition));
-                    Exports_Directory.Add(ExportsDirectory);
-                }
-
-                NextExportPosition += ExportsDirectory.ExportLength;
-                UassetFile.Seek(Start + 72);
-            }
-        }
 
         int ExportSize()
         {

@@ -41,7 +41,7 @@ namespace AssetParser
                 int ExportIndex  = memoryList.GetIntValue();
                 IndexEntries.Add(ExportIndex);
             }
-            
+
             //TODO :(
             if (uexp.UassetData.Exports_Directory[Uexp.ExportIndex].Value >= 4 || uexp.UassetData.EngineVersion >= UEVersions.VER_UE4_ADDED_PACKAGE_OWNER)
             {
