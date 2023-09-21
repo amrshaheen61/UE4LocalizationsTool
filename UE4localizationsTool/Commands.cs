@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using UE4localizationsTool.Core.locres;
+using UE4localizationsTool.Helper;
 
 namespace UE4localizationsTool
 {
@@ -12,7 +14,8 @@ namespace UE4localizationsTool
     {
         filter = 1 << 0,
         noname = 1 << 1,
-        method2 = 1 << 2
+        method2 = 1 << 2,
+        CSV = 1 << 3,
     }
 
 
@@ -20,7 +23,7 @@ namespace UE4localizationsTool
     public class Commands
     {
         private List<List<string>> Strings;
-
+        private string TextFileExtension = ".txt";
         public Args Flags;
 
         private bool UseMatching = false;
@@ -35,7 +38,10 @@ namespace UE4localizationsTool
                 GetFilterValues();
             }
 
+            if (Flags.HasFlag(Args.CSV)){
 
+                TextFileExtension = ".csv";
+            }
             string[] Paths;
             string ConsoleText;
             switch (Options.ToLower())
@@ -58,7 +64,7 @@ namespace UE4localizationsTool
                     Console.Write("Done\n");
                     Console.ForegroundColor = ConsoleColor.White;
 
-                    SaveTextFile(SourcePath + ".txt");
+                    SaveTextFile(SourcePath + TextFileExtension);
 
 
                     break;
@@ -76,7 +82,7 @@ namespace UE4localizationsTool
                     Console.Write(ConsoleText);
                     Console.ForegroundColor = ConsoleColor.White;
 
-                    if (!SourcePath.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
+                    if (!SourcePath.EndsWith(TextFileExtension, StringComparison.OrdinalIgnoreCase))
                     {
                         throw new Exception("Invalid text file type: " + Path.GetFileName(SourcePath));
                     }
@@ -93,7 +99,7 @@ namespace UE4localizationsTool
                 case "-importall"://Folders Without rename Files
                     Paths = SourcePath.Split(new char[] { '*' }, 2);
 
-                    if (!Paths[1].EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
+                    if (!Paths[1].EndsWith(TextFileExtension, StringComparison.OrdinalIgnoreCase))
                     {
                         throw new Exception("Invalid text file type: " + Path.GetFileName(SourcePath));
                     }
@@ -113,6 +119,14 @@ namespace UE4localizationsTool
             string ConsoleText = "Saving text file... ";
             Console.Write(ConsoleText);
             Console.ForegroundColor = ConsoleColor.White;
+
+
+            if (Flags.HasFlag(Args.CSV))
+            {
+                CSVFile.Instance.Save(Strings, FilePath);
+
+                goto End;
+            }
 
             string[] stringsArray = new string[Strings.Count];
             int i = 0;
@@ -137,7 +151,7 @@ namespace UE4localizationsTool
                 i++;
             }
             File.WriteAllLines(FilePath, stringsArray);
-
+            End:
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write("Done\n");
             Console.ForegroundColor = ConsoleColor.White;
@@ -154,8 +168,8 @@ namespace UE4localizationsTool
 
             if (FilePath.EndsWith(".locres", StringComparison.OrdinalIgnoreCase))
             {
-                locres locres = new locres(FilePath);
-                return locres.Strings;
+                IAsset locres = new LocresFile(FilePath);
+                return locres.ExtractTexts();
                 //  SizeOfRecord = locres.Strings.Count;
             }
             else if (FilePath.EndsWith(".uasset", StringComparison.OrdinalIgnoreCase) || FilePath.EndsWith(".umap", StringComparison.OrdinalIgnoreCase))
@@ -285,8 +299,11 @@ namespace UE4localizationsTool
 
             if (FilePath.EndsWith(".locres", StringComparison.OrdinalIgnoreCase))
             {
-                locres locres = new locres(FilePath);
-                EditList(locres.Strings, Values);
+                var locres = new LocresFile(FilePath);
+                var strings = locres.ExtractTexts();
+                EditList(locres.ExtractTexts(), Values);
+                locres.ImportTexts(strings);
+
                 if (Option == "-import")
                 {
                     locres.SaveFile(FilePath);

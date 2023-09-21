@@ -429,6 +429,16 @@ namespace AssetParser
                             ReadExpression();
                             ReadExpression();
                             ReadExpression();
+
+                            if (uexp.DumpNameSpaces)
+                            {
+                                uexp.StringNodes.Add(new StringNode()
+                                {
+                                    NameSpace = uexp.Strings[uexp.Strings.Count - 3][1],
+                                    Key = uexp.Strings[uexp.Strings.Count - 2][1],
+                                    Value = uexp.Strings[uexp.Strings.Count - 1][1]
+                                });
+                            }
                             break;
                         case 2: // InvariantText IsCultureInvariant
                             ReadExpression();
@@ -440,6 +450,16 @@ namespace AssetParser
                             FuncBlock.Skip(4);
                             ReadExpression();
                             ReadExpression();
+
+                            if (uexp.DumpNameSpaces)
+                            {
+                                uexp.StringNodes.Add(new StringNode()
+                                {
+                            //        NameSpace = uexp.Strings[uexp.Strings.Count - 3][1],
+                                    Key = uexp.Strings[uexp.Strings.Count - 2][1],
+                                    Value = uexp.Strings[uexp.Strings.Count - 1][1]
+                                });
+                            }
                             break;
                     }
                     break;

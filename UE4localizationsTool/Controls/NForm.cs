@@ -9,26 +9,15 @@ namespace UE4localizationsTool.Controls
         {
             base.CreateHandle();
             if (Properties.Settings.Default.DarkMode)
-                DarkMode();
+                DarkMode(this);
         }
 
-
-        public void DarkMode()
+        public void DarkMode(Control control)
         {
+            if (control == null) return;
 
-            this.BackColor = Color.FromArgb(30, 30, 30);
-            this.ForeColor = Color.White;
-
-            foreach (Control control in this.Controls)
-            {
-                DarkMode(control);
-            }
-        }
-
-        private void DarkMode(Control control)
-        {
-
-            if (!(control.BackColor.R == control.BackColor.G && control.BackColor.G == control.BackColor.B))
+            if (!(control.BackColor.R == control.BackColor.G && control.BackColor.G == control.BackColor.B) ||
+                    !(control.ForeColor.R == control.ForeColor.G && control.ForeColor.G == control.ForeColor.B))
             {
                 return;
             }
@@ -36,145 +25,102 @@ namespace UE4localizationsTool.Controls
             control.BackColor = Color.FromArgb(30, 30, 30);
             control.ForeColor = Color.White;
 
-            if (control is GroupBox)
+            if (control is ListView listView)
             {
-                ((GroupBox)control).ForeColor = Color.White;
-            }
-            if (control is ListView)
-            {
-                ((ListView)control).BackColor = Color.FromArgb(30, 30, 30);
-                ((ListView)control).ForeColor = Color.White;
-                ((ListView)control).OwnerDraw = true;
-                ((ListView)control).DrawItem += (c, e) =>
-                {
-                    e.DrawDefault = true;
-                };
-
-                ((ListView)control).DrawSubItem += (c, e) =>
-                {
-                    e.DrawDefault = true;
-                };
-
-                ((ListView)control).DrawColumnHeader += (c, e) =>
+                listView.OwnerDraw = true;
+                listView.DrawItem += (c, e) => e.DrawDefault = true;
+                listView.DrawSubItem += (c, e) => e.DrawDefault = true;
+                listView.DrawColumnHeader += (c, e) =>
                 {
                     e.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(50, 50, 50)), e.Bounds);
                     e.Graphics.DrawString(e.Header.Text, e.Font, new SolidBrush(Color.White), e.Bounds);
                 };
-
             }
-
-            if (control is TreeView)
+            else if (control is DataGridView dataGridView)
             {
-                ((TreeView)control).BackColor = Color.FromArgb(30, 30, 30);
-                ((TreeView)control).ForeColor = Color.White;
-                ((TreeView)control).LineColor = Color.White;
-
-
+                dataGridView.BackgroundColor = Color.FromArgb(30, 30, 30);
+                dataGridView.DefaultCellStyle.BackColor = Color.FromArgb(40, 40, 40);
+                dataGridView.DefaultCellStyle.ForeColor = Color.White;
+                dataGridView.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(50, 50, 50);
+                dataGridView.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
+                dataGridView.EnableHeadersVisualStyles = false;
+                dataGridView.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
+                dataGridView.RowsDefaultCellStyle.SelectionBackColor = Color.FromArgb(70, 70, 70);
+                dataGridView.RowsDefaultCellStyle.SelectionForeColor = Color.White;
+                DarkMode(dataGridView.ContextMenuStrip);
             }
-
-            if (control is DataGridView)
+            else if (control is Panel panel)
             {
-                ((DataGridView)control).BackgroundColor = Color.FromArgb(30, 30, 30);
-                ((DataGridView)control).DefaultCellStyle.BackColor = Color.FromArgb(40, 40, 40);
-                ((DataGridView)control).DefaultCellStyle.ForeColor = Color.White;
-                ((DataGridView)control).ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(50, 50, 50);
-                ((DataGridView)control).ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
-                ((DataGridView)control).EnableHeadersVisualStyles = false;
-
-                ((DataGridView)control).ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
-                ((DataGridView)control).RowsDefaultCellStyle.SelectionBackColor = Color.FromArgb(70, 70, 70);
-                ((DataGridView)control).RowsDefaultCellStyle.SelectionForeColor = Color.White;
-            }
-            if (control is Panel)
-            {
-                ((Panel)control).BackColor = Color.FromArgb(30, 30, 30);
-
-                foreach (Control controls in ((Panel)control).Controls)
+                panel.BackColor = Color.FromArgb(30, 30, 30);
+                foreach (Control childControl in panel.Controls)
                 {
-                    DarkMode(controls);
+                    DarkMode(childControl);
                 }
             }
-            if (control is TextBox)
+            else if (control is TextBox textBox)
             {
-                ((TextBox)control).BackColor = Color.FromArgb(40, 40, 40);
-                ((TextBox)control).ForeColor = Color.White;
-                ((TextBox)control).BorderStyle = BorderStyle.FixedSingle;
+                textBox.BackColor = Color.FromArgb(40, 40, 40);
+                textBox.ForeColor = Color.White;
+                textBox.BorderStyle = BorderStyle.FixedSingle;
             }
-            if (control is ComboBox)
+            else if (control is ComboBox comboBox)
             {
-                ((ComboBox)control).BackColor = Color.FromArgb(40, 40, 40);
-                ((ComboBox)control).ForeColor = Color.White;
+                comboBox.BackColor = Color.FromArgb(40, 40, 40);
+                comboBox.ForeColor = Color.White;
             }
-            if (control is CheckBox)
+            else if (control is CheckBox || control is RadioButton)
             {
-                ((CheckBox)control).ForeColor = Color.White;
+                control.ForeColor = Color.White;
             }
-            if (control is RadioButton)
+            else if (control is Button button)
             {
-                ((RadioButton)control).ForeColor = Color.White;
+                button.BackColor = Color.FromArgb(40, 40, 40);
+                button.ForeColor = Color.White;
+                button.FlatStyle = FlatStyle.Flat;
+                button.FlatAppearance.BorderSize = 1;
+                button.FlatAppearance.BorderColor = Color.FromArgb(60, 60, 60);
+                button.FlatAppearance.MouseOverBackColor = Color.FromArgb(60, 60, 60);
             }
-            if (control is Button)
+            else if (control is MenuStrip || control is ContextMenuStrip)
             {
-                ((Button)control).BackColor = Color.FromArgb(40, 40, 40);
-                ((Button)control).ForeColor = Color.White;
-                ((Button)control).FlatStyle = FlatStyle.Flat;
-                ((Button)control).FlatAppearance.BorderSize = 1;
-                ((Button)control).FlatAppearance.BorderColor = Color.FromArgb(60, 60, 60);
-                ((Button)control).FlatAppearance.MouseOverBackColor = Color.FromArgb(60, 60, 60);
-
+                control.BackColor = Color.FromArgb(30, 30, 30);
+                control.ForeColor = Color.White;
+                if (control is MenuStrip menuStrip)
+                {
+                    menuStrip.RenderMode = ToolStripRenderMode.Professional;
+                    menuStrip.Renderer = new DarkModeMenuStripRenderer(new CustomColorTable());
+                }
+                else if (control is ContextMenuStrip contextMenuStrip)
+                {
+                    contextMenuStrip.RenderMode = ToolStripRenderMode.Professional;
+                    contextMenuStrip.Renderer = new DarkModeMenuStripRenderer(new CustomColorTable());
+                }
             }
-
-            if (control is MenuStrip)
+            else if (control is SplitContainer splitContainer)
             {
-                ((MenuStrip)control).BackColor = Color.FromArgb(30, 30, 30);
-                ((MenuStrip)control).ForeColor = Color.White;
-
-                ((MenuStrip)control).RenderMode = System.Windows.Forms.ToolStripRenderMode.Professional;
-                ((MenuStrip)control).Renderer = new DarkModeMenuStripRenderer(new CustomColorTable());
+                splitContainer.BackColor = Color.FromArgb(30, 30, 30);
+                splitContainer.ForeColor = Color.White;
+                DarkMode(splitContainer.Panel1);
+                DarkMode(splitContainer.Panel2);
             }
-
-            if (control is SplitContainer)
+            else if (control is PictureBox || control is Label)
             {
-                ((SplitContainer)control).BackColor = Color.FromArgb(30, 30, 30);
-                ((SplitContainer)control).ForeColor = Color.White;
-
-
-                DarkMode(((SplitContainer)control).Panel1);
-                DarkMode(((SplitContainer)control).Panel2);
-            }
-
-            if (control is PictureBox)
-            {
-                ((PictureBox)control).BackColor = Color.FromArgb(30, 30, 30);
-                ((PictureBox)control).ForeColor = Color.White;
+                control.BackColor = Color.FromArgb(30, 30, 30);
+                control.ForeColor = Color.White;
             }
 
-
-            if (control is Label)
+            foreach (Control childControl in control.Controls)
             {
-                ((Label)control).BackColor = Color.FromArgb(30, 30, 30);
-                ((Label)control).ForeColor = Color.White;
+                DarkMode(childControl);
             }
-
-
-
-            foreach (Control c in control.Controls)
-            {
-                DarkMode(c);
-            }
-
-
         }
-
 
         public class DarkModeMenuStripRenderer : ToolStripProfessionalRenderer
         {
-
             public DarkModeMenuStripRenderer(ProfessionalColorTable colorTable)
                 : base(colorTable)
             {
             }
-
 
             protected override void OnRenderItemText(ToolStripItemTextRenderEventArgs e)
             {
@@ -183,108 +129,27 @@ namespace UE4localizationsTool.Controls
             }
         }
 
-
         public class CustomColorTable : ProfessionalColorTable
         {
-            public override Color MenuStripGradientBegin
-            {
-                get { return Color.FromArgb(30, 30, 30); }
-            }
-
-            public override Color MenuStripGradientEnd
-            {
-                get { return Color.FromArgb(30, 30, 30); }
-            }
-
-            public override Color MenuItemSelected
-            {
-                get { return Color.FromArgb(63, 63, 70); }
-            }
-
-            public override Color MenuItemBorder
-            {
-                get { return Color.FromArgb(63, 63, 70); }
-            }
-
-            public override Color MenuItemSelectedGradientBegin
-            {
-                get { return Color.FromArgb(63, 63, 70); }
-            }
-
-            public override Color MenuItemSelectedGradientEnd
-            {
-                get { return Color.FromArgb(63, 63, 70); }
-            }
-
-            public override Color MenuItemPressedGradientBegin
-            {
-                get { return Color.FromArgb(63, 63, 70); }
-            }
-
-            public override Color MenuItemPressedGradientEnd
-            {
-                get { return Color.FromArgb(63, 63, 70); }
-            }
-
-            public override Color MenuBorder
-            {
-                get { return Color.FromArgb(63, 63, 70); }
-            }
-
-            public override Color ToolStripDropDownBackground
-            {
-                get { return Color.FromArgb(30, 30, 30); }
-            }
-
-            public override Color ImageMarginGradientBegin
-            {
-                get { return Color.FromArgb(30, 30, 30); }
-            }
-
-            public override Color ImageMarginGradientMiddle
-            {
-                get { return Color.FromArgb(30, 30, 30); }
-            }
-
-
-            public override Color ImageMarginGradientEnd
-            {
-                get { return Color.FromArgb(30, 30, 30); }
-            }
-
-            public override Color ToolStripBorder
-            {
-                get { return Color.FromArgb(63, 63, 70); }
-            }
-
-            public override Color ToolStripContentPanelGradientBegin
-            {
-                get { return Color.FromArgb(30, 30, 30); }
-            }
-
-            public override Color ToolStripContentPanelGradientEnd
-            {
-                get { return Color.FromArgb(30, 30, 30); }
-            }
-
-            public override Color ToolStripGradientBegin
-            {
-                get { return Color.FromArgb(30, 30, 30); }
-            }
-
-            public override Color ToolStripGradientMiddle
-            {
-                get { return Color.FromArgb(30, 30, 30); }
-            }
-
-            public override Color ToolStripGradientEnd
-            {
-                get { return Color.FromArgb(30, 30, 30); }
-            }
-
-
+            public override Color MenuStripGradientBegin => Color.FromArgb(30, 30, 30);
+            public override Color MenuStripGradientEnd => Color.FromArgb(30, 30, 30);
+            public override Color MenuItemSelected => Color.FromArgb(63, 63, 70);
+            public override Color MenuItemBorder => Color.FromArgb(63, 63, 70);
+            public override Color MenuItemSelectedGradientBegin => Color.FromArgb(63, 63, 70);
+            public override Color MenuItemSelectedGradientEnd => Color.FromArgb(63, 63, 70);
+            public override Color MenuItemPressedGradientBegin => Color.FromArgb(63, 63, 70);
+            public override Color MenuItemPressedGradientEnd => Color.FromArgb(63, 63, 70);
+            public override Color MenuBorder => Color.FromArgb(63, 63, 70);
+            public override Color ToolStripDropDownBackground => Color.FromArgb(30, 30, 30);
+            public override Color ImageMarginGradientBegin => Color.FromArgb(30, 30, 30);
+            public override Color ImageMarginGradientMiddle => Color.FromArgb(30, 30, 30);
+            public override Color ImageMarginGradientEnd => Color.FromArgb(30, 30, 30);
+            public override Color ToolStripBorder => Color.FromArgb(63, 63, 70);
+            public override Color ToolStripContentPanelGradientBegin => Color.FromArgb(30, 30, 30);
+            public override Color ToolStripContentPanelGradientEnd => Color.FromArgb(30, 30, 30);
+            public override Color ToolStripGradientBegin => Color.FromArgb(30, 30, 30);
+            public override Color ToolStripGradientMiddle => Color.FromArgb(30, 30, 30);
+            public override Color ToolStripGradientEnd => Color.FromArgb(30, 30, 30);
         }
-
-
     }
 }

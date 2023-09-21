@@ -189,7 +189,7 @@ namespace AssetParser
                 UassetFile.Skip(8);
 
                 //Wrong way
-                ulong Class = UassetFile.GetUInt64Value();
+                ulong Class = UassetFile.GetUInt64Value();//CityHash64 ?!
 
                 switch (Class)
                 {

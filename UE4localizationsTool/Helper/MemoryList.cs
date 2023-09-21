@@ -50,7 +50,6 @@ namespace Helper.MemoryList
         {
             get
             {
-
                 if (this.MemoryListIndex - 1 > MemoryListData.Count - 1)
                 {
 
@@ -189,7 +188,9 @@ namespace Helper.MemoryList
 
         public void Clear()
         {
+
             MemoryListData.Clear();
+            MemoryListPosition = 0;
         }
 
         public void Add(object Value)
@@ -309,7 +310,7 @@ namespace Helper.MemoryList
             }
         }
 
-        void IDisposable.Dispose() { }
+  
         public void Dispose()
         {
             Clear();
@@ -565,6 +566,12 @@ namespace Helper.MemoryList
 
         public void ReplaceBytes(int OldBytesLenght, byte[] NewBytes, bool SavePosition = true, int SeekAndRead = -1)
         {
+
+            if (OldBytesLenght== NewBytes.Length)
+            {
+                SetBytes(NewBytes, SavePosition, SeekAndRead);              
+                return;
+            }
 
             if (SeekAndRead != -1)
             {

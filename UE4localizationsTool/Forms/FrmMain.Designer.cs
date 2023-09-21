@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Windows.Forms;
+using UE4localizationsTool.Controls;
 
 namespace UE4localizationsTool
 {
@@ -46,8 +48,6 @@ namespace UE4localizationsTool
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.find = new System.Windows.Forms.ToolStripMenuItem();
             this.filterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.byNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.byValueToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.clearFilterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sortToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.nameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -73,28 +73,29 @@ namespace UE4localizationsTool
             this.commandLinesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.donateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.DataCount = new System.Windows.Forms.ToolStripLabel();
+            this.locresOprationsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.editSelectedRowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.removeSelectedRowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.addNewRowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mergeLocresFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mergeUassetFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.StateLabel = new System.Windows.Forms.ToolStripLabel();
+            this.dataGridView1 = new NDataGridView();
             this.TextName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.TextValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Index = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.SearchPanal = new System.Windows.Forms.Panel();
-            this.searchcount = new System.Windows.Forms.Label();
-            this.SearchHide = new System.Windows.Forms.Label();
-            this.FindPrevious = new System.Windows.Forms.Button();
-            this.FindNext = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
-            this.InputSearch = new System.Windows.Forms.TextBox();
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.pasteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.StateLabel = new System.Windows.Forms.Label();
-            this.DataCount = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.searchBox = new UE4localizationsTool.Controls.SearchBox();
+            this.StatusBlock = new System.Windows.Forms.Panel();
+            this.StatusText = new System.Windows.Forms.Label();
+            this.StatusTitle = new System.Windows.Forms.Label();
+            this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
-            this.SearchPanal.SuspendLayout();
-            this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.StatusBlock.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -104,7 +105,10 @@ namespace UE4localizationsTool
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
             this.editToolStripMenuItem,
-            this.aboutToolStripMenuItem});
+            this.aboutToolStripMenuItem,
+            this.DataCount,
+            this.locresOprationsToolStripMenuItem,
+            this.StateLabel});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(0);
@@ -155,6 +159,7 @@ namespace UE4localizationsTool
             this.toolStripSeparator1,
             this.find,
             this.filterToolStripMenuItem,
+            this.clearFilterToolStripMenuItem,
             this.sortToolStripMenuItem,
             this.toolStripSeparator2,
             this.undoToolStripMenuItem,
@@ -189,7 +194,7 @@ namespace UE4localizationsTool
             this.noNamesToolStripMenuItem.Enabled = false;
             this.noNamesToolStripMenuItem.Name = "noNamesToolStripMenuItem";
             this.noNamesToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.E)));
-            this.noNamesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.noNamesToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
             this.noNamesToolStripMenuItem.Text = "No names";
             this.noNamesToolStripMenuItem.Click += new System.EventHandler(this.noNamesToolStripMenuItem_Click);
             // 
@@ -198,14 +203,14 @@ namespace UE4localizationsTool
             this.withNamesToolStripMenuItem.Enabled = false;
             this.withNamesToolStripMenuItem.Name = "withNamesToolStripMenuItem";
             this.withNamesToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.R)));
-            this.withNamesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.withNamesToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
             this.withNamesToolStripMenuItem.Text = "With names";
             this.withNamesToolStripMenuItem.Click += new System.EventHandler(this.withNamesToolStripMenuItem_Click);
             // 
             // csvFileToolStripMenuItem
             // 
             this.csvFileToolStripMenuItem.Name = "csvFileToolStripMenuItem";
-            this.csvFileToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.csvFileToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
             this.csvFileToolStripMenuItem.Text = "CSV file";
             this.csvFileToolStripMenuItem.Click += new System.EventHandler(this.csvFileToolStripMenuItem_Click);
             // 
@@ -229,42 +234,23 @@ namespace UE4localizationsTool
             this.find.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F)));
             this.find.Size = new System.Drawing.Size(229, 22);
             this.find.Text = "Find";
-            this.find.Click += new System.EventHandler(this.search_Click);
+            this.find.Click += new System.EventHandler(this.find_Click);
             // 
             // filterToolStripMenuItem
             // 
-            this.filterToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.byNameToolStripMenuItem,
-            this.byValueToolStripMenuItem,
-            this.clearFilterToolStripMenuItem});
             this.filterToolStripMenuItem.Enabled = false;
             this.filterToolStripMenuItem.Name = "filterToolStripMenuItem";
             this.filterToolStripMenuItem.Size = new System.Drawing.Size(229, 22);
             this.filterToolStripMenuItem.Text = "Filter";
-            // 
-            // byNameToolStripMenuItem
-            // 
-            this.byNameToolStripMenuItem.Name = "byNameToolStripMenuItem";
-            this.byNameToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Q)));
-            this.byNameToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
-            this.byNameToolStripMenuItem.Text = "By Name";
-            this.byNameToolStripMenuItem.Click += new System.EventHandler(this.byNameToolStripMenuItem_Click);
-            // 
-            // byValueToolStripMenuItem
-            // 
-            this.byValueToolStripMenuItem.Name = "byValueToolStripMenuItem";
-            this.byValueToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.W)));
-            this.byValueToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
-            this.byValueToolStripMenuItem.Text = "By Value";
-            this.byValueToolStripMenuItem.Click += new System.EventHandler(this.byValueToolStripMenuItem_Click);
+            this.filterToolStripMenuItem.Click += new System.EventHandler(this.filterToolStripMenuItem_Click);
             // 
             // clearFilterToolStripMenuItem
             // 
             this.clearFilterToolStripMenuItem.Enabled = false;
             this.clearFilterToolStripMenuItem.Name = "clearFilterToolStripMenuItem";
-            this.clearFilterToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.D)));
-            this.clearFilterToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
+            this.clearFilterToolStripMenuItem.Size = new System.Drawing.Size(229, 22);
             this.clearFilterToolStripMenuItem.Text = "Clear filter";
+            this.clearFilterToolStripMenuItem.Visible = false;
             this.clearFilterToolStripMenuItem.Click += new System.EventHandler(this.clearFilterToolStripMenuItem_Click);
             // 
             // sortToolStripMenuItem
@@ -459,15 +445,76 @@ namespace UE4localizationsTool
             this.aboutToolStripMenuItem1.Text = "About";
             this.aboutToolStripMenuItem1.Click += new System.EventHandler(this.aboutToolStripMenuItem1_Click);
             // 
+            // DataCount
+            // 
+            this.DataCount.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.DataCount.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.DataCount.Name = "DataCount";
+            this.DataCount.Size = new System.Drawing.Size(57, 21);
+            this.DataCount.Text = "----------";
+            // 
+            // locresOprationsToolStripMenuItem
+            // 
+            this.locresOprationsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.editSelectedRowToolStripMenuItem,
+            this.removeSelectedRowToolStripMenuItem,
+            this.addNewRowToolStripMenuItem,
+            this.mergeLocresFileToolStripMenuItem,
+            this.mergeUassetFileToolStripMenuItem});
+            this.locresOprationsToolStripMenuItem.Name = "locresOprationsToolStripMenuItem";
+            this.locresOprationsToolStripMenuItem.Size = new System.Drawing.Size(112, 24);
+            this.locresOprationsToolStripMenuItem.Text = "Locres operations";
+            // 
+            // editSelectedRowToolStripMenuItem
+            // 
+            this.editSelectedRowToolStripMenuItem.Name = "editSelectedRowToolStripMenuItem";
+            this.editSelectedRowToolStripMenuItem.Size = new System.Drawing.Size(203, 22);
+            this.editSelectedRowToolStripMenuItem.Text = "Edit Selected Row";
+            this.editSelectedRowToolStripMenuItem.Click += new System.EventHandler(this.editSelectedRowToolStripMenuItem_Click);
+            // 
+            // removeSelectedRowToolStripMenuItem
+            // 
+            this.removeSelectedRowToolStripMenuItem.Name = "removeSelectedRowToolStripMenuItem";
+            this.removeSelectedRowToolStripMenuItem.Size = new System.Drawing.Size(203, 22);
+            this.removeSelectedRowToolStripMenuItem.Text = "Remove Selected Row(s)";
+            this.removeSelectedRowToolStripMenuItem.Click += new System.EventHandler(this.removeSelectedRowToolStripMenuItem_Click);
+            // 
+            // addNewRowToolStripMenuItem
+            // 
+            this.addNewRowToolStripMenuItem.Name = "addNewRowToolStripMenuItem";
+            this.addNewRowToolStripMenuItem.Size = new System.Drawing.Size(203, 22);
+            this.addNewRowToolStripMenuItem.Text = "Add New Row";
+            this.addNewRowToolStripMenuItem.Click += new System.EventHandler(this.addNewRowToolStripMenuItem_Click);
+            // 
+            // mergeLocresFileToolStripMenuItem
+            // 
+            this.mergeLocresFileToolStripMenuItem.Name = "mergeLocresFileToolStripMenuItem";
+            this.mergeLocresFileToolStripMenuItem.Size = new System.Drawing.Size(203, 22);
+            this.mergeLocresFileToolStripMenuItem.Text = "Merge Locres File";
+            this.mergeLocresFileToolStripMenuItem.Click += new System.EventHandler(this.mergeLocresFileToolStripMenuItem_Click);
+            // 
+            // mergeUassetFileToolStripMenuItem
+            // 
+            this.mergeUassetFileToolStripMenuItem.Name = "mergeUassetFileToolStripMenuItem";
+            this.mergeUassetFileToolStripMenuItem.Size = new System.Drawing.Size(203, 22);
+            this.mergeUassetFileToolStripMenuItem.Text = "Merge Uasset File (Beta)";
+            this.mergeUassetFileToolStripMenuItem.Click += new System.EventHandler(this.mergeUassetFileToolStripMenuItem_Click);
+            // 
+            // StateLabel
+            // 
+            this.StateLabel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.StateLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.StateLabel.ForeColor = System.Drawing.Color.Maroon;
+            this.StateLabel.Name = "StateLabel";
+            this.StateLabel.Size = new System.Drawing.Size(57, 21);
+            this.StateLabel.Text = "----------";
+            // 
             // dataGridView1
             // 
             this.dataGridView1.AllowUserToAddRows = false;
             this.dataGridView1.AllowUserToDeleteRows = false;
             this.dataGridView1.AllowUserToOrderColumns = true;
             this.dataGridView1.AllowUserToResizeRows = false;
-            this.dataGridView1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.dataGridView1.BackgroundColor = System.Drawing.SystemColors.Window;
             this.dataGridView1.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -475,23 +522,24 @@ namespace UE4localizationsTool
             this.TextName,
             this.TextValue,
             this.Index});
+            this.dataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridView1.ImeMode = System.Windows.Forms.ImeMode.Disable;
-            this.dataGridView1.Location = new System.Drawing.Point(0, 23);
-            this.dataGridView1.MultiSelect = false;
+            this.dataGridView1.IsFilterApplied = false;
+            this.dataGridView1.Location = new System.Drawing.Point(0, 24);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowHeadersVisible = false;
             this.dataGridView1.RowHeadersWidth = 51;
             this.dataGridView1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.dataGridView1.Size = new System.Drawing.Size(689, 427);
+            this.dataGridView1.Size = new System.Drawing.Size(689, 396);
             this.dataGridView1.TabIndex = 1;
-            this.dataGridView1.CellBeginEdit += new System.Windows.Forms.DataGridViewCellCancelEventHandler(this.dataGridView1_CellBeginEdit);
-            this.dataGridView1.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellEndEdit);
+            this.dataGridView1.FilterApplied += new System.EventHandler(this.dataGridView1_FilterApplied);
+            this.dataGridView1.FilterCleared += new System.EventHandler(this.dataGridView1_FilterCleared);
+            this.dataGridView1.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dataGridView1_CellFormatting);
             this.dataGridView1.CellValidated += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellValidated);
             this.dataGridView1.CellValidating += new System.Windows.Forms.DataGridViewCellValidatingEventHandler(this.dataGridView1_CellValidating);
             this.dataGridView1.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellValueChanged);
+            this.dataGridView1.CellValuePushed += new System.Windows.Forms.DataGridViewCellValueEventHandler(this.dataGridView1_CellValuePushed);
             this.dataGridView1.Sorted += new System.EventHandler(this.dataGridView1_Sorted);
-            this.dataGridView1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dataGridView1_KeyDown);
-            this.dataGridView1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.dataGridView1_MouseDown);
             // 
             // TextName
             // 
@@ -518,130 +566,6 @@ namespace UE4localizationsTool
             this.Index.Visible = false;
             this.Index.Width = 125;
             // 
-            // SearchPanal
-            // 
-            this.SearchPanal.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.SearchPanal.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.SearchPanal.Controls.Add(this.searchcount);
-            this.SearchPanal.Controls.Add(this.SearchHide);
-            this.SearchPanal.Controls.Add(this.FindPrevious);
-            this.SearchPanal.Controls.Add(this.FindNext);
-            this.SearchPanal.Controls.Add(this.label1);
-            this.SearchPanal.Controls.Add(this.InputSearch);
-            this.SearchPanal.Location = new System.Drawing.Point(0, 420);
-            this.SearchPanal.Name = "SearchPanal";
-            this.SearchPanal.Size = new System.Drawing.Size(689, 30);
-            this.SearchPanal.TabIndex = 2;
-            this.SearchPanal.Visible = false;
-            // 
-            // searchcount
-            // 
-            this.searchcount.Location = new System.Drawing.Point(423, 7);
-            this.searchcount.Name = "searchcount";
-            this.searchcount.Size = new System.Drawing.Size(211, 18);
-            this.searchcount.TabIndex = 6;
-            this.searchcount.Click += new System.EventHandler(this.label2_Click);
-            // 
-            // SearchHide
-            // 
-            this.SearchHide.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.SearchHide.AutoSize = true;
-            this.SearchHide.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.SearchHide.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
-            this.SearchHide.Location = new System.Drawing.Point(664, 6);
-            this.SearchHide.Name = "SearchHide";
-            this.SearchHide.Size = new System.Drawing.Size(18, 17);
-            this.SearchHide.TabIndex = 5;
-            this.SearchHide.Text = "X";
-            this.SearchHide.Click += new System.EventHandler(this.SearchHide_Click);
-            // 
-            // FindPrevious
-            // 
-            this.FindPrevious.Location = new System.Drawing.Point(331, 4);
-            this.FindPrevious.Name = "FindPrevious";
-            this.FindPrevious.Size = new System.Drawing.Size(86, 23);
-            this.FindPrevious.TabIndex = 4;
-            this.FindPrevious.Text = "Find Previous";
-            this.FindPrevious.UseVisualStyleBackColor = true;
-            this.FindPrevious.Click += new System.EventHandler(this.FindPrevious_Click);
-            // 
-            // FindNext
-            // 
-            this.FindNext.Location = new System.Drawing.Point(250, 4);
-            this.FindNext.Name = "FindNext";
-            this.FindNext.Size = new System.Drawing.Size(75, 23);
-            this.FindNext.TabIndex = 3;
-            this.FindNext.Text = "Find Next";
-            this.FindNext.UseVisualStyleBackColor = true;
-            this.FindNext.Click += new System.EventHandler(this.FindNext_Click);
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(7, 9);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(56, 13);
-            this.label1.TabIndex = 1;
-            this.label1.Text = "Find what:";
-            // 
-            // InputSearch
-            // 
-            this.InputSearch.Location = new System.Drawing.Point(79, 5);
-            this.InputSearch.Name = "InputSearch";
-            this.InputSearch.Size = new System.Drawing.Size(162, 20);
-            this.InputSearch.TabIndex = 0;
-            this.InputSearch.KeyDown += new System.Windows.Forms.KeyEventHandler(this.InputSearch_KeyDown);
-            // 
-            // contextMenuStrip1
-            // 
-            this.contextMenuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.copyToolStripMenuItem,
-            this.pasteToolStripMenuItem});
-            this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(145, 48);
-            // 
-            // copyToolStripMenuItem
-            // 
-            this.copyToolStripMenuItem.Name = "copyToolStripMenuItem";
-            this.copyToolStripMenuItem.ShortcutKeyDisplayString = "Ctrl+C";
-            this.copyToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
-            this.copyToolStripMenuItem.Text = "Copy";
-            this.copyToolStripMenuItem.Click += new System.EventHandler(this.copyToolStripMenuItem_Click);
-            // 
-            // pasteToolStripMenuItem
-            // 
-            this.pasteToolStripMenuItem.Name = "pasteToolStripMenuItem";
-            this.pasteToolStripMenuItem.ShortcutKeyDisplayString = "Ctrl+V";
-            this.pasteToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
-            this.pasteToolStripMenuItem.Text = "Paste";
-            this.pasteToolStripMenuItem.Click += new System.EventHandler(this.pasteToolStripMenuItem_Click);
-            // 
-            // StateLabel
-            // 
-            this.StateLabel.AutoSize = true;
-            this.StateLabel.Location = new System.Drawing.Point(143, 5);
-            this.StateLabel.Name = "StateLabel";
-            this.StateLabel.Size = new System.Drawing.Size(64, 13);
-            this.StateLabel.TabIndex = 3;
-            this.StateLabel.Tag = "";
-            this.StateLabel.Text = "-------------------";
-            // 
-            // DataCount
-            // 
-            this.DataCount.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.DataCount.AutoSize = true;
-            this.DataCount.ImageAlign = System.Drawing.ContentAlignment.BottomCenter;
-            this.DataCount.Location = new System.Drawing.Point(658, 5);
-            this.DataCount.Name = "DataCount";
-            this.DataCount.Size = new System.Drawing.Size(25, 13);
-            this.DataCount.TabIndex = 5;
-            this.DataCount.Text = "------";
-            this.DataCount.TextAlign = System.Drawing.ContentAlignment.TopRight;
-            this.DataCount.TextChanged += new System.EventHandler(this.DataCount_TextChanged);
-            // 
             // pictureBox1
             // 
             this.pictureBox1.BackColor = System.Drawing.Color.Green;
@@ -652,18 +576,73 @@ namespace UE4localizationsTool
             this.pictureBox1.TabStop = false;
             this.pictureBox1.Visible = false;
             // 
+            // searchBox
+            // 
+            this.searchBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.searchBox.DataGridView = this.dataGridView1;
+            this.searchBox.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.searchBox.Location = new System.Drawing.Point(0, 420);
+            this.searchBox.Name = "searchBox";
+            this.searchBox.Size = new System.Drawing.Size(689, 30);
+            this.searchBox.TabIndex = 2;
+            this.searchBox.Visible = false;
+            // 
+            // StatusBlock
+            // 
+            this.StatusBlock.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.StatusBlock.AutoSize = true;
+            this.StatusBlock.BackColor = System.Drawing.Color.White;
+            this.StatusBlock.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.StatusBlock.Controls.Add(this.StatusText);
+            this.StatusBlock.Controls.Add(this.StatusTitle);
+            this.StatusBlock.Controls.Add(this.pictureBox2);
+            this.StatusBlock.Location = new System.Drawing.Point(189, 174);
+            this.StatusBlock.Name = "StatusBlock";
+            this.StatusBlock.Size = new System.Drawing.Size(310, 103);
+            this.StatusBlock.TabIndex = 8;
+            this.StatusBlock.Visible = false;
+            // 
+            // StatusText
+            // 
+            this.StatusText.AutoSize = true;
+            this.StatusText.Location = new System.Drawing.Point(106, 65);
+            this.StatusText.Name = "StatusText";
+            this.StatusText.Size = new System.Drawing.Size(28, 13);
+            this.StatusText.TabIndex = 2;
+            this.StatusText.Text = "-------";
+            // 
+            // StatusTitle
+            // 
+            this.StatusTitle.AutoSize = true;
+            this.StatusTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.StatusTitle.Location = new System.Drawing.Point(103, 22);
+            this.StatusTitle.Name = "StatusTitle";
+            this.StatusTitle.Size = new System.Drawing.Size(114, 31);
+            this.StatusTitle.TabIndex = 0;
+            this.StatusTitle.Text = "----------";
+            // 
+            // pictureBox2
+            // 
+            this.pictureBox2.BackColor = System.Drawing.Color.Transparent;
+            this.pictureBox2.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox2.Image")));
+            this.pictureBox2.Location = new System.Drawing.Point(9, 12);
+            this.pictureBox2.Name = "pictureBox2";
+            this.pictureBox2.Size = new System.Drawing.Size(82, 78);
+            this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox2.TabIndex = 1;
+            this.pictureBox2.TabStop = false;
+            // 
             // FrmMain
             // 
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(689, 450);
-            this.Controls.Add(this.DataCount);
-            this.Controls.Add(this.StateLabel);
-            this.Controls.Add(this.SearchPanal);
-            this.Controls.Add(this.dataGridView1);
+            this.Controls.Add(this.StatusBlock);
             this.Controls.Add(this.pictureBox1);
+            this.Controls.Add(this.dataGridView1);
             this.Controls.Add(this.menuStrip1);
+            this.Controls.Add(this.searchBox);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.MinimumSize = new System.Drawing.Size(704, 487);
@@ -676,10 +655,10 @@ namespace UE4localizationsTool
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
-            this.SearchPanal.ResumeLayout(false);
-            this.SearchPanal.PerformLayout();
-            this.contextMenuStrip1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            this.StatusBlock.ResumeLayout(false);
+            this.StatusBlock.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -695,35 +674,20 @@ namespace UE4localizationsTool
         private System.Windows.Forms.ToolStripMenuItem exportAllTextToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem importAllTextToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
-        private System.Windows.Forms.DataGridView dataGridView1;
+        private NDataGridView dataGridView1;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem find;
-        private System.Windows.Forms.Panel SearchPanal;
-        private System.Windows.Forms.Label SearchHide;
-        private System.Windows.Forms.Button FindPrevious;
-        private System.Windows.Forms.Button FindNext;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox InputSearch;
-        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
-        private System.Windows.Forms.ToolStripMenuItem copyToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem pasteToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripMenuItem copyToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem pasteToolStripMenuItem1;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripMenuItem fontToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem rightToLeftToolStripMenuItem;
-        private System.Windows.Forms.Label StateLabel;
         private System.Windows.Forms.ToolStripMenuItem undoToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem redoToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem commandLinesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem filterToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem byValueToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem byNameToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem clearFilterToolStripMenuItem;
-        private System.Windows.Forms.Label DataCount;
-        private System.Windows.Forms.Label searchcount;
         private System.Windows.Forms.ToolStripMenuItem noNamesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem withNamesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem sortToolStripMenuItem;
@@ -744,6 +708,20 @@ namespace UE4localizationsTool
         private System.Windows.Forms.DataGridViewTextBoxColumn Index;
         private System.Windows.Forms.ToolStripMenuItem Checkforupdates;
         private System.Windows.Forms.ToolStripMenuItem csvFileToolStripMenuItem;
+        private Controls.SearchBox searchBox;
+        private System.Windows.Forms.ToolStripMenuItem clearFilterToolStripMenuItem;
+        private ToolStripLabel StateLabel;
+        private ToolStripLabel DataCount;
+        private ToolStripMenuItem locresOprationsToolStripMenuItem;
+        private ToolStripMenuItem editSelectedRowToolStripMenuItem;
+        private ToolStripMenuItem removeSelectedRowToolStripMenuItem;
+        private ToolStripMenuItem addNewRowToolStripMenuItem;
+        private ToolStripMenuItem mergeLocresFileToolStripMenuItem;
+        private Label StatusText;
+        private Label StatusTitle;
+        private PictureBox pictureBox2;
+        private Panel StatusBlock;
+        private ToolStripMenuItem mergeUassetFileToolStripMenuItem;
     }
 }
 

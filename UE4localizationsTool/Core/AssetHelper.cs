@@ -1,6 +1,7 @@
 ﻿using Helper.MemoryList;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace AssetParser
@@ -132,7 +133,40 @@ namespace AssetParser
             memoryList.SetStringValueN(ReplaceBreaklines(str, true), true, -1, encoding);
         }
 
+        public static void SetStringUE(this MemoryList memoryList, string StringValue, bool UseUnicode = false)
+        {
 
+            StringValue = ReplaceBreaklines(StringValue, true);
+
+            if (string.IsNullOrEmpty(StringValue))
+            {
+                memoryList.InsertIntValue(0);
+                return;
+            }
+
+
+            StringValue += '\0';
+
+            Encoding encoding = Encoding.Unicode;
+            if (IsASCII(StringValue) && !UseUnicode)
+            {
+                encoding = Encoding.ASCII;
+            }
+
+            byte[] TextBytes = encoding.GetBytes(StringValue);
+
+            if (encoding == Encoding.ASCII)
+            {
+                memoryList.InsertIntValue(TextBytes.Length);
+                memoryList.InsertBytes(TextBytes);
+            }
+            else
+            {
+                memoryList.InsertIntValue(TextBytes.Length / -2);
+                memoryList.InsertBytes(TextBytes);
+            }
+        }
+        
         public static string GetStringUE(this MemoryList memoryList, int Lenght, bool SavePosition = true, int SeekAndRead = -1, Encoding encoding = null)
         {
             string Stringvalue = ReplaceBreaklines(memoryList.GetStringValue(Lenght, SavePosition, SeekAndRead, encoding));
@@ -331,6 +365,16 @@ namespace AssetParser
                     new ReadStringProperty(memoryList, uexp, PropertyName + "_1", Modify);
                     new ReadStringProperty(memoryList, uexp, PropertyName + "_2", Modify);
                     new ReadStringProperty(memoryList, uexp, PropertyName + "_3", Modify);
+
+                    if (uexp.DumpNameSpaces)
+                    {
+                        uexp.StringNodes.Add(new StringNode() { 
+                        NameSpace = uexp.Strings[uexp.Strings.Count - 3][1],
+                        Key= uexp.Strings[uexp.Strings.Count - 2][1],
+                        Value= uexp.Strings[uexp.Strings.Count - 1][1]
+                        });
+                    }
+
                     break;
                 case TextHistoryType.NamedFormat:
                 case TextHistoryType.OrderedFormat:
@@ -356,6 +400,16 @@ namespace AssetParser
                 case TextHistoryType.StringTableEntry:
                     new FName(memoryList, uexp, PropertyName, Modify);
                     new ReadStringProperty(memoryList, uexp, PropertyName + "_1", Modify);
+
+                    if (uexp.DumpNameSpaces)
+                    {
+                        uexp.StringNodes.Add(new StringNode()
+                        {
+                            Key = uexp.Strings[uexp.Strings.Count - 2][1],
+                            Value = uexp.Strings[uexp.Strings.Count - 1][1]
+                        });
+                    }
+
                     break;
 
                 default:

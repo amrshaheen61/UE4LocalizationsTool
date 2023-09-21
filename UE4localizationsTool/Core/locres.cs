@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
 
 namespace AssetParser
 {
@@ -207,9 +208,24 @@ namespace AssetParser
             locresData.WriteFile(FilPath);
         }
 
+        public void AddItemsToDataGridView(DataGridView dataGrid)
+        {
+            throw new NotImplementedException();
+        }
 
+        public void LoadFromDataGridView(DataGridView dataGrid)
+        {
+            throw new NotImplementedException();
+        }
 
+        public List<List<string>> ExtractTexts()
+        {
+            throw new NotImplementedException();
+        }
 
-
+        public void ImportTexts(List<List<string>> strings)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

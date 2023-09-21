@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{C8AA2127-04A4-400B-9CA3-1951639BB0A3}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <RootNamespace>UE4localizationsTool</RootNamespace>
     <AssemblyName>UE4localizationsTool</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -39,11 +39,12 @@
     <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Prefer32Bit>false</Prefer32Bit>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
     <CodeAnalysisIgnoreGeneratedCode>true</CodeAnalysisIgnoreGeneratedCode>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -82,13 +83,26 @@
   <PropertyGroup />
   <PropertyGroup />
   <PropertyGroup />
+  <PropertyGroup />
   <PropertyGroup>
-    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
+    <NoWin32Manifest>true</NoWin32Manifest>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Commands.cs" />
+    <Compile Include="Controls\NDataGridView.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Controls\NForm.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Controls\NTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\SearchBox.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\SearchBox.Designer.cs">
+      <DependentUpon>SearchBox.cs</DependentUpon>
     </Compile>
     <Compile Include="Core\AssetHelper.cs" />
     <Compile Include="Core\ConsoleMode.cs" />
@@ -101,13 +115,15 @@
     <Compile Include="Core\Games\RED Game\REDAdvTextData.cs" />
     <Compile Include="Core\Games\RED Game\REDLibraryTextData.cs" />
     <Compile Include="Core\Games\RED Game\REDLocalizeTextData.cs" />
+    <Compile Include="Core\Hash\CityHash64.cs" />
+    <Compile Include="Core\Hash\Crc.cs" />
     <Compile Include="Core\IAsset.cs" />
     <Compile Include="Core\IoPackage.cs" />
     <Compile Include="Core\IUasset.cs" />
+    <Compile Include="Core\locres\LocresNamespace.cs" />
     <Compile Include="Core\Object\Objects.cs" />
     <Compile Include="Core\Spreadsheet.cs" />
     <Compile Include="Core\DataTable.cs" />
-    <Compile Include="Core\locres.cs" />
     <Compile Include="Core\StringTable.cs" />
     <Compile Include="Core\StructProperty.cs" />
     <Compile Include="Core\Uasset.cs" />
@@ -124,35 +140,38 @@
     <Compile Include="Forms\FrmFilter.Designer.cs">
       <DependentUpon>FrmFilter.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\FrmLocresEntryEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FrmLocresEntryEditor.Designer.cs">
+      <DependentUpon>FrmLocresEntryEditor.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\FrmMain.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\FrmMain.Designer.cs">
       <DependentUpon>FrmMain.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\FrmState.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\FrmState.Designer.cs">
-      <DependentUpon>FrmState.cs</DependentUpon>
-    </Compile>
     <Compile Include="Helper\CSVFile.cs" />
     <Compile Include="Helper\MemoryList.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.cs" />
+    <EmbeddedResource Include="Controls\SearchBox.resx">
+      <DependentUpon>SearchBox.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\FrmAbout.resx">
       <DependentUpon>FrmAbout.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\FrmFilter.resx">
       <DependentUpon>FrmFilter.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Forms\FrmLocresEntryEditor.resx">
+      <DependentUpon>FrmLocresEntryEditor.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\FrmMain.resx">
       <DependentUpon>FrmMain.cs</DependentUpon>
       <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\FrmState.resx">
-      <DependentUpon>FrmState.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -197,8 +216,10 @@
   <ItemGroup>
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="System" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

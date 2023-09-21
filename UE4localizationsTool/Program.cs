@@ -57,6 +57,11 @@ namespace UE4localizationsTool
                     case "-method2":
                         args1 |= Args.method2;
                         break;
+                    
+                    case "-c":
+                    case "-csv":
+                        args1 |= Args.CSV;
+                        break;
                     default:
                         Console.ForegroundColor = ConsoleColor.Yellow;
                         Console.WriteLine("Invalid command: " + args[n]);
@@ -80,6 +85,8 @@ namespace UE4localizationsTool
                     case "-noname":
                     case "-method2":
                     case "-m2":
+                    case "-c":
+                    case "-csv":
                         throw new Exception("Invalid number of arguments.\n\n" + commandlines);
                 }
             }

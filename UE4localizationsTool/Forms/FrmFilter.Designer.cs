@@ -41,6 +41,10 @@
             this.BtnClose = new System.Windows.Forms.Button();
             this.regularexpression = new System.Windows.Forms.CheckBox();
             this.reversemode = new System.Windows.Forms.CheckBox();
+            this.Columns = new System.Windows.Forms.ComboBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.ColumnPanel = new System.Windows.Forms.Panel();
+            this.ColumnPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // button1
@@ -134,12 +138,12 @@
             this.matchcase.Text = "Match case";
             this.matchcase.UseVisualStyleBackColor = true;
             // 
-            // Close
+            // BtnClose
             // 
             this.BtnClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.BtnClose.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.BtnClose.Location = new System.Drawing.Point(441, 110);
-            this.BtnClose.Name = "Close";
+            this.BtnClose.Name = "BtnClose";
             this.BtnClose.Size = new System.Drawing.Size(113, 23);
             this.BtnClose.TabIndex = 10;
             this.BtnClose.Text = "Close";
@@ -167,6 +171,33 @@
             this.reversemode.Text = "Reverse mode";
             this.reversemode.UseVisualStyleBackColor = true;
             // 
+            // Columns
+            // 
+            this.Columns.FormattingEnabled = true;
+            this.Columns.Location = new System.Drawing.Point(58, 3);
+            this.Columns.Name = "Columns";
+            this.Columns.Size = new System.Drawing.Size(156, 21);
+            this.Columns.TabIndex = 13;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(10, 6);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(45, 13);
+            this.label2.TabIndex = 14;
+            this.label2.Text = "Column:";
+            // 
+            // ColumnPanel
+            // 
+            this.ColumnPanel.Controls.Add(this.Columns);
+            this.ColumnPanel.Controls.Add(this.label2);
+            this.ColumnPanel.Location = new System.Drawing.Point(211, 126);
+            this.ColumnPanel.Name = "ColumnPanel";
+            this.ColumnPanel.Size = new System.Drawing.Size(224, 27);
+            this.ColumnPanel.TabIndex = 15;
+            this.ColumnPanel.Visible = false;
+            // 
             // FrmFilter
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -174,6 +205,7 @@
             this.AutoSize = true;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.ClientSize = new System.Drawing.Size(584, 261);
+            this.Controls.Add(this.ColumnPanel);
             this.Controls.Add(this.reversemode);
             this.Controls.Add(this.regularexpression);
             this.Controls.Add(this.BtnClose);
@@ -195,10 +227,11 @@
             this.MinimumSize = new System.Drawing.Size(600, 300);
             this.Name = "FrmFilter";
             this.ShowIcon = false;
-            this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "Filter";
             this.Load += new System.EventHandler(this.FrmFilter_Load);
+            this.ColumnPanel.ResumeLayout(false);
+            this.ColumnPanel.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -217,5 +250,8 @@
         private System.Windows.Forms.Button BtnClose;
         private System.Windows.Forms.CheckBox regularexpression;
         private System.Windows.Forms.CheckBox reversemode;
+        private System.Windows.Forms.ComboBox Columns;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Panel ColumnPanel;
     }
 }

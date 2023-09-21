@@ -84,7 +84,6 @@
             this.MinimumSize = new System.Drawing.Size(412, 206);
             this.Name = "FrmAbout";
             this.ShowIcon = false;
-            this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "About";
             this.ResumeLayout(false);

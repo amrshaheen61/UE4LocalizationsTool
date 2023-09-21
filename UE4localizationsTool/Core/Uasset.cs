@@ -129,6 +129,7 @@ namespace AssetParser
 
         private void ReadHeader(bool saveoffsets = true)
         {
+            UassetFile.Seek(0);
             UassetFile.Skip(4);//Unreal Signature
 
             LegacyFileVersion = UassetFile.GetIntValue();
@@ -357,6 +358,7 @@ namespace AssetParser
                     OffsetsList.Add(UassetFile.GetPosition());
                 PreloadDependencyOffset = UassetFile.GetIntValue();
             }
+
         }
 
         public void EditName(string NewStr, int Index)
@@ -390,12 +392,12 @@ namespace AssetParser
 
             NewSize = UassetFile.GetSize() - OldSize;
 
-
             foreach (int offset in OffsetsList)
             {
-                if (UassetFile.GetIntValue(false, offset) > Name_Directory_Offset)
+                var OldOffsetValue = UassetFile.GetIntValue(false, offset);
+                if (OldOffsetValue > Name_Directory_Offset)
                 {
-                    int NewOffsetValue = UassetFile.GetIntValue(false, offset) + NewSize;
+                    int NewOffsetValue = OldOffsetValue + NewSize;
                     UassetFile.SetIntValue(NewOffsetValue, false, offset);
                 }
             }
