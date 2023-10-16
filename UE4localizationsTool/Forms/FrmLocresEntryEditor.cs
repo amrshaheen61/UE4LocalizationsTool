@@ -14,6 +14,20 @@ namespace UE4localizationsTool.Forms
         public string NameSpace { get; set; }
         public string Key { get; set; }
         public string Value { get; set; }
+
+        public HashTable HashTable
+        {
+            get
+            {
+                return new HashTable()
+                {
+                    NameHash = uint.Parse(txtNameSapceHash.Text),
+                    KeyHash = uint.Parse(txtKeyHash.Text),
+                    ValueHash = uint.Parse(txtValueHash.Text),
+                };
+            }
+        }
+
         public LocresFile asset { get; set; }
 
         public FrmLocresEntryEditor()
@@ -44,6 +58,12 @@ namespace UE4localizationsTool.Forms
                 Key = items[0];
                 Value = gridView.CurrentCell.OwningRow.Cells["Text value"].Value.ToString();
             }
+
+       var Hashs=  gridView.CurrentCell.OwningRow.Cells["Hash Table"].Value  as HashTable;
+
+            txtNameSapceHash.Text = Hashs.NameHash.ToString();
+            txtKeyHash.Text = Hashs.KeyHash.ToString();
+            txtValueHash.Text = Hashs.ValueHash.ToString();
             Print();
         }
 
@@ -82,7 +102,7 @@ namespace UE4localizationsTool.Forms
             //    throw new Exception("this NameSpace and Key already exists in the table.");
             //}
 
-            dt.Rows.Add(RowName, Value);
+            dt.Rows.Add(RowName, Value,HashTable);
 
         }
 
@@ -100,6 +120,7 @@ namespace UE4localizationsTool.Forms
         {
             DGV.SetValue(DGV.CurrentCell.OwningRow.Cells["Name"], GetName());
             DGV.SetValue(DGV.CurrentCell.OwningRow.Cells["Text value"], txtValue.Text);
+            DGV.SetValue(DGV.CurrentCell.OwningRow.Cells["Hash Table"], HashTable);
         }
 
         private void txtNameSpace_TextChanged(object sender, EventArgs e)
@@ -117,5 +138,34 @@ namespace UE4localizationsTool.Forms
             Value = AssetParser.AssetHelper.ReplaceBreaklines(txtValue.Text);
         }
 
+        private void BtnNameSpace_Click(object sender, EventArgs e)
+        {
+            txtNameSapceHash.Text = asset.CalcHash(txtNameSpace.Text).ToString();
+        }
+
+        private void BtnKey_Click(object sender, EventArgs e)
+        {
+            txtKeyHash.Text = asset.CalcHash(txtKey.Text).ToString();
+        }
+
+        private void BtnValue_Click(object sender, EventArgs e)
+        {
+            txtValueHash.Text=txtValue.Text.StrCrc32().ToString();
+        }
+
+        private void Apply_Click(object sender, EventArgs e)
+        {
+            if(string.IsNullOrEmpty(txtNameSapceHash.Text)|| string.IsNullOrEmpty(txtKeyHash.Text)|| string.IsNullOrEmpty(txtValueHash.Text))
+            {
+                MessageBox.Show("NameSpace or Key or Value is empty");
+                return;
+            }
+
+            if(!uint.TryParse(txtNameSapceHash.Text,out uint temp)|| !uint.TryParse(txtKeyHash.Text, out uint temp1) || !uint.TryParse(txtValueHash.Text, out uint temp2))
+            {
+                MessageBox.Show("NameSpace or Key or Value is not a number");
+                return;
+            }
+        }
     }
 }

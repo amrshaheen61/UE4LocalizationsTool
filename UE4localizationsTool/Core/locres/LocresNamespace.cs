@@ -10,9 +10,34 @@ using UE4localizationsTool.Core.Hash;
 
 namespace UE4localizationsTool.Core.locres
 {
-    public class NameSpaceTable : List<StringTable>
+
+    public class HashTable
     {
         public uint NameHash { get; set; }
+        public uint KeyHash { get; set; }
+        public uint ValueHash { get; set; }
+
+        public HashTable()
+        {
+
+        }
+        public HashTable(uint NameHash, uint KeyHash=0, uint ValueHash=0)
+        {
+            this.NameHash = NameHash;
+            this.KeyHash = KeyHash;
+            this.ValueHash = ValueHash;
+        }
+
+        public override string ToString()
+        {
+            return $"NameHash: {NameHash} KeyHash: {KeyHash} ValueHash: {ValueHash}";
+        }
+    }
+
+
+    public class NameSpaceTable : List<StringTable>
+    {
+        public uint NameHash { get; set; } = 0;
         public string Name { get; set; }
         public NameSpaceTable(string TableName, uint NameHash = 0)
         {
@@ -297,18 +322,40 @@ namespace UE4localizationsTool.Core.locres
 
             foreach (var NameSpace in this)
             {
-                locresData.SetUIntValue(CalcHash(NameSpace.Name));
-                
-                locresData.SetStringUE(NameSpace.Name);
+
+                if (NameSpace.NameHash==0) 
+                {
+                    locresData.SetUIntValue(CalcHash(NameSpace.Name));
+                }
+                else
+                {
+                    locresData.SetUIntValue(NameSpace.NameHash);
+                }
+
+                locresData.SetStringUE(NameSpace.Name,IgnoreNull: false);
                 locresData.SetIntValue(NameSpace.Count);
 
                 foreach (var Table in NameSpace)
                 {
-
-                    locresData.SetUIntValue(CalcHash(Table.key));
+                    if(Table.keyHash==0)
+                    {
+                        locresData.SetUIntValue(CalcHash(Table.key));
+                    }
+                    else
+                    {
+                        locresData.SetUIntValue(Table.keyHash);
+                    }
                     
-                    locresData.SetStringUE(Table.key);
-                    locresData.SetUIntValue(Table.Value.StrCrc32());
+                    locresData.SetStringUE(Table.key, IgnoreNull: false);
+
+                    if(Table.ValueHash == 0)
+                    {
+                        locresData.SetUIntValue(Table.Value.StrCrc32());
+                    }
+                    else
+                    {
+                        locresData.SetUIntValue(Table.ValueHash);
+                    }
 
                     int stringTableIndex = stringTable.FindIndex(x => x.Text == Table.Value);
 
@@ -339,7 +386,7 @@ namespace UE4localizationsTool.Core.locres
             {
                 foreach (var entry in stringTable)
                 {
-                    locresData.SetStringUE(entry.Text);
+                    locresData.SetStringUE(entry.Text, IgnoreNull: false);
                     locresData.SetIntValue(entry.refCount);
                 }
             }
@@ -347,7 +394,7 @@ namespace UE4localizationsTool.Core.locres
             {
                 foreach (var entry in stringTable)
                 {
-                    locresData.SetStringUE(entry.Text);
+                    locresData.SetStringUE(entry.Text, IgnoreNull: false);
                 }
             }
 
@@ -370,13 +417,22 @@ namespace UE4localizationsTool.Core.locres
 
             foreach (var names in this)
             {
-                locresData.SetStringUE(names.Name, true);
+                locresData.SetStringUE(names.Name, true, IgnoreNull: false);
                 locresData.SetIntValue(names.Count);
                 foreach (var table in names)
                 {
-                    locresData.SetStringUE(table.key, true);
-                    locresData.SetUIntValue(table.Value.StrCrc32());
-                    locresData.SetStringUE(table.Value, true);
+                    locresData.SetStringUE(table.key, true, IgnoreNull: false);
+
+                    if (table.ValueHash == 0)
+                    {
+                        locresData.SetUIntValue(table.Value.StrCrc32());
+                    }
+                    else
+                    {
+                        locresData.SetUIntValue(table.ValueHash);
+                    }
+
+                    locresData.SetStringUE(table.Value, true, IgnoreNull: false);
                 }
             }
 
@@ -425,6 +481,7 @@ namespace UE4localizationsTool.Core.locres
             var dataTable = new System.Data.DataTable();
             dataTable.Columns.Add("Name", typeof(string));
             dataTable.Columns.Add("Text value", typeof(string));
+            dataTable.Columns.Add("Hash Table", typeof(HashTable));
             
             foreach (var names in this)
             {
@@ -432,12 +489,13 @@ namespace UE4localizationsTool.Core.locres
                 {
                     string name = string.IsNullOrEmpty(names.Name) ? table.key : names.Name + "::" + table.key;
                     string textValue = table.Value;
-                    dataTable.Rows.Add(name, textValue);
+                    dataTable.Rows.Add(name, textValue,new HashTable(names.NameHash,table.keyHash,table.ValueHash));
                 }
             }
 
             dataGrid.DataSource = dataTable;
             dataGrid.Columns["Text value"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+         //   dataGrid.Columns["Hash Table"].Visible = false;
         }
 
         public void LoadFromDataGridView(DataGridView dataGrid)
@@ -463,8 +521,11 @@ namespace UE4localizationsTool.Core.locres
                     KeyStr = items[0];
                 }
 
-              
-                AddString(NameSpaceStr, KeyStr, row.Cells["Text value"].Value.ToString());
+                var HashTable= row.Cells["Hash Table"].Value as HashTable;
+
+
+
+                AddString(NameSpaceStr, KeyStr, row.Cells["Text value"].Value.ToString(), HashTable.NameHash, HashTable.KeyHash, HashTable.ValueHash);
             }
         }
 

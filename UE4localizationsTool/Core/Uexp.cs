@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
+using UE4localizationsTool.Core.Games;
 
 namespace AssetParser
 {
@@ -166,8 +167,8 @@ namespace AssetParser
                         case "MuseStringTable":
                             new MuseStringTable(memoryList, this, Modify);
                             break;
-                        case "SubtitlesText":
-                            new MuseStringTable(memoryList, this, Modify);
+                        case "J5BinderAsset":
+                            new J5BinderAsset(memoryList, this, Modify);
                             break;
                     }
                     ConsoleMode.Print($"-----------End------------", ConsoleColor.DarkRed);

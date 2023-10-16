@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using UE4localizationsTool.Controls;
+using UE4localizationsTool.Core.Hash;
 using UE4localizationsTool.Core.locres;
 using UE4localizationsTool.Forms;
 using UE4localizationsTool.Helper;
@@ -124,7 +125,7 @@ namespace UE4localizationsTool
         private void ExportAll(ExportType exportType)
         {
 
-            if (this.SortApply) SortDataGrid(2, true);
+            if (this.SortApply && !(Asset is LocresFile)) SortDataGrid(2, true);
 
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.Filter = "Text File|*.txt";
@@ -180,7 +181,7 @@ namespace UE4localizationsTool
 
             if (ofd.ShowDialog() == DialogResult.OK)
             {
-                if (this.SortApply) SortDataGrid(2, true);
+                if (this.SortApply && !(Asset is LocresFile)) SortDataGrid(2, true);
 
                 if (ofd.FileName.EndsWith(".csv", StringComparison.InvariantCulture))
                 {
@@ -551,7 +552,7 @@ namespace UE4localizationsTool
         private void find_Click(object sender, EventArgs e)
         {
             searchBox.Show();
-           
+
         }
 
         private void filterToolStripMenuItem_Click(object sender, EventArgs e)
@@ -674,7 +675,7 @@ namespace UE4localizationsTool
                             {
                                 string name = string.IsNullOrEmpty(names.Name) ? table.key : names.Name + "::" + table.key;
                                 string textValue = table.Value;
-                                dataTable.Rows.Add(name, textValue);
+                                dataTable.Rows.Add(name, textValue, new HashTable(names.NameHash, table.keyHash, table.ValueHash));
                             }
                         }
                     }
@@ -731,7 +732,10 @@ namespace UE4localizationsTool
                     {
                         foreach (var Strings in new Uexp(Uexp.GetUasset(fileName), true).StringNodes)
                         {
-                            dataTable.Rows.Add(Strings.GetName(), Strings.Value);
+                            var locresasset = Asset as LocresFile;
+                            var HashTable = new HashTable(locresasset.CalcHash(Strings.NameSpace), locresasset.CalcHash(Strings.Key), Strings.Value.StrCrc32());
+
+                            dataTable.Rows.Add(Strings.GetName(), Strings.Value, HashTable);
                         }
                     }
 
@@ -766,7 +770,7 @@ namespace UE4localizationsTool
 
         private void dataGridView1_CellValuePushed(object sender, DataGridViewCellValueEventArgs e)
         {
-   
+
         }
 
         private void dataGridView1_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)

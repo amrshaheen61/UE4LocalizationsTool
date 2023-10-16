@@ -123,22 +123,22 @@ namespace AssetParser
             return ReplaceBreaklines(Stringvalue).TrimEnd('\0');
         }
 
-        public static string GetStringUE(this MemoryList memoryList, Encoding encoding)
+        public static string GetStringUE(this MemoryList memoryList, Encoding encoding, bool SavePosition = true, int SeekAndRead = -1)
         {
-            string Stringvalue = ReplaceBreaklines(memoryList.GetStringValueN(true, -1, encoding));
+            string Stringvalue = ReplaceBreaklines(memoryList.GetStringValueN(SavePosition, SeekAndRead, encoding));
             return Stringvalue.TrimEnd('\0');
         }
-        public static void SetStringUE(this MemoryList memoryList, string str, Encoding encoding)
+        public static void SetStringUE(this MemoryList memoryList, string str, Encoding encoding, bool SavePosition = true, int SeekAndRead = -1)
         {
-            memoryList.SetStringValueN(ReplaceBreaklines(str, true), true, -1, encoding);
+            memoryList.SetStringValueN(ReplaceBreaklines(str, true), SavePosition, SeekAndRead, encoding);
         }
 
-        public static void SetStringUE(this MemoryList memoryList, string StringValue, bool UseUnicode = false)
+        public static void SetStringUE(this MemoryList memoryList, string StringValue, bool UseUnicode = false,bool IgnoreNull=true)
         {
 
             StringValue = ReplaceBreaklines(StringValue, true);
 
-            if (string.IsNullOrEmpty(StringValue))
+            if (string.IsNullOrEmpty(StringValue)&&IgnoreNull)
             {
                 memoryList.InsertIntValue(0);
                 return;

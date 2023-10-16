@@ -158,7 +158,15 @@ namespace Helper.MemoryList
 
         public void SetSize(int Value)
         {
+            if (MemoryListPosition> Value)
+            {
+                MemoryListPosition = Value;
+            }
+
+
             MemoryListSize = Value;
+
+
         }
 
         public void WriteFile(string FilePath)

@@ -5,10 +5,10 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{C8AA2127-04A4-400B-9CA3-1951639BB0A3}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <RootNamespace>UE4localizationsTool</RootNamespace>
     <AssemblyName>UE4localizationsTool</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
@@ -69,7 +69,7 @@
     <ManifestKeyFile>UE4localizationsTool_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <GenerateManifests>true</GenerateManifests>
+    <GenerateManifests>false</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
     <SignManifests>false</SignManifests>
@@ -108,6 +108,7 @@
     <Compile Include="Core\ConsoleMode.cs" />
     <Compile Include="Core\Enum.cs" />
     <Compile Include="Core\Function.cs" />
+    <Compile Include="Core\Games\J5BinderAsset.cs" />
     <Compile Include="Core\Games\MuseStringTable.cs" />
     <Compile Include="Core\Games\OctopathTraveler.cs" />
     <Compile Include="Core\Games\TheLastOricru.cs" />
