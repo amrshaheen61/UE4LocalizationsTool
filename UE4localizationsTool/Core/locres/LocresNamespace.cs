@@ -495,7 +495,7 @@ namespace UE4localizationsTool.Core.locres
 
             dataGrid.DataSource = dataTable;
             dataGrid.Columns["Text value"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-         //   dataGrid.Columns["Hash Table"].Visible = false;
+            dataGrid.Columns["Hash Table"].Visible = false;
         }
 
         public void LoadFromDataGridView(DataGridView dataGrid)
