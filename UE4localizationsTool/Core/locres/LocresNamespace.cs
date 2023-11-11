@@ -304,6 +304,8 @@ namespace UE4localizationsTool.Core.locres
 
             locresData.SetBytes(MagicGUID);
             locresData.SetByteValue((byte)Version);
+
+            var localizedStringOffsetpos = locresData.GetPosition();
             locresData.SetInt64Value(0);//localizedStringOffset
 
             if (Version >= LocresVersion.Optimized)
@@ -322,31 +324,35 @@ namespace UE4localizationsTool.Core.locres
 
             foreach (var NameSpace in this)
             {
-
-                if (NameSpace.NameHash==0) 
+                if (Version >= LocresVersion.Optimized)
                 {
-                    locresData.SetUIntValue(CalcHash(NameSpace.Name));
+                    if (NameSpace.NameHash == 0)
+                    {
+                        locresData.SetUIntValue(CalcHash(NameSpace.Name));
+                    }
+                    else
+                    {
+                        locresData.SetUIntValue(NameSpace.NameHash);
+                    }
                 }
-                else
-                {
-                    locresData.SetUIntValue(NameSpace.NameHash);
-                }
-
-                locresData.SetStringUE(NameSpace.Name,IgnoreNull: false);
+                locresData.SetStringUE(NameSpace.Name);
                 locresData.SetIntValue(NameSpace.Count);
 
                 foreach (var Table in NameSpace)
                 {
-                    if(Table.keyHash==0)
+                    if (Version >= LocresVersion.Optimized)
                     {
-                        locresData.SetUIntValue(CalcHash(Table.key));
-                    }
-                    else
-                    {
-                        locresData.SetUIntValue(Table.keyHash);
+                        if (Table.keyHash == 0)
+                        {
+                            locresData.SetUIntValue(CalcHash(Table.key));
+                        }
+                        else
+                        {
+                            locresData.SetUIntValue(Table.keyHash);
+                        }
                     }
                     
-                    locresData.SetStringUE(Table.key, IgnoreNull: false);
+                    locresData.SetStringUE(Table.key);
 
                     if(Table.ValueHash == 0)
                     {
@@ -386,7 +392,7 @@ namespace UE4localizationsTool.Core.locres
             {
                 foreach (var entry in stringTable)
                 {
-                    locresData.SetStringUE(entry.Text, IgnoreNull: false);
+                    locresData.SetStringUE(entry.Text);
                     locresData.SetIntValue(entry.refCount);
                 }
             }
@@ -394,11 +400,11 @@ namespace UE4localizationsTool.Core.locres
             {
                 foreach (var entry in stringTable)
                 {
-                    locresData.SetStringUE(entry.Text, IgnoreNull: false);
+                    locresData.SetStringUE(entry.Text);
                 }
             }
 
-            locresData.Seek(17);
+            locresData.Seek(localizedStringOffsetpos);
             locresData.SetInt64Value(localizedStringOffset);
         }
 
@@ -417,11 +423,11 @@ namespace UE4localizationsTool.Core.locres
 
             foreach (var names in this)
             {
-                locresData.SetStringUE(names.Name, true, IgnoreNull: false);
+                locresData.SetStringUE(names.Name, true);
                 locresData.SetIntValue(names.Count);
                 foreach (var table in names)
                 {
-                    locresData.SetStringUE(table.key, true, IgnoreNull: false);
+                    locresData.SetStringUE(table.key, true);
 
                     if (table.ValueHash == 0)
                     {
@@ -432,7 +438,7 @@ namespace UE4localizationsTool.Core.locres
                         locresData.SetUIntValue(table.ValueHash);
                     }
 
-                    locresData.SetStringUE(table.Value, true, IgnoreNull: false);
+                    locresData.SetStringUE(table.Value, true);
                 }
             }
 
