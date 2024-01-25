@@ -2,7 +2,6 @@
 using Helper.MemoryList;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
@@ -21,7 +20,7 @@ namespace UE4localizationsTool.Core.locres
         {
 
         }
-        public HashTable(uint NameHash, uint KeyHash=0, uint ValueHash=0)
+        public HashTable(uint NameHash, uint KeyHash = 0, uint ValueHash = 0)
         {
             this.NameHash = NameHash;
             this.KeyHash = KeyHash;
@@ -351,10 +350,10 @@ namespace UE4localizationsTool.Core.locres
                             locresData.SetUIntValue(Table.keyHash);
                         }
                     }
-                    
+
                     locresData.SetStringUE(Table.key);
 
-                    if(Table.ValueHash == 0)
+                    if (Table.ValueHash == 0)
                     {
                         locresData.SetUIntValue(Table.Value.StrCrc32());
                     }
@@ -476,7 +475,7 @@ namespace UE4localizationsTool.Core.locres
             var Hash = CityHash.Init.CityHash64(Encoding.Unicode.GetBytes(value));
             return (uint)Hash + ((uint)(Hash >> 32) * 23);
         }
-        
+
 
         public void AddItemsToDataGridView(DataGridView dataGrid)
         {
@@ -488,14 +487,14 @@ namespace UE4localizationsTool.Core.locres
             dataTable.Columns.Add("Name", typeof(string));
             dataTable.Columns.Add("Text value", typeof(string));
             dataTable.Columns.Add("Hash Table", typeof(HashTable));
-            
+
             foreach (var names in this)
             {
                 foreach (var table in names)
                 {
                     string name = string.IsNullOrEmpty(names.Name) ? table.key : names.Name + "::" + table.key;
                     string textValue = table.Value;
-                    dataTable.Rows.Add(name, textValue,new HashTable(names.NameHash,table.keyHash,table.ValueHash));
+                    dataTable.Rows.Add(name, textValue, new HashTable(names.NameHash, table.keyHash, table.ValueHash));
                 }
             }
 
@@ -513,21 +512,21 @@ namespace UE4localizationsTool.Core.locres
                 //1-> Key
                 var items = row.Cells["Name"].Value.ToString().Split(new string[] { "::" }, StringSplitOptions.None);
 
-                string NameSpaceStr="";
-                string KeyStr="";
-                
+                string NameSpaceStr = "";
+                string KeyStr = "";
+
                 if (items.Length == 2)
                 {
                     NameSpaceStr = items[0];
                     KeyStr = items[1];
-                    
+
                 }
                 else
                 {
                     KeyStr = items[0];
                 }
 
-                var HashTable= row.Cells["Hash Table"].Value as HashTable;
+                var HashTable = row.Cells["Hash Table"].Value as HashTable;
 
 
 
@@ -547,7 +546,7 @@ namespace UE4localizationsTool.Core.locres
                     if (!string.IsNullOrEmpty(names.Name))
                         strings.Add(new List<string>() { names.Name + "::" + table.key, table.Value });
                     else
-                        strings.Add(new List<string>() { names.Name, table.Value });
+                        strings.Add(new List<string>() { table.key, table.Value });
 
                 }
             }

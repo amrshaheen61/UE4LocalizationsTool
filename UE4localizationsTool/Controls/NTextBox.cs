@@ -43,11 +43,11 @@ namespace UE4localizationsTool.Controls
 
         protected override void OnKeyPress(KeyPressEventArgs e)
         {
-            if (Multiline&&StopEnterKey && e.KeyChar == '\r'|| StopEnterKey && e.KeyChar == '\n')
+            if (Multiline && StopEnterKey && e.KeyChar == '\r' || StopEnterKey && e.KeyChar == '\n')
             {
                 e.Handled = true;
             }
-            
+
 
             base.OnKeyPress(e);
         }

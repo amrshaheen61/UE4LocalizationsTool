@@ -26,7 +26,7 @@ namespace AssetParser
         public MemoryList UassetFile { get; set; }
         public bool IOFile { get; set; } = true;
         public bool IsNotUseUexp { get; set; }
-        public bool UseFromStruct { get; set; }
+        public bool UseFromStruct { get; set; } = true;
         public bool AutoVersion { get; set; }
         public bool UseMethod2 { get; set; }
 
@@ -47,8 +47,19 @@ namespace AssetParser
             //Todo 
 
             IsNotUseUexp = true;
+            UassetFile.MemoryListPosition = 0;
+            ConsoleMode.Print("Reading Uasset Header...");
+            Console.WriteLine(UassetFile.GetIntValue(false, 4));
 
-            if (UassetFile.GetIntValue(false, 4) == 0)
+
+
+            UassetFile.Seek(UassetFile.GetIntValue(false, 24), SeekOrigin.Begin);
+
+            string path = UassetFile.GetStringUES();
+            UassetFile.Seek(0, SeekOrigin.Begin);
+
+
+            if (path.StartsWith("/"))
             {
                 EngineVersion = UEVersions.VER_UE4_16; //?!
                 UE4Header();

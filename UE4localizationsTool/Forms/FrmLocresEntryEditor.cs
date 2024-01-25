@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Data;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 using UE4localizationsTool.Controls;
 using UE4localizationsTool.Core.Hash;
@@ -59,7 +58,7 @@ namespace UE4localizationsTool.Forms
                 Value = gridView.CurrentCell.OwningRow.Cells["Text value"].Value.ToString();
             }
 
-       var Hashs=  gridView.CurrentCell.OwningRow.Cells["Hash Table"].Value  as HashTable;
+            var Hashs = gridView.CurrentCell.OwningRow.Cells["Hash Table"].Value as HashTable;
 
             txtNameSapceHash.Text = Hashs.NameHash.ToString();
             txtKeyHash.Text = Hashs.KeyHash.ToString();
@@ -67,11 +66,12 @@ namespace UE4localizationsTool.Forms
             Print();
         }
 
-        public FrmLocresEntryEditor(Form form)
+        public FrmLocresEntryEditor(Form form, LocresFile asset)
         {
             InitializeComponent();
             this.Location = new Point(form.Location.X + (form.Width - this.Width) / 2, form.Location.Y + (form.Height - this.Height) / 2);
             Apply.Text = "Add";
+            this.asset = asset;
         }
 
         private void Print()
@@ -102,7 +102,7 @@ namespace UE4localizationsTool.Forms
             //    throw new Exception("this NameSpace and Key already exists in the table.");
             //}
 
-            dt.Rows.Add(RowName, Value,HashTable);
+            dt.Rows.Add(RowName, Value, HashTable);
 
         }
 
@@ -150,18 +150,18 @@ namespace UE4localizationsTool.Forms
 
         private void BtnValue_Click(object sender, EventArgs e)
         {
-            txtValueHash.Text=txtValue.Text.StrCrc32().ToString();
+            txtValueHash.Text = txtValue.Text.StrCrc32().ToString();
         }
 
         private void Apply_Click(object sender, EventArgs e)
         {
-            if(string.IsNullOrEmpty(txtNameSapceHash.Text)|| string.IsNullOrEmpty(txtKeyHash.Text)|| string.IsNullOrEmpty(txtValueHash.Text))
+            if (string.IsNullOrEmpty(txtNameSapceHash.Text) || string.IsNullOrEmpty(txtKeyHash.Text) || string.IsNullOrEmpty(txtValueHash.Text))
             {
                 MessageBox.Show("NameSpace or Key or Value is empty");
                 return;
             }
 
-            if(!uint.TryParse(txtNameSapceHash.Text,out uint temp)|| !uint.TryParse(txtKeyHash.Text, out uint temp1) || !uint.TryParse(txtValueHash.Text, out uint temp2))
+            if (!uint.TryParse(txtNameSapceHash.Text, out uint temp) || !uint.TryParse(txtKeyHash.Text, out uint temp1) || !uint.TryParse(txtValueHash.Text, out uint temp2))
             {
                 MessageBox.Show("NameSpace or Key or Value is not a number");
                 return;

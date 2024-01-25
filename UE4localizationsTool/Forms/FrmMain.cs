@@ -53,38 +53,38 @@ namespace UE4localizationsTool
             ResetControls();
             ControlsMode(false);
 
-            try
-            {
-                StatusMessage("loading File...", "loading File, please wait.");
+            //try
+            //{
+            StatusMessage("loading File...", "loading File, please wait.");
 
-                if (filePath.ToLower().EndsWith(".locres"))
-                {
-                    Asset = await Task.Run(() => new LocresFile(filePath));
-                    locresOprationsToolStripMenuItem.Visible = true;
-                    CreateBackupList();
-                }
-                else if (filePath.ToLower().EndsWith(".uasset") || filePath.ToLower().EndsWith(".umap"))
-                {
-                    IUasset Uasset = await Task.Run(() => Uexp.GetUasset(filePath));
-                    Uasset.UseMethod2 = Uasset.UseMethod2 ? Uasset.UseMethod2 : Method2.Checked;
-                    Asset = await Task.Run(() => new Uexp(Uasset));
-                    CreateBackupList();
-                    if (!Asset.IsGood)
-                    {
-                        StateLabel.Text = "Warning: This file is't fully parsed and may not contain some text.";
-                    }
-                }
-
-                this.FilePath = filePath;
-                this.Text = ToolName + " - " + Path.GetFileName(FilePath);
-                ControlsMode(true);
-                CloseFromState();
-            }
-            catch (Exception ex)
+            if (filePath.ToLower().EndsWith(".locres"))
             {
-                CloseFromState();
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Asset = await Task.Run(() => new LocresFile(filePath));
+                locresOprationsToolStripMenuItem.Visible = true;
+                CreateBackupList();
             }
+            else if (filePath.ToLower().EndsWith(".uasset") || filePath.ToLower().EndsWith(".umap"))
+            {
+                IUasset Uasset = await Task.Run(() => Uexp.GetUasset(filePath));
+                Uasset.UseMethod2 = Uasset.UseMethod2 ? Uasset.UseMethod2 : Method2.Checked;
+                Asset = await Task.Run(() => new Uexp(Uasset));
+                CreateBackupList();
+                if (!Asset.IsGood)
+                {
+                    StateLabel.Text = "Warning: This file is't fully parsed and may not contain some text.";
+                }
+            }
+
+            this.FilePath = filePath;
+            this.Text = ToolName + " - " + Path.GetFileName(FilePath);
+            ControlsMode(true);
+            CloseFromState();
+            //}
+            //catch (Exception ex)
+            //{
+            //    CloseFromState();
+            //    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //}
 
         }
 
@@ -411,6 +411,13 @@ namespace UE4localizationsTool
                        );
             }
 
+
+            if (!UE4localizationsTool.Properties.Settings.Default.GoodByeMessage)
+            {
+                MessageBox.Show("Hello, I hope my tool has been helpful to you. This will be the final version. I apologize for any inconvenience.", "Good bye!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                UE4localizationsTool.Properties.Settings.Default.GoodByeMessage = true;
+                UE4localizationsTool.Properties.Settings.Default.Save();
+            }
         }
 
         private void noNamesToolStripMenuItem_Click(object sender, EventArgs e)
@@ -625,7 +632,7 @@ namespace UE4localizationsTool
 
         private void addNewRowToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var EntryEditor = new FrmLocresEntryEditor(this);
+            var EntryEditor = new FrmLocresEntryEditor(this, (LocresFile)Asset);
 
             if (EntryEditor.ShowDialog() == DialogResult.OK)
             {
@@ -753,28 +760,9 @@ namespace UE4localizationsTool
             }
         }
 
-        private void dataGridView1_CellValidating(object sender, DataGridViewCellValidatingEventArgs e)
+        private void replaceToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
-        }
-
-        private void dataGridView1_CellValueChanged(object sender, DataGridViewCellEventArgs e)
-        {
-
-        }
-
-        private void dataGridView1_CellValidated(object sender, DataGridViewCellEventArgs e)
-        {
-
-        }
-
-        private void dataGridView1_CellValuePushed(object sender, DataGridViewCellValueEventArgs e)
-        {
-
-        }
-
-        private void dataGridView1_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
-        {
+            searchBox.ShowReplacePanel();
         }
     }
 }

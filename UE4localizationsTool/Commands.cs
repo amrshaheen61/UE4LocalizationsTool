@@ -38,12 +38,14 @@ namespace UE4localizationsTool
                 GetFilterValues();
             }
 
-            if (Flags.HasFlag(Args.CSV)){
+            if (Flags.HasFlag(Args.CSV))
+            {
 
                 TextFileExtension = ".csv";
             }
             string[] Paths;
             string ConsoleText;
+            string[] rows;
             switch (Options.ToLower())
             {
                 case "export"://Single File
@@ -87,7 +89,18 @@ namespace UE4localizationsTool
                         throw new Exception("Invalid text file type: " + Path.GetFileName(SourcePath));
                     }
 
-                    Import(Path.ChangeExtension(SourcePath, null), File.ReadAllLines(SourcePath), Options.ToLower());
+
+
+                    if (Flags.HasFlag(Args.CSV))
+                    {
+                        rows = CSVFile.Instance.Load(SourcePath, Flags.HasFlag(Args.noname));
+                    }
+                    else
+                    {
+                        rows = File.ReadAllLines(SourcePath);
+                    }
+
+                    Import(Path.ChangeExtension(SourcePath, null), rows, Options.ToLower());
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.Write("Done\n");
                     Console.ForegroundColor = ConsoleColor.White;
@@ -104,7 +117,19 @@ namespace UE4localizationsTool
                         throw new Exception("Invalid text file type: " + Path.GetFileName(SourcePath));
                     }
 
-                    ImportFolder(Paths[0], File.ReadAllLines(Paths[1]), Options.ToLower());
+
+
+                    if (Flags.HasFlag(Args.CSV))
+                    {
+                        rows = CSVFile.Instance.Load(Paths[1], Flags.HasFlag(Args.noname));
+                    }
+                    else
+                    {
+                        rows = File.ReadAllLines(Paths[1]);
+                    }
+
+
+                    ImportFolder(Paths[0], rows, Options.ToLower());
                     break;
                 default:
                     throw new Exception("Invalid number of arguments.\n" + Program.commandlines);
@@ -123,7 +148,7 @@ namespace UE4localizationsTool
 
             if (Flags.HasFlag(Args.CSV))
             {
-                CSVFile.Instance.Save(Strings, FilePath);
+                CSVFile.Instance.Save(Strings, FilePath, Flags.HasFlag(Args.noname));
 
                 goto End;
             }
@@ -151,7 +176,7 @@ namespace UE4localizationsTool
                 i++;
             }
             File.WriteAllLines(FilePath, stringsArray);
-            End:
+        End:
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write("Done\n");
             Console.ForegroundColor = ConsoleColor.White;
@@ -301,7 +326,7 @@ namespace UE4localizationsTool
             {
                 var locres = new LocresFile(FilePath);
                 var strings = locres.ExtractTexts();
-                EditList(locres.ExtractTexts(), Values);
+                EditList(strings, Values);
                 locres.ImportTexts(strings);
 
                 if (Option == "-import")

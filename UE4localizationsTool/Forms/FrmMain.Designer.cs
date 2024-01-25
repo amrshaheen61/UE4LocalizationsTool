@@ -47,6 +47,7 @@ namespace UE4localizationsTool
             this.importAllTextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.find = new System.Windows.Forms.ToolStripMenuItem();
+            this.replaceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.clearFilterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sortToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -158,6 +159,7 @@ namespace UE4localizationsTool
             this.importAllTextToolStripMenuItem,
             this.toolStripSeparator1,
             this.find,
+            this.replaceToolStripMenuItem,
             this.filterToolStripMenuItem,
             this.clearFilterToolStripMenuItem,
             this.sortToolStripMenuItem,
@@ -235,6 +237,14 @@ namespace UE4localizationsTool
             this.find.Size = new System.Drawing.Size(229, 22);
             this.find.Text = "Find";
             this.find.Click += new System.EventHandler(this.find_Click);
+            // 
+            // replaceToolStripMenuItem
+            // 
+            this.replaceToolStripMenuItem.Name = "replaceToolStripMenuItem";
+            this.replaceToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.H)));
+            this.replaceToolStripMenuItem.Size = new System.Drawing.Size(229, 22);
+            this.replaceToolStripMenuItem.Text = "Replace";
+            this.replaceToolStripMenuItem.Click += new System.EventHandler(this.replaceToolStripMenuItem_Click);
             // 
             // filterToolStripMenuItem
             // 
@@ -530,15 +540,10 @@ namespace UE4localizationsTool
             this.dataGridView1.RowHeadersVisible = false;
             this.dataGridView1.RowHeadersWidth = 51;
             this.dataGridView1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.dataGridView1.Size = new System.Drawing.Size(689, 396);
+            this.dataGridView1.Size = new System.Drawing.Size(689, 390);
             this.dataGridView1.TabIndex = 1;
             this.dataGridView1.FilterApplied += new System.EventHandler(this.dataGridView1_FilterApplied);
             this.dataGridView1.FilterCleared += new System.EventHandler(this.dataGridView1_FilterCleared);
-            this.dataGridView1.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dataGridView1_CellFormatting);
-            this.dataGridView1.CellValidated += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellValidated);
-            this.dataGridView1.CellValidating += new System.Windows.Forms.DataGridViewCellValidatingEventHandler(this.dataGridView1_CellValidating);
-            this.dataGridView1.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellValueChanged);
-            this.dataGridView1.CellValuePushed += new System.Windows.Forms.DataGridViewCellValueEventHandler(this.dataGridView1_CellValuePushed);
             this.dataGridView1.Sorted += new System.EventHandler(this.dataGridView1_Sorted);
             // 
             // TextName
@@ -578,12 +583,13 @@ namespace UE4localizationsTool
             // 
             // searchBox
             // 
+            this.searchBox.AutoSize = true;
             this.searchBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.searchBox.DataGridView = this.dataGridView1;
             this.searchBox.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.searchBox.Location = new System.Drawing.Point(0, 420);
+            this.searchBox.Location = new System.Drawing.Point(0, 414);
             this.searchBox.Name = "searchBox";
-            this.searchBox.Size = new System.Drawing.Size(689, 30);
+            this.searchBox.Size = new System.Drawing.Size(689, 36);
             this.searchBox.TabIndex = 2;
             this.searchBox.Visible = false;
             // 
@@ -607,7 +613,7 @@ namespace UE4localizationsTool
             this.StatusText.AutoSize = true;
             this.StatusText.Location = new System.Drawing.Point(106, 65);
             this.StatusText.Name = "StatusText";
-            this.StatusText.Size = new System.Drawing.Size(28, 13);
+            this.StatusText.Size = new System.Drawing.Size(35, 13);
             this.StatusText.TabIndex = 2;
             this.StatusText.Text = "-------";
             // 
@@ -722,6 +728,7 @@ namespace UE4localizationsTool
         private PictureBox pictureBox2;
         private Panel StatusBlock;
         private ToolStripMenuItem mergeUassetFileToolStripMenuItem;
+        private ToolStripMenuItem replaceToolStripMenuItem;
     }
 }
 

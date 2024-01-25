@@ -29,6 +29,7 @@ public class NDataGridView : DataGridView
     [Browsable(true)]
     public event EventHandler RowCountChanged;
 
+
     private bool _isFiltering = false;
 
     [Browsable(false)]
@@ -124,28 +125,7 @@ public class NDataGridView : DataGridView
     }
 
 
-    //protected override void OnCellBeginEdit(DataGridViewCellCancelEventArgs e)
-    //{
-    //    // BackupDataUndo.Push(new DataRow() { cell = Rows[e.RowIndex].Cells[e.ColumnIndex], StringValue = Rows[e.RowIndex].Cells[e.ColumnIndex].Value, style = Rows[e.RowIndex].Cells[e.ColumnIndex].Style.Clone() });
-    //    base.OnCellBeginEdit(e);
-    //}
 
-    //protected override void OnCellEndEdit(DataGridViewCellEventArgs e)
-    //{
-    //    base.OnCellEndEdit(e);
-    //    if (BackupDataUndo.Count > 0)
-    //    {
-    //        if (!object.Equals(BackupDataUndo.Peek().StringValue, Rows[e.RowIndex].Cells[e.ColumnIndex].Value))
-    //        {
-    //            BackupDataRedo.Clear();
-    //            UpdateBackColor(Rows[e.RowIndex].Cells[e.ColumnIndex]);
-    //        }
-    //        else
-    //        {
-    //            BackupDataUndo.Pop();
-    //        }
-    //    }
-    //}
 
     protected override void OnCellValidating(DataGridViewCellValidatingEventArgs e)
     {
@@ -160,7 +140,7 @@ public class NDataGridView : DataGridView
     }
 
 
-    public void SetValue(DataGridViewCell cell,object Value)
+    public void SetValue(DataGridViewCell cell, object Value)
     {
         if (!object.Equals(Value, cell.Value))
         {

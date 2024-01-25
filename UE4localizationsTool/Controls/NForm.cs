@@ -12,6 +12,88 @@ namespace UE4localizationsTool.Controls
                 DarkMode(this);
         }
 
+#if DEBUG
+
+        protected override void OnLoad(System.EventArgs e)
+        {
+            GetAllControlNames(this, Name);
+        }
+
+        private void GetAllControlNames(Control control, string parentName)
+        {
+            string controlName = parentName;
+
+            if (control is TextBox || control is Label || control is Button || control is ComboBox
+                || control is ListBox || control is DataGridView || control is CheckBox)
+            {
+                controlName += $".{control.Name}";
+                //control.GetType().GetProperty("Text", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).SetValue(column, "amr");
+                Console.WriteLine(controlName);
+
+                if (control is DataGridView)
+                {
+                    foreach (DataGridViewColumn column in ((DataGridView)control).Columns)
+                    {
+                        Console.WriteLine(controlName + "." + column.Name);
+                        //column.HeaderText = "amr";
+                        // column.GetType().GetProperty("HeaderText", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).SetValue(column, "amr");
+                    }
+                }
+
+            }
+            else if (control is ToolStripMenuItem)
+            {
+                controlName += $".{control.Name}";
+                //control.GetType().GetProperty("Text", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).SetValue(column, "amr");
+                Console.WriteLine(controlName);
+            }
+
+            foreach (Control childControl in control.Controls)
+            {
+                GetAllControlNames(childControl, controlName);
+            }
+
+            if (control.ContextMenuStrip != null)
+            {
+                foreach (ToolStripMenuItem toolStripItem in control.ContextMenuStrip.Items)
+                {
+                    GetAllContextMenuNames(toolStripItem, controlName);
+                }
+            }
+
+            if (control is MenuStrip)
+            {
+                foreach (var toolStripItem in ((MenuStrip)control).Items)
+                {
+                    if (toolStripItem is ToolStripMenuItem)
+                        GetAllContextMenuNames((ToolStripMenuItem)toolStripItem, controlName);
+                }
+            }
+        }
+
+        private void GetAllContextMenuNames(ToolStripMenuItem control, string parentName)
+        {
+            string controlName = parentName;
+
+            if (control is ToolStripMenuItem)
+            {
+                controlName += $".{(control as ToolStripMenuItem).Name}";
+                //control.GetType().GetProperty("Text", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).SetValue(column, "amr");
+                Console.WriteLine(controlName);
+            }
+
+            // Recursively call the method for child controls
+            foreach (ToolStripItem childControl in control.DropDownItems)
+            {
+                if (childControl is ToolStripMenuItem)
+                {
+                    GetAllContextMenuNames(childControl as ToolStripMenuItem, controlName);
+                }
+            }
+        }
+
+#endif
+
         public void DarkMode(Control control)
         {
             if (control == null) return;
@@ -77,7 +159,6 @@ namespace UE4localizationsTool.Controls
                 button.BackColor = Color.FromArgb(40, 40, 40);
                 button.ForeColor = Color.White;
                 button.FlatStyle = FlatStyle.Flat;
-                button.FlatAppearance.BorderSize = 1;
                 button.FlatAppearance.BorderColor = Color.FromArgb(60, 60, 60);
                 button.FlatAppearance.MouseOverBackColor = Color.FromArgb(60, 60, 60);
             }
