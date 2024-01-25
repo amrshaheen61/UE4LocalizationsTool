@@ -53,38 +53,38 @@ namespace UE4localizationsTool
             ResetControls();
             ControlsMode(false);
 
-            //try
-            //{
-            StatusMessage("loading File...", "loading File, please wait.");
+            try
+            {
+                StatusMessage("loading File...", "loading File, please wait.");
 
-            if (filePath.ToLower().EndsWith(".locres"))
-            {
-                Asset = await Task.Run(() => new LocresFile(filePath));
-                locresOprationsToolStripMenuItem.Visible = true;
-                CreateBackupList();
-            }
-            else if (filePath.ToLower().EndsWith(".uasset") || filePath.ToLower().EndsWith(".umap"))
-            {
-                IUasset Uasset = await Task.Run(() => Uexp.GetUasset(filePath));
-                Uasset.UseMethod2 = Uasset.UseMethod2 ? Uasset.UseMethod2 : Method2.Checked;
-                Asset = await Task.Run(() => new Uexp(Uasset));
-                CreateBackupList();
-                if (!Asset.IsGood)
+                if (filePath.ToLower().EndsWith(".locres"))
                 {
-                    StateLabel.Text = "Warning: This file is't fully parsed and may not contain some text.";
+                    Asset = await Task.Run(() => new LocresFile(filePath));
+                    locresOprationsToolStripMenuItem.Visible = true;
+                    CreateBackupList();
                 }
-            }
+                else if (filePath.ToLower().EndsWith(".uasset") || filePath.ToLower().EndsWith(".umap"))
+                {
+                    IUasset Uasset = await Task.Run(() => Uexp.GetUasset(filePath));
+                    Uasset.UseMethod2 = Uasset.UseMethod2 ? Uasset.UseMethod2 : Method2.Checked;
+                    Asset = await Task.Run(() => new Uexp(Uasset));
+                    CreateBackupList();
+                    if (!Asset.IsGood)
+                    {
+                        StateLabel.Text = "Warning: This file is't fully parsed and may not contain some text.";
+                    }
+                }
 
-            this.FilePath = filePath;
-            this.Text = ToolName + " - " + Path.GetFileName(FilePath);
-            ControlsMode(true);
-            CloseFromState();
-            //}
-            //catch (Exception ex)
-            //{
-            //    CloseFromState();
-            //    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            //}
+                this.FilePath = filePath;
+                this.Text = ToolName + " - " + Path.GetFileName(FilePath);
+                ControlsMode(true);
+                CloseFromState();
+            }
+            catch (Exception ex)
+            {
+                CloseFromState();
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
 
         }
 
